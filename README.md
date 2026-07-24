@@ -10,6 +10,7 @@
 - **域名白名单** — 配置不拦截的域名，某些站点仍走浏览器下载
 - **工具栏开关** — 点击扩展图标一键切换拦截开关，Badge 显示当前状态
 - **弹窗通知** — 发送成功/失败时弹出系统通知
+- **点击反馈** — 拦截下载时在点击位置弹出 Toast（绿色=已发送到 Aria2，橙色=已回退），工具栏 Badge 同步闪烁
 - **RPC 密钥支持** — 支持 `--rpc-secret` 认证，连接有密码保护的 aria2
 - **Cookie/UA 透传** — 自动携带浏览器 Cookie 和 User-Agent，登录态下载无压力
 - **可配文件类型** — 自定义 Content Script 拦截的文件扩展名列表
@@ -70,7 +71,8 @@ aria2c --conf-path=/path/to/aria2.conf
 
 1. 安装后在扩展栏点击 Aria2 Bridge 图标可切换拦截开关
 2. 右键任意链接/图片/视频 →「用 Aria2 下载」发送任务
-3. 右键扩展图标 →「选项」进入设置页
+3. 右键扩展图标 →「📊 打开 AriaNg 管理面板」打开 Web 管理面板
+4. 右键扩展图标 →「选项」进入设置页
 
 ### 设置项
 
@@ -83,11 +85,11 @@ aria2c --conf-path=/path/to/aria2.conf
 | **拦截的文件类型** | 每行一个扩展名，Content Script 拦截这些扩展名的链接点击。留空使用默认列表 |
 | **启用自动拦截** | 下载拦截总开关 |
 
-设置页还提供了「测试连接」按钮、「恢复默认」按钮和「打开 AriaNg」入口。
+设置页还提供了「测试连接」按钮和「恢复默认」按钮。
 
 ### AriaNg 管理面板
 
-项目内置了 [AriaNg](https://github.com/mayswind/AriaNg) 构建版（以 submodule 方式追踪源码），在设置页点击「打开 AriaNg」即可打开 aria2 的 Web 管理面板。
+项目内置了 [AriaNg](https://github.com/mayswind/AriaNg) 构建版（以 submodule 方式追踪源码），可通过右键扩展图标 →「📊 打开 AriaNg 管理面板」快速打开。
 
 **自动同步 RPC 配置**：打开 AriaNg 时，插件会自动将设置页中配置的 RPC 地址和密钥通过 URL 参数传递给 AriaNg，无需手动重新配置 RPC 连接。
 
@@ -107,7 +109,7 @@ aria2-bridge/
 ├── content.js               # Content Script — 页面点击拦截
 ├── options.html             # 设置页
 ├── options.js               # 设置页逻辑（含连接测试）
-├── aria-ng/                 # AriaNg 预构建静态文件（AllInOne）
+├── aria-ng/                 # AriaNg 预构建静态文件（外部 JS/CSS/字体）
 ├── submodules/
 │   └── AriaNg/              # AriaNg 源码 submodule
 └── icons/                   # 图标 (16/48/128)
@@ -118,6 +120,16 @@ aria2-bridge/
 ### 构建/开发
 
 纯原生 Chrome Extension，无构建步骤，改完刷新扩展即可。
+
+### 更新 AriaNg 版本
+
+```bash
+cd submodules/AriaNg
+git pull                     # 更新 submodule 到最新
+npm install && npm run build # 构建 AriaNg
+cp -r dist/* ../../aria-ng/  # 将构建产物复制到扩展目录
+cd ../..
+git add -A && git commit -m "chore: update AriaNg to latest"
 
 ### 权限说明
 
@@ -137,6 +149,7 @@ aria2-bridge/
 - 如果 aria2 未运行，下载会自动回退到浏览器原生下载
 - `cookies` 权限仅用于读取当前访问站点的 Cookie 并转发给 aria2，不会被记录或上传
 - Content Script 只拦截左键（及中键 `<a download>`），不影响右键菜单和快捷键
+- 拦截下载时会在点击位置弹出 Toast 提示，同时工具栏 Badge 会短暂闪烁
 
 ## License
 
