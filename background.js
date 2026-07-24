@@ -205,10 +205,14 @@ let isSelfRedirect = false;
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'download') {
     processDownload(message.url, message.referer)
-      .then(() => sendResponse({ success: true }))
+      .then(() => {
+        flashBadge('✓', '#4caf50');
+        sendResponse({ success: true });
+      })
       .catch((err) => {
         // aria2 down — fall back to browser-native download
         console.warn('[Aria2 Bridge] aria2 unreachable, falling back:', err.message);
+        flashBadge('!', '#ff9800');
         isSelfRedirect = true;
         chrome.downloads.download({ url: message.url }).finally(() => {
           isSelfRedirect = false;
