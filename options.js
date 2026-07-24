@@ -143,9 +143,43 @@ $('resetBtn').addEventListener('click', async () => {
 });
 
 // Also keep the old dblclick test on RPC URL for power users
-$('openAriaNgBtn').addEventListener('click', () => {
-  const url = chrome.runtime.getURL('aria-ng/index.html');
-  chrome.tabs.create({ url });
+$('openAriaNgBtn').addEventListener('click', async () => {
+  const data = await chrome.storage.sync.get(DEFAULT_CONFIG);
+
+  // Parse RPC URL into components for AriaNg command hash
+  let protocol = 'http';
+  let host = 'localhost';
+  let port = '6800';
+  let iface = 'jsonrpc';
+  let secret = '';
+
+  try {
+    const url = new URL(data.rpcUrl || DEFAULT_CONFIG.rpcUrl);
+    protocol = url.protocol.replace(':', '') || 'http';
+    host = url.hostname || 'localhost';
+    port = url.port || '6800';
+    // Extract interface from path
+    const match = url.pathname.match(/\/([^/]+)$/);
+    if (match) iface = match[1];
+  } catch {}
+
+  if (data.rpcSecret) {
+    // URL-safe base64 (matches AriaNg's base64.urlencode)
+    secret = btoa(data.rpcSecret)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+
+  const hash = '#/settings/rpc/set' +
+    '?protocol=' + encodeURIComponent(protocol) +
+    '&host=' + encodeURIComponent(host) +
+    '&port=' + encodeURIComponent(port) +
+    '&interface=' + encodeURIComponent(iface) +
+    '&secret=' + encodeURIComponent(secret);
+
+  const base = chrome.runtime.getURL('aria-ng/index.html');
+  chrome.tabs.create({ url: base + hash });
 });
 
 $('rpcUrl').addEventListener('dblclick', async () => {
