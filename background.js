@@ -4,9 +4,20 @@
 
 const DEFAULT_CONFIG = {
   rpcUrl: 'http://localhost:6800/jsonrpc',
+  rpcSecret: '',
   enabled: true,
   defaultDir: '',
-  bypassDomains: []
+  bypassDomains: [],
+  downloadExts: [
+    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
+    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+    '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
+    '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
+    '.torrent', '.nzb',
+    '.csv', '.json', '.xml',
+    '.psd', '.ai', '.skp',
+    '.epub', '.mobi', '.cbr'
+  ]
 };
 
 let config = {};
@@ -30,12 +41,20 @@ async function saveConfig(updates) {
 // Aria2 RPC
 // ========================================
 
+/**
+ * Call aria2 JSON-RPC method.
+ * If rpcSecret is configured, prepends 'token:<secret>' as first param.
+ */
 async function aria2Rpc(method, params) {
+  const effectiveParams = config.rpcSecret
+    ? ['token:' + config.rpcSecret, ...params]
+    : params;
+
   const body = {
     jsonrpc: '2.0',
     id: `bridge_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     method,
-    params
+    params: effectiveParams
   };
 
   const response = await fetch(config.rpcUrl, {
@@ -55,15 +74,76 @@ async function aria2Rpc(method, params) {
   return result.result;
 }
 
+// ========================================
+// Cookie helper
+// ========================================
+
+/**
+ * Get Cookie header string for a URL via chrome.cookies API.
+ * Returns empty string if no cookies or on error.
+ */
+async function getCookieString(url) {
+  try {
+    const cookies = await chrome.cookies.getAll({ url });
+    if (!cookies || cookies.length === 0) return '';
+    return cookies.map(c => `${c.name}=${c.value}`).join('; ');
+  } catch {
+    return '';
+  }
+}
+
+// ========================================
+// Build aria2 headers
+// ========================================
+
+/**
+ * Build an array of HTTP header strings for aria2.addUri.
+ * Includes User-Agent, Referer (if given), and Cookie (if available).
+ */
+async function buildHeaders(url, referer) {
+  const headers = [];
+
+  // Always pass browser User-Agent so servers see a realistic UA
+  headers.push(`User-Agent: ${navigator.userAgent}`);
+
+  if (referer) {
+    headers.push(`Referer: ${referer}`);
+  }
+
+  // Cookies help with authenticated downloads (e.g. forum attachments)
+  const cookie = await getCookieString(url);
+  if (cookie) {
+    headers.push(`Cookie: ${cookie}`);
+  }
+
+  return headers;
+}
+
+// ========================================
+// Aria2 addUri with options
+// ========================================
+
+/**
+ * Send a download URL to aria2 with optional per-download options.
+ *
+ * @param {string} url       - Download URL
+ * @param {object} [options] - { dir, out, referer, headers }
+ * @returns {Promise<string>} aria2 GID
+ */
 async function aria2AddUri(url, options = {}) {
   const params = [[url]];
 
   const rpcOpts = {};
   if (options.dir) rpcOpts.dir = options.dir;
   if (options.out) rpcOpts.out = options.out;
-  if (options.referer) rpcOpts.referer = options.referer;
+
+  // Merge explicitly provided headers with auto-built ones
+  const effectiveHeaders = await buildHeaders(url, options.referer);
   if (options.headers && options.headers.length > 0) {
-    rpcOpts.header = options.headers;
+    effectiveHeaders.push(...options.headers);
+  }
+  if (effectiveHeaders.length > 0) {
+    rpcOpts.header = effectiveHeaders;
   }
 
   if (Object.keys(rpcOpts).length > 0) {
@@ -143,8 +223,7 @@ async function processDownload(url, referer) {
   if (!config.enabled) return;
   if (!url.startsWith('http://') && !url.startsWith('https://')) return;
 
-  const options = {};
-  if (referer) options.referer = referer;
+  const options = { referer };
   if (config.defaultDir) options.dir = config.defaultDir;
 
   const filename = extractFilename(url);

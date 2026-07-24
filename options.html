@@ -7,13 +7,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      font-size: 14px; color: #222; padding: 24px; min-width: 420px;
+      font-size: 14px; color: #222; padding: 24px; min-width: 500px;
       background: #fafafa;
     }
     h2 { font-size: 18px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e0e0e0; }
-    .field { margin-bottom: 16px; }
+    section { margin-bottom: 24px; }
+    h3 { font-size: 15px; margin-bottom: 12px; color: #333; }
+    .field { margin-bottom: 14px; }
     label { display: block; font-weight: 600; margin-bottom: 4px; color: #444; }
-    input[type="url"], input[type="text"], textarea {
+    input[type="url"], input[type="text"], input[type="password"], textarea {
       width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px;
       font-size: 13px; background: #fff; transition: border-color 0.15s;
     }
@@ -23,7 +25,7 @@
     .checkbox-row { display: flex; align-items: center; gap: 8px; }
     .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; }
     .checkbox-row label { margin: 0; cursor: pointer; }
-    .actions { margin-top: 24px; display: flex; align-items: center; gap: 12px; }
+    .actions { margin-top: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     button {
       padding: 8px 24px; border: none; border-radius: 6px; cursor: pointer;
       font-size: 14px; font-weight: 500; transition: background 0.15s;
@@ -31,43 +33,72 @@
     .btn-primary { background: #4a90d9; color: #fff; }
     .btn-primary:hover { background: #357abd; }
     .btn-primary:active { background: #2a6cb5; }
+    .btn-secondary { background: #e8e8e8; color: #333; }
+    .btn-secondary:hover { background: #d5d5d5; }
     #status {
       padding: 8px 12px; border-radius: 6px; font-size: 13px; display: none;
       animation: fadeIn 0.2s ease;
     }
     #status.success { display: inline-block; background: #d4edda; color: #155724; }
     #status.error   { display: inline-block; background: #f8d7da; color: #721c24; }
+    #status.info    { display: inline-block; background: #d1ecf1; color: #0c5460; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   </style>
 </head>
 <body>
   <h2>⚡ Aria2 Bridge 设置</h2>
 
-  <div class="field">
-    <label for="rpcUrl">Aria2 RPC 地址</label>
-    <input type="url" id="rpcUrl" placeholder="http://localhost:6800/jsonrpc">
-    <div class="hint">aria2 JSON-RPC 接口地址。默认 http://localhost:6800/jsonrpc</div>
-  </div>
+  <!-- Connection -->
+  <section>
+    <h3>连接</h3>
+    <div class="field">
+      <label for="rpcUrl">Aria2 RPC 地址</label>
+      <input type="url" id="rpcUrl" placeholder="http://localhost:6800/jsonrpc">
+      <div class="hint">aria2 JSON-RPC 接口地址。默认 http://localhost:6800/jsonrpc</div>
+    </div>
+    <div class="field">
+      <label for="rpcSecret">RPC 密钥（可选）</label>
+      <input type="password" id="rpcSecret" placeholder="aria2 --rpc-secret 设置的密码">
+      <div class="hint">aria2 启动参数 <code>--rpc-secret=xxx</code> 中设置的密码，仅填密码本身即可（扩展自动加 <code>token:</code> 前缀）。留空表示无密码</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button class="btn-primary" id="testBtn">🔗 测试连接</button>
+      <span id="testResult" style="font-size:13px;align-self:center;display:none"></span>
+    </div>
+  </section>
 
-  <div class="field">
-    <label for="defaultDir">默认下载目录（可选）</label>
-    <input type="text" id="defaultDir" placeholder="/path/to/downloads">
-    <div class="hint">留空则使用 aria2 配置文件中设定的目录</div>
-  </div>
+  <!-- Download -->
+  <section>
+    <h3>下载</h3>
+    <div class="field">
+      <label for="defaultDir">默认下载目录（可选）</label>
+      <input type="text" id="defaultDir" placeholder="/path/to/downloads">
+      <div class="hint">留空则使用 aria2 配置文件中设定的目录</div>
+    </div>
+    <div class="field">
+      <label for="bypassDomains">不拦截的域名</label>
+      <textarea id="bypassDomains" rows="3" placeholder="example.com&#10;cdn.example.com"></textarea>
+      <div class="hint">每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载</div>
+    </div>
+    <div class="field checkbox-row">
+      <input type="checkbox" id="enabled">
+      <label for="enabled">启用下载自动拦截</label>
+    </div>
+  </section>
 
-  <div class="field">
-    <label for="bypassDomains">不拦截的域名</label>
-    <textarea id="bypassDomains" rows="3" placeholder="example.com&#10;cdn.example.com"></textarea>
-    <div class="hint">每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载</div>
-  </div>
-
-  <div class="field checkbox-row">
-    <input type="checkbox" id="enabled">
-    <label for="enabled">启用下载自动拦截</label>
-  </div>
+  <!-- File types -->
+  <section>
+    <h3>拦截的文件类型</h3>
+    <div class="field">
+      <label for="downloadExts">文件扩展名列表</label>
+      <textarea id="downloadExts" rows="6" placeholder=".zip&#10;.rar&#10;.7z"></textarea>
+      <div class="hint">每行一个扩展名（带点号）。Content Script 会拦截这些扩展名的链接点击。留空使用默认列表</div>
+    </div>
+  </section>
 
   <div class="actions">
-    <button class="btn-primary" id="saveBtn">保存设置</button>
+    <button class="btn-primary" id="saveBtn">💾 保存设置</button>
+    <button class="btn-secondary" id="resetBtn">↻ 恢复默认</button>
     <div id="status"></div>
   </div>
 

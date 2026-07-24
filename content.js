@@ -5,8 +5,8 @@
 // at the navigation level, preventing blank-page
 // navigation before aria2 gets the URL.
 
-// Common downloadable file extensions
-const DOWNLOAD_EXTS = new Set([
+// Default file extensions (override via extension settings)
+const DEFAULT_EXTS = [
   '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
   '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
   '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
@@ -15,7 +15,22 @@ const DOWNLOAD_EXTS = new Set([
   '.csv', '.json', '.xml',
   '.psd', '.ai', '.skp',
   '.epub', '.mobi', '.cbr'
-]);
+];
+
+// Mutable, loaded from storage on script start
+let downloadExts = new Set(DEFAULT_EXTS);
+
+// Load user-configured extensions from storage
+(async () => {
+  try {
+    const { downloadExts: stored } = await chrome.storage.sync.get({ downloadExts: DEFAULT_EXTS });
+    if (stored && Array.isArray(stored) && stored.length > 0) {
+      downloadExts = new Set(stored.map(s => s.startsWith('.') ? s : '.' + s));
+    }
+  } catch {
+    // Fall back to defaults
+  }
+})();
 
 // Check if a URL looks like a downloadable file
 function looksLikeDownload(url) {
@@ -24,13 +39,13 @@ function looksLikeDownload(url) {
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
     const path = u.pathname.toLowerCase();
     const match = path.match(/\.([a-z0-9]+)(?:[?#]|$)/);
-    return match ? DOWNLOAD_EXTS.has('.' + match[1]) : false;
+    return match ? downloadExts.has('.' + match[1]) : false;
   } catch {
     return false;
   }
 }
 
-// Click interception
+// Intercept left-click on download links
 document.addEventListener('click', (e) => {
   // Only handle left clicks without modifiers
   if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
