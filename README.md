@@ -87,7 +87,11 @@ aria2c --conf-path=/path/to/aria2.conf
 
 ### AriaNg 管理面板
 
-项目内置了 [AriaNg](https://github.com/mayswind/AriaNg) AllInOne 版本（以 submodule 方式追踪源码），在设置页点击「打开 AriaNg」即可打开 aria2 的 Web 管理面板。支持：
+项目内置了 [AriaNg](https://github.com/mayswind/AriaNg) 构建版（以 submodule 方式追踪源码），在设置页点击「打开 AriaNg」即可打开 aria2 的 Web 管理面板。
+
+**自动同步 RPC 配置**：打开 AriaNg 时，插件会自动将设置页中配置的 RPC 地址和密钥通过 URL 参数传递给 AriaNg，无需手动重新配置 RPC 连接。
+
+支持的功能：
 
 - 查看下载进度和速度
 - 暂停/继续/删除任务
