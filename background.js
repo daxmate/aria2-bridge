@@ -271,6 +271,7 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
     if (config.defaultDir) options.dir = config.defaultDir;
 
     await aria2AddUri(url, options);
+    flashBadge('✓', '#4caf50');
     console.log(`[Aria2 Bridge] Download → aria2: ${url}`);
   } catch (err) {
     // aria2 down — restart browser download
@@ -367,9 +368,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const gid = await aria2AddUri(url, options);
     const label = url.split('/').pop() || url;
     showNotification('Aria2 Bridge — 已发送', label);
+    flashBadge('✓', '#4caf50');
     setTimeout(() => chrome.notifications.clear(gid), 3000);
   } catch (err) {
     showNotification('Aria2 Bridge — 发送失败', err.message);
+    flashBadge('✗', '#f44336');
   }
 });
 
@@ -389,6 +392,24 @@ function updateBadge() {
     chrome.action.setBadgeText({ text: 'OFF' });
     chrome.action.setBadgeBackgroundColor({ color: '#888' });
   }
+}
+
+/**
+ * Briefly flash a status badge icon then restore normal state.
+ * Used for download feedback when the user isn't looking at the page.
+ */
+let badgeFlashTimer = null;
+
+function flashBadge(text, color) {
+  if (badgeFlashTimer) clearTimeout(badgeFlashTimer);
+
+  chrome.action.setBadgeText({ text });
+  chrome.action.setBadgeBackgroundColor({ color });
+
+  badgeFlashTimer = setTimeout(() => {
+    updateBadge();
+    badgeFlashTimer = null;
+  }, 1500);
 }
 
 // ========================================
