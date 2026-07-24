@@ -112,6 +112,9 @@ aria2-bridge/
 ├── aria-ng/                 # AriaNg 预构建静态文件（外部 JS/CSS/字体）
 ├── submodules/
 │   └── AriaNg/              # AriaNg 源码 submodule
+├── scripts/
+│   ├── update-aria-ng.sh    # 自动拉取+构建+拷贝 AriaNg
+│   └── package.sh           # 打包 release zip
 └── icons/                   # 图标 (16/48/128)
 ```
 
@@ -124,12 +127,13 @@ aria2-bridge/
 ### 更新 AriaNg 版本
 
 ```bash
-cd submodules/AriaNg
-git pull                     # 更新 submodule 到最新
-npm install && npm run build # 构建 AriaNg
-cp -r dist/* ../../aria-ng/  # 将构建产物复制到扩展目录
-cd ../..
-git add -A && git commit -m "chore: update AriaNg to latest"
+./scripts/update-aria-ng.sh
+```
+
+### 打包发布
+
+```bash
+./scripts/package.sh v1.1.0
 ```
 
 ### 权限说明
