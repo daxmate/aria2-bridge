@@ -19,11 +19,11 @@
 ## 工作原理
 
 ```
-┌──────────┐  拦截点击/下载   ┌────────────┐  JSON-RPC   ┌─────────┐
-│ Browser  │ ──────────────→  │ Service    │ ──────────→  │ Aria2   │
-│ (点击/JS) │                 │ Worker     │ (+Cookie/UA) │ (本地)  │
-│           │ ←── 回退 ────  │            │              │         │
-└──────────┘                 └────────────┘              └─────────┘
+┌─────────────────┐  Intercept  ┌──────────────────┐  JSON-RPC   ┌─────────┐
+│     Browser     │ ──────────→ │ Service Worker   │ ──────────→ │  Aria2  │
+│ (Click / JS)    │             │ (+Cookie / UA)   │             │ (Local) │
+│                 │ ←─ Fallback│                  │             │         │
+└─────────────────┘             └──────────────────┘             └─────────┘
 ```
 
 拦截分两层：
@@ -130,6 +130,7 @@ npm install && npm run build # 构建 AriaNg
 cp -r dist/* ../../aria-ng/  # 将构建产物复制到扩展目录
 cd ../..
 git add -A && git commit -m "chore: update AriaNg to latest"
+```
 
 ### 权限说明
 
