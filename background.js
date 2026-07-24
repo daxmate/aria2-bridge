@@ -291,17 +291,67 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 // Context menu
 // ========================================
 
-const MENU_ID = 'aria2-bridge-send';
+const MENU_ID_SEND = 'aria2-bridge-send';
+const MENU_ID_OPEN = 'aria2-bridge-open-ariang';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: MENU_ID,
+    id: MENU_ID_SEND,
     title: '用 Aria2 下载',
     contexts: ['link', 'image', 'video', 'audio']
   });
+  chrome.contextMenus.create({
+    id: MENU_ID_OPEN,
+    title: '📊 打开 AriaNg 管理面板',
+    contexts: ['action']
+  });
 });
 
+/**
+ * Build AriaNg URL with RPC settings passed via hash params.
+ */
+function buildAriaNgUrl() {
+  let protocol = 'http';
+  let host = 'localhost';
+  let port = '6800';
+  let iface = 'jsonrpc';
+  let secret = '';
+
+  try {
+    const url = new URL(config.rpcUrl || 'http://localhost:6800/jsonrpc');
+    protocol = url.protocol.replace(':', '') || 'http';
+    host = url.hostname || 'localhost';
+    port = url.port || '6800';
+    const match = url.pathname.match(/\/([^/]+)$/);
+    if (match) iface = match[1];
+  } catch {}
+
+  if (config.rpcSecret) {
+    secret = btoa(config.rpcSecret)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+  }
+
+  const hash = '#/settings/rpc/set' +
+    '?protocol=' + encodeURIComponent(protocol) +
+    '&host=' + encodeURIComponent(host) +
+    '&port=' + encodeURIComponent(port) +
+    '&interface=' + encodeURIComponent(iface) +
+    '&secret=' + encodeURIComponent(secret);
+
+  return chrome.runtime.getURL('aria-ng/index.html') + hash;
+}
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+  // Menu: Open AriaNg
+  if (info.menuItemId === MENU_ID_OPEN) {
+    const url = buildAriaNgUrl();
+    chrome.tabs.create({ url });
+    return;
+  }
+
+  // Menu: Send to aria2
   const url = info.linkUrl || info.srcUrl;
   if (!url) return;
 
