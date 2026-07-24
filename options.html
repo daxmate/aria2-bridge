@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>设置 - Aria2 Bridge</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 14px; color: #222; padding: 24px; min-width: 420px;
+      background: #fafafa;
+    }
+    h2 { font-size: 18px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e0e0e0; }
+    .field { margin-bottom: 16px; }
+    label { display: block; font-weight: 600; margin-bottom: 4px; color: #444; }
+    input[type="url"], input[type="text"], textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px;
+      font-size: 13px; background: #fff; transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus { outline: none; border-color: #4a90d9; box-shadow: 0 0 0 2px rgba(74,144,217,0.2); }
+    textarea { resize: vertical; font-family: "SF Mono", Menlo, monospace; }
+    .hint { font-size: 12px; color: #888; margin-top: 4px; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; }
+    .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; }
+    .checkbox-row label { margin: 0; cursor: pointer; }
+    .actions { margin-top: 24px; display: flex; align-items: center; gap: 12px; }
+    button {
+      padding: 8px 24px; border: none; border-radius: 6px; cursor: pointer;
+      font-size: 14px; font-weight: 500; transition: background 0.15s;
+    }
+    .btn-primary { background: #4a90d9; color: #fff; }
+    .btn-primary:hover { background: #357abd; }
+    .btn-primary:active { background: #2a6cb5; }
+    #status {
+      padding: 8px 12px; border-radius: 6px; font-size: 13px; display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    #status.success { display: inline-block; background: #d4edda; color: #155724; }
+    #status.error   { display: inline-block; background: #f8d7da; color: #721c24; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <h2>⚡ Aria2 Bridge 设置</h2>
+
+  <div class="field">
+    <label for="rpcUrl">Aria2 RPC 地址</label>
+    <input type="url" id="rpcUrl" placeholder="http://localhost:6800/jsonrpc">
+    <div class="hint">aria2 JSON-RPC 接口地址。默认 http://localhost:6800/jsonrpc</div>
+  </div>
+
+  <div class="field">
+    <label for="defaultDir">默认下载目录（可选）</label>
+    <input type="text" id="defaultDir" placeholder="/path/to/downloads">
+    <div class="hint">留空则使用 aria2 配置文件中设定的目录</div>
+  </div>
+
+  <div class="field">
+    <label for="bypassDomains">不拦截的域名</label>
+    <textarea id="bypassDomains" rows="3" placeholder="example.com&#10;cdn.example.com"></textarea>
+    <div class="hint">每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载</div>
+  </div>
+
+  <div class="field checkbox-row">
+    <input type="checkbox" id="enabled">
+    <label for="enabled">启用下载自动拦截</label>
+  </div>
+
+  <div class="actions">
+    <button class="btn-primary" id="saveBtn">保存设置</button>
+    <div id="status"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
