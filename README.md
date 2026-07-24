@@ -122,7 +122,13 @@ aria2-bridge/
 
 ### 构建/开发
 
-纯原生 Chrome Extension，无构建步骤，改完刷新扩展即可。
+纯原生 Chrome Extension，核心功能无需构建。AriaNg 的预构建文件已提交在 `aria-ng/` 中，克隆后即可使用。
+
+如果需要更新 AriaNg 版本，运行：
+
+```bash
+./scripts/update-aria-ng.sh
+```
 
 ### 更新 AriaNg 版本
 
