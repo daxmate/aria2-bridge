@@ -12,6 +12,13 @@ DIST_DIR="$ROOT_DIR/aria-ng"
 
 echo "==> Updating AriaNg submodule..."
 cd "$SUBMODULE_DIR"
+
+# Stash any local changes (e.g. package-lock.json from previous build)
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "    Stashing local changes..."
+  git stash --include-untracked
+fi
+
 git checkout master
 git pull origin master
 

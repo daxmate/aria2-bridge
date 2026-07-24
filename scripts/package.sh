@@ -2,12 +2,15 @@
 # ============================================
 # scripts/package.sh
 # Create a release zip for GitHub Releases.
+# Usage: ./scripts/package.sh [version]
+#   version defaults to the latest git tag
 # ============================================
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="${1:-$(git describe --tags --abbrev=0 2>/dev/null || echo 'dev')}"
+RAW_VERSION="${1:-$(git describe --tags --abbrev=0 2>/dev/null || echo 'dev')}"
+VERSION="${RAW_VERSION#v}"  # strip leading 'v' if present
 OUTPUT_DIR="${2:-/tmp/aria2-bridge-release}"
 ZIP_NAME="aria2-bridge-${VERSION}.zip"
 
@@ -44,7 +47,7 @@ echo ""
 echo "==> Done! File: $OUTPUT_DIR/$ZIP_NAME"
 echo ""
 echo "    To create a GitHub release:"
-echo "      gh release create ${VERSION} ${OUTPUT_DIR}/${ZIP_NAME} \\"
+echo "      gh release create v${VERSION} ${OUTPUT_DIR}/${ZIP_NAME} \\"
 echo "        --repo daxmate/aria2-bridge \\"
-echo "        --title \"Aria2 Bridge ${VERSION}\" \\"
+echo "        --title \"Aria2 Bridge v${VERSION}\" \\"
 echo "        --notes \"Release notes here\""
