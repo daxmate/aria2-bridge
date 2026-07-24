@@ -29,6 +29,7 @@ cp \
   options.html \
   options.js \
   README.md \
+  LICENSE \
   "$OUTPUT_DIR/aria2-bridge/"
 
 # Copy assets
