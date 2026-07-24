@@ -143,6 +143,11 @@ $('resetBtn').addEventListener('click', async () => {
 });
 
 // Also keep the old dblclick test on RPC URL for power users
+$('openAriaNgBtn').addEventListener('click', () => {
+  const url = chrome.runtime.getURL('aria-ng/index.html');
+  chrome.tabs.create({ url });
+});
+
 $('rpcUrl').addEventListener('dblclick', async () => {
   $('testBtn').click();
 });

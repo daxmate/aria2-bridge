@@ -1,0 +1,3 @@
+[submodule "submodules/AriaNg"]
+	path = submodules/AriaNg
+	url = https://github.com/mayswind/AriaNg.git

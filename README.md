@@ -83,18 +83,30 @@ aria2c --conf-path=/path/to/aria2.conf
 | **拦截的文件类型** | 每行一个扩展名，Content Script 拦截这些扩展名的链接点击。留空使用默认列表 |
 | **启用自动拦截** | 下载拦截总开关 |
 
-设置页还提供了「测试连接」按钮和「恢复默认」按钮。
+设置页还提供了「测试连接」按钮、「恢复默认」按钮和「打开 AriaNg」入口。
+
+### AriaNg 管理面板
+
+项目内置了 [AriaNg](https://github.com/mayswind/AriaNg) AllInOne 版本（以 submodule 方式追踪源码），在设置页点击「打开 AriaNg」即可打开 aria2 的 Web 管理面板。支持：
+
+- 查看下载进度和速度
+- 暂停/继续/删除任务
+- 管理全局设置和 RPC 连接
+- 添加新的下载任务
 
 ## 项目结构
 
 ```
 aria2-bridge/
-├── manifest.json       # 扩展清单 (Manifest V3)
-├── background.js       # Service Worker — RPC 通信、下载拦截、右键菜单
-├── content.js          # Content Script — 页面点击拦截
-├── options.html        # 设置页
-├── options.js          # 设置页逻辑（含连接测试）
-└── icons/              # 图标 (16/48/128)
+├── manifest.json            # 扩展清单 (Manifest V3)
+├── background.js            # Service Worker — RPC 通信、下载拦截、右键菜单
+├── content.js               # Content Script — 页面点击拦截
+├── options.html             # 设置页
+├── options.js               # 设置页逻辑（含连接测试）
+├── aria-ng/                 # AriaNg 预构建静态文件（AllInOne）
+├── submodules/
+│   └── AriaNg/              # AriaNg 源码 submodule
+└── icons/                   # 图标 (16/48/128)
 ```
 
 ## 开发
