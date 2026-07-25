@@ -89,7 +89,13 @@ aria2c --conf-path=/path/to/aria2.conf
 
 ### AriaNg 管理面板
 
-项目内置了 [AriaNg](https://github.com/mayswind/AriaNg) 构建版（以 submodule 方式追踪源码），可通过右键扩展图标 →「📊 打开 AriaNg 管理面板」快速打开。
+项目内置了 [AriaNg](https://github.com/mayswind/AriaNg) 管理面板（以 submodule 追踪源码），可通过右键扩展图标 →「📊 打开 AriaNg 管理面板」快速打开。
+
+首次使用前需运行以下命令生成面板文件：
+
+```bash
+./scripts/update-aria-ng.sh
+```
 
 **自动同步 RPC 配置**：打开 AriaNg 时，插件会自动将设置页中配置的 RPC 地址和密钥通过 URL 参数传递给 AriaNg，无需手动重新配置 RPC 连接。
 
@@ -109,22 +115,21 @@ aria2-bridge/
 ├── content.js               # Content Script — 页面点击拦截
 ├── options.html             # 设置页
 ├── options.js               # 设置页逻辑（含连接测试）
-├── aria-ng/                 # AriaNg 预构建静态文件（外部 JS/CSS/字体）
 ├── submodules/
 │   └── AriaNg/              # AriaNg 源码 submodule
 ├── scripts/
-│   ├── update-aria-ng.sh    # 自动拉取+构建+拷贝 AriaNg
+│   ├── update-aria-ng.sh    # 从 submodule 构建并拷贝 AriaNg 到 aria-ng/
 │   └── package.sh           # 打包 release zip
 └── icons/                   # 图标 (16/48/128)
+
+> `aria-ng/` 为构建产物，不提交到仓库。克隆后先运行 `./scripts/update-aria-ng.sh` 生成。
 ```
 
 ## 开发
 
 ### 构建/开发
 
-纯原生 Chrome Extension，核心功能无需构建。AriaNg 的预构建文件已提交在 `aria-ng/` 中，克隆后即可使用。
-
-如果需要更新 AriaNg 版本，运行：
+纯原生 Chrome Extension，核心功能无需构建。AriaNg 面板通过 submodule 管理，克隆后运行以下命令生成：
 
 ```bash
 ./scripts/update-aria-ng.sh
