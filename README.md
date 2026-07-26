@@ -161,6 +161,7 @@ aria2-bridge/
 | `storage` | 持久化设置 |
 | `notifications` | 发送成功/失败通知 |
 | `cookies` | 读取目标域名 Cookie，传递到 aria2 以维持登录态 |
+| `tabs` | 管理 AriaNg 标签页（避免重复打开） |
 | `host_permissions` | 允许 cookies API 和 aria2 RPC 通信 |
 
 ## 注意事项
