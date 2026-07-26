@@ -385,12 +385,12 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 // ========================================
-// Toolbar action toggle
+// Toolbar action — 打开 AriaNg 管理界面
 // ========================================
 
 chrome.action.onClicked.addListener(async () => {
-  config.enabled = !config.enabled;
-  await saveConfig({ enabled: config.enabled });
+  const url = buildAriaNgUrl();
+  chrome.tabs.create({ url });
 });
 
 function updateBadge() {
