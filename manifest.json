@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Aria2 Bridge",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "轻量 aria2 下载拦截插件。自动拦截浏览器下载并转发到本地 aria2 RPC，提供右键菜单快捷发送。",
   "permissions": [
     "downloads",
