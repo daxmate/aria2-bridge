@@ -1,116 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <title data-i18n="optionsTitle">设置 - Aria2 Bridge</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      font-size: 14px; color: #222; padding: 24px; min-width: 500px;
-      background: #fafafa;
-    }
-    h2 { font-size: 18px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e0e0e0; }
-    section { margin-bottom: 24px; }
-    h3 { font-size: 15px; margin-bottom: 12px; color: #333; }
-    .field { margin-bottom: 14px; }
-    label { display: block; font-weight: 600; margin-bottom: 4px; color: #444; }
-    input[type="url"], input[type="text"], input[type="password"], textarea {
-      width: 100%; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px;
-      font-size: 13px; background: #fff; transition: border-color 0.15s;
-    }
-    input:focus, textarea:focus { outline: none; border-color: #4a90d9; box-shadow: 0 0 0 2px rgba(74,144,217,0.2); }
-    textarea { resize: vertical; font-family: "SF Mono", Menlo, monospace; }
-    .hint { font-size: 12px; color: #888; margin-top: 4px; }
-    .checkbox-row { display: flex; align-items: center; gap: 8px; }
-    .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; }
-    .checkbox-row label { margin: 0; cursor: pointer; }
-    .actions { margin-top: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-    button {
-      padding: 8px 24px; border: none; border-radius: 6px; cursor: pointer;
-      font-size: 14px; font-weight: 500; transition: background 0.15s;
-    }
-    .btn-primary { background: #4a90d9; color: #fff; }
-    .btn-primary:hover { background: #357abd; }
-    .btn-primary:active { background: #2a6cb5; }
-    .btn-secondary { background: #e8e8e8; color: #333; }
-    .btn-secondary:hover { background: #d5d5d5; }
-    #status {
-      padding: 8px 12px; border-radius: 6px; font-size: 13px; display: none;
-      animation: fadeIn 0.2s ease;
-    }
-    #status.success { display: inline-block; background: #d4edda; color: #155724; }
-    #status.error   { display: inline-block; background: #f8d7da; color: #721c24; }
-    #status.info    { display: inline-block; background: #d1ecf1; color: #0c5460; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  </style>
-</head>
-<body>
-  <h2 data-i18n="optionsPageTitle">⚡ Aria2 Bridge 设置</h2>
+  <head>
+    <meta charset="utf-8" />
+    <title data-i18n="optionsTitle">设置 - Aria2 Bridge</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        font-size: 14px;
+        color: #222;
+        padding: 24px;
+        min-width: 500px;
+        background: #fafafa;
+      }
+      h2 {
+        font-size: 18px;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      section {
+        margin-bottom: 24px;
+      }
+      h3 {
+        font-size: 15px;
+        margin-bottom: 12px;
+        color: #333;
+      }
+      .field {
+        margin-bottom: 14px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #444;
+      }
+      input[type="url"],
+      input[type="text"],
+      input[type="password"],
+      textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 13px;
+        background: #fff;
+        transition: border-color 0.15s;
+      }
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #4a90d9;
+        box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+      }
+      textarea {
+        resize: vertical;
+        font-family: "SF Mono", Menlo, monospace;
+      }
+      .hint {
+        font-size: 12px;
+        color: #888;
+        margin-top: 4px;
+      }
+      .checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .checkbox-row input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+      }
+      .checkbox-row label {
+        margin: 0;
+        cursor: pointer;
+      }
+      .actions {
+        margin-top: 24px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 8px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.15s;
+      }
+      .btn-primary {
+        background: #4a90d9;
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: #357abd;
+      }
+      .btn-primary:active {
+        background: #2a6cb5;
+      }
+      .btn-secondary {
+        background: #e8e8e8;
+        color: #333;
+      }
+      .btn-secondary:hover {
+        background: #d5d5d5;
+      }
+      #status {
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        display: none;
+        animation: fadeIn 0.2s ease;
+      }
+      #status.success {
+        display: inline-block;
+        background: #d4edda;
+        color: #155724;
+      }
+      #status.error {
+        display: inline-block;
+        background: #f8d7da;
+        color: #721c24;
+      }
+      #status.info {
+        display: inline-block;
+        background: #d1ecf1;
+        color: #0c5460;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2 data-i18n="optionsPageTitle">⚡ Aria2 Bridge 设置</h2>
 
-  <!-- Connection -->
-  <section>
-    <h3 data-i18n="optionsSectionConnection">连接</h3>
-    <div class="field">
-      <label data-i18n="optionsRpcUrlLabel" for="rpcUrl">Aria2 RPC 地址</label>
-      <input type="url" id="rpcUrl" data-i18n-placeholder="optionsRpcUrlPlaceholder" placeholder="http://localhost:6800/jsonrpc">
-      <div class="hint" data-i18n="optionsRpcUrlHint">aria2 JSON-RPC 接口地址。默认 http://localhost:6800/jsonrpc</div>
-    </div>
-    <div class="field">
-      <label data-i18n="optionsSecretLabel" for="rpcSecret">RPC 密钥（可选）</label>
-      <input type="password" id="rpcSecret" data-i18n-placeholder="optionsSecretPlaceholder" placeholder="aria2 --rpc-secret 设置的密码">
-      <div class="hint" data-i18n="optionsSecretHint">aria2 启动参数 --rpc-secret=xxx 中设置的密码，仅填密码本身即可（扩展自动加 token: 前缀）。留空表示无密码</div>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button class="btn-primary" id="testBtn" data-i18n="optionsTestBtn">🔗 测试连接</button>
-      <span id="testResult" style="font-size:13px;align-self:center;display:none"></span>
-    </div>
-  </section>
+    <!-- Language -->
+    <section>
+      <h3 data-i18n="optionsSectionLanguage">语言</h3>
+      <div class="field">
+        <label data-i18n="optionsLocaleLabel" for="localeSelect"
+          >界面语言</label
+        >
+        <select
+          id="localeSelect"
+          style="
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #fff;
+          "
+        >
+          <option value="auto" data-i18n="optionsLocaleAuto">跟随浏览器</option>
+          <option value="zh_CN">中文</option>
+          <option value="en">English</option>
+        </select>
+        <div class="hint" data-i18n="optionsLocaleHint">
+          选择扩展界面的显示语言。修改后立即生效。
+        </div>
+      </div>
+    </section>
+    <!-- Download -->
+    <section>
+      <h3 data-i18n="optionsSectionDownload">下载</h3>
+      <div class="field">
+        <label data-i18n="optionsBypassLabel" for="bypassDomains"
+          >不拦截的域名</label
+        >
+        <textarea
+          id="bypassDomains"
+          rows="3"
+          data-i18n-placeholder="optionsBypassPlaceholder"
+          placeholder="example.com&#10;cdn.example.com"
+        ></textarea>
+        <div class="hint" data-i18n="optionsBypassHint">
+          每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载
+        </div>
+      </div>
+      <div class="field checkbox-row">
+        <input type="checkbox" id="enabled" />
+        <label data-i18n="optionsEnabledLabel" for="enabled"
+          >启用下载自动拦截</label
+        >
+      </div>
+    </section>
 
-
-  <!-- Language -->
-  <section>
-    <h3 data-i18n="optionsSectionLanguage">语言</h3>
-    <div class="field">
-      <label data-i18n="optionsLocaleLabel" for="localeSelect">界面语言</label>
-      <select id="localeSelect" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;background:#fff">
-        <option value="auto" data-i18n="optionsLocaleAuto">跟随浏览器</option>
-        <option value="zh_CN">中文</option>
-        <option value="en">English</option>
-      </select>
-      <div class="hint" data-i18n="optionsLocaleHint">选择扩展界面的显示语言。修改后立即生效。</div>
-    </div>
-  </section>
-  <!-- Download -->
-  <section>
-    <h3 data-i18n="optionsSectionDownload">下载</h3>
-    <div class="field">
-      <label data-i18n="optionsDefaultDirLabel" for="defaultDir">默认下载目录（可选）</label>
-      <input type="text" id="defaultDir" data-i18n-placeholder="optionsDefaultDirPlaceholder" placeholder="/path/to/downloads">
-      <div class="hint" data-i18n="optionsDefaultDirHint">留空则使用 aria2 配置文件中设定的目录</div>
-    </div>
-    <div class="field">
-      <label data-i18n="optionsBypassLabel" for="bypassDomains">不拦截的域名</label>
-      <textarea id="bypassDomains" rows="3" data-i18n-placeholder="optionsBypassPlaceholder" placeholder="example.com&#10;cdn.example.com"></textarea>
-      <div class="hint" data-i18n="optionsBypassHint">每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载</div>
-    </div>
-    <div class="field checkbox-row">
-      <input type="checkbox" id="enabled">
-      <label data-i18n="optionsEnabledLabel" for="enabled">启用下载自动拦截</label>
-    </div>
-  </section>
-
-  <!-- AriaNg -->
-  <section>
-    <h3 data-i18n="optionsSectionAriaNg">📊 AriaNg 管理面板</h3>
-    <p style="font-size:13px;color:#666;margin-bottom:12px" data-i18n="optionsAriaNgDesc">
-      AriaNg 是 aria2 的 Web 管理面板，可查看下载进度、管理任务、调整设置。
-      已在插件中内置。
-    </p>
-    <button class="btn-primary" id="openAriaNgBtn" data-i18n="optionsOpenAriaNgBtn">📂 打开 AriaNg</button>
-  </section>
-
-  <script src="js/i18n.js"></script>
-  <script src="options.js"></script>
-</body>
+    <script src="js/i18n.js"></script>
+    <script src="options.js"></script>
+  </body>
 </html>
