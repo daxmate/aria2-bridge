@@ -93,6 +93,15 @@
     return key;
   };
 
+  /**
+   * 强制重新加载语言
+   */
+  I18n.reload = async function () {
+    I18n._pending = null;
+    I18n._messages = null;
+    return I18n.init();
+  };
+
   // 导出到全局
   self.Aria2I18n = I18n;
 })();

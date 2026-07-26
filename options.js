@@ -147,7 +147,7 @@ $('saveBtn').addEventListener('click', async function () {
     // 语言变了 → 热生效，不刷新页面
     var prevLocale = $('localeSelect').dataset._originalLocale || 'auto';
     if (updates.locale !== prevLocale) {
-      await Aria2I18n.init();
+      await Aria2I18n.reload();
       applyI18n();
       // 通知 background 更新右键菜单
       try {

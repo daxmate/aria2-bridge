@@ -289,7 +289,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // 更新右键菜单语言
 async function updateContextMenus() {
-  await Aria2I18n.init();
+  await Aria2I18n.reload();
   try {
     chrome.contextMenus.update(MENU_ID_SEND, { title: Aria2I18n.t('menuSend') });
     chrome.contextMenus.update(MENU_ID_OPEN, { title: Aria2I18n.t('menuOpenAriaNg') });
