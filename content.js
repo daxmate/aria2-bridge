@@ -174,3 +174,78 @@ document.addEventListener('auxclick', (e) => {
   e.preventDefault();
   sendToAria2(link.href, location.href, e.clientX, e.clientY);
 }, true);
+
+// ========================================
+// Hugging Face — 读取模型文件列表
+// ========================================
+
+const HF_MODEL_PATTERN = /^https:\/\/huggingface\.co\/([^\/]+\/[^\/]+?)(?:\/|$)/;
+
+// 跳过常见的元数据文件
+const HF_SKIP_PATTERNS = [
+  /^\.gitattributes$/,
+  /^\.gitignore$/,
+  /^README\.md$/,
+  /^LICENSE(\..*)?$/,
+  /^CONTRIBUTING\.md$/,
+  /^SECURITY\.md$/,
+  /^CODE_OF_CONDUCT\.md$/,
+  /^\.git\/.*/,
+  /^\.huggingface$/,
+  /^model_cards\/.*/
+];
+
+function getHfModelId() {
+  const match = location.href.match(HF_MODEL_PATTERN);
+  return match ? match[1] : null;
+}
+
+function shouldSkipHfFile(path) {
+  return HF_SKIP_PATTERNS.some(p => p.test(path));
+}
+
+async function getHfFileList(modelId) {
+  try {
+    const resp = await fetch(
+      `https://huggingface.co/api/models/${encodeURIComponent(modelId)}/tree/main?recursive=1`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const items = await resp.json();
+
+    const files = [];
+    for (const item of items) {
+      if (item.type !== 'file') continue;
+      if (shouldSkipHfFile(item.path)) continue;
+
+      const pathParts = item.path.split('/');
+      const encodedPath = pathParts.map(encodeURIComponent).join('/');
+
+      files.push({
+        path: item.path,
+        size: item.size,
+        url: `https://huggingface.co/${modelId}/resolve/main/${encodedPath}`
+      });
+    }
+
+    return files;
+  } catch (e) {
+    console.error('[Aria2 Bridge] HF file list error:', e);
+    return null;
+  }
+}
+
+// 监听 background 发来的消息
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === 'getHfFileList') {
+    const modelId = getHfModelId();
+    if (modelId) {
+      getHfFileList(modelId).then(files => {
+        sendResponse({ modelId, files });
+      });
+      return true; // 异步响应
+    } else {
+      sendResponse({ modelId: null, files: null });
+    }
+  }
+});

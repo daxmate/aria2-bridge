@@ -298,6 +298,7 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
 const MENU_ID_SEND = 'aria2-bridge-send';
 const MENU_ID_OPEN = 'aria2-bridge-open-ariang';
+const MENU_ID_HF_DOWNLOAD = 'aria2-bridge-hf-download';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -310,7 +311,12 @@ chrome.runtime.onInstalled.addListener(() => {
     title: '📊 打开 AriaNg 管理面板',
     contexts: ['action']
   });
-
+  chrome.contextMenus.create({
+    id: MENU_ID_HF_DOWNLOAD,
+    title: '📥 下载该模型所有文件到 Aria2',
+    contexts: ['page'],
+    documentUrlPatterns: ['https://huggingface.co/*']
+  });
 });
 
 /**
@@ -356,6 +362,39 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === MENU_ID_OPEN) {
     const url = buildAriaNgUrl();
     chrome.tabs.create({ url });
+    return;
+  }
+
+  // Menu: Hugging Face — download all model files
+  if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, { action: 'getHfFileList' });
+      if (!response || !response.files || response.files.length === 0) {
+        showNotification('Aria2 Bridge', '未找到可下载的模型文件');
+        return;
+      }
+
+      const modelName = response.modelId.split('/').pop() || response.modelId;
+      const baseDir = config.defaultDir || undefined;
+      let count = 0;
+
+      for (const file of response.files) {
+        try {
+          // 以模型名作为子目录，保持原始路径结构
+          const outPath = modelName + '/' + file.path;
+          await aria2AddUri(file.url, { dir: baseDir, out: outPath });
+          count++;
+        } catch (err) {
+          console.warn('[Aria2 Bridge] HF file failed:', file.path, err.message);
+        }
+      }
+
+      showNotification('Aria2 Bridge — HF 下载', `已发送 ${count}/${response.files.length} 个文件到 aria2`);
+      flashBadge('✓', '#4caf50');
+    } catch (err) {
+      console.warn('[Aria2 Bridge] HF context menu error:', err.message);
+      showNotification('Aria2 Bridge', '获取 HF 文件列表失败，请刷新页面后重试');
+    }
     return;
   }
 
