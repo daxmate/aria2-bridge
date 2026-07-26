@@ -61,7 +61,9 @@ function showToast(x, y, type) {
 
   const isSuccess = type === 'success';
   const icon = isSuccess ? TOAST_ICON_OK : TOAST_ICON_FALLBACK;
-  const text = isSuccess ? '已发送到 Aria2' : '已回退到浏览器';
+  const text = isSuccess
+    ? chrome.i18n.getMessage('toastSent')
+    : chrome.i18n.getMessage('toastFallback');
 
   const toast = document.createElement('div');
   toast.id = '__aria2_bridge_toast';

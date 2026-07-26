@@ -24,6 +24,31 @@ const DEFAULT_CONFIG = {
 
 const $ = (id) => document.getElementById(id);
 
+// --- i18n ---
+
+function applyI18n() {
+  // Replace textContent of elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const msg = chrome.i18n.getMessage(key);
+    if (msg) el.textContent = msg;
+  });
+
+  // Replace placeholder of inputs with data-i18n-placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const msg = chrome.i18n.getMessage(key);
+    if (msg) el.placeholder = msg;
+  });
+
+  // Set document title
+  const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
+  if (titleKey) {
+    const titleMsg = chrome.i18n.getMessage(titleKey);
+    if (titleMsg) document.title = titleMsg;
+  }
+}
+
 // --- Load ---
 async function loadSettings() {
   const data = await chrome.storage.sync.get(DEFAULT_CONFIG);
@@ -102,9 +127,9 @@ async function testConnection() {
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message);
-    return `✅ 连接成功 — aria2 ${data.result.version}`;
+    return chrome.i18n.getMessage('optionsTestSuccess', [data.result.version]);
   } catch (err) {
-    throw new Error(`❌ 连接失败: ${err.message}`);
+    throw new Error(chrome.i18n.getMessage('optionsTestFail', [err.message]));
   }
 }
 
@@ -112,9 +137,9 @@ async function testConnection() {
 $('saveBtn').addEventListener('click', async () => {
   try {
     await saveSettings();
-    showStatus('✅ 设置已保存', 'success');
+    showStatus(chrome.i18n.getMessage('optionsSaveSuccess'), 'success');
   } catch (err) {
-    showStatus('❌ 保存失败: ' + err.message, 'error');
+    showStatus(chrome.i18n.getMessage('optionsSaveFail', [err.message]), 'error');
   }
 });
 
@@ -122,7 +147,7 @@ $('testBtn').addEventListener('click', async () => {
   const btn = $('testBtn');
   const originalText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = '⏳ 测试中...';
+  btn.textContent = chrome.i18n.getMessage('optionsTestConnecting');
   showTestResult('');
 
   try {
@@ -139,7 +164,7 @@ $('testBtn').addEventListener('click', async () => {
 $('resetBtn').addEventListener('click', async () => {
   await chrome.storage.sync.clear();
   await loadSettings();
-  showStatus('↻ 已恢复默认设置', 'info');
+  showStatus(chrome.i18n.getMessage('optionsResetDone'), 'info');
 });
 
 // Also keep the old dblclick test on RPC URL for power users
@@ -187,4 +212,7 @@ $('rpcUrl').addEventListener('dblclick', async () => {
 });
 
 // --- Init ---
-document.addEventListener('DOMContentLoaded', loadSettings);
+document.addEventListener('DOMContentLoaded', () => {
+  applyI18n();
+  loadSettings();
+});

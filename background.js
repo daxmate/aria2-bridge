@@ -357,17 +357,17 @@ const MENU_ID_HF_DOWNLOAD = 'aria2-bridge-hf-download';
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: MENU_ID_SEND,
-    title: '用 Aria2 下载',
+    title: chrome.i18n.getMessage('menuSend'),
     contexts: ['link', 'image', 'video', 'audio']
   });
   chrome.contextMenus.create({
     id: MENU_ID_OPEN,
-    title: '📊 打开 AriaNg 管理面板',
+    title: chrome.i18n.getMessage('menuOpenAriaNg'),
     contexts: ['action']
   });
   chrome.contextMenus.create({
     id: MENU_ID_HF_DOWNLOAD,
-    title: '📥 下载该模型所有文件到 Aria2',
+    title: chrome.i18n.getMessage('menuHfDownload'),
     contexts: ['page'],
     documentUrlPatterns: ['https://huggingface.co/*']
   });
@@ -429,7 +429,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
       if (!idResponse || !idResponse.modelId) {
         flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', '无法识别模型 ID，请确认页面已完全加载');
+        showNotification('Aria2 Bridge', chrome.i18n.getMessage('notifHfModelIdFail'));
         return;
       }
 
@@ -438,7 +438,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
       if (!files || files.length === 0) {
         flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', '未找到可下载的模型文件');
+        showNotification('Aria2 Bridge', chrome.i18n.getMessage('notifHfNoFiles'));
         return;
       }
 
@@ -458,14 +458,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const failCount = results.filter(r => r.status === 'rejected').length;
 
       flashBadge(failCount > 0 ? '⚠' : '✓', failCount > 0 ? '#ff9800' : '#4caf50');
-      showNotification('Aria2 Bridge — HF 下载',
+      showNotification('Aria2 Bridge — HF ' + chrome.i18n.getMessage('notifSentTitle'),
         failCount > 0
-          ? `${successCount} 个成功, ${failCount} 个失败`
-          : `${successCount} 个文件已添加到 aria2`);
+          ? chrome.i18n.getMessage('notifHfPartial', [String(successCount), String(failCount)])
+          : chrome.i18n.getMessage('notifHfSuccess', [String(successCount)]));
     } catch (err) {
       console.warn('[Aria2 Bridge] HF context menu error:', err.message);
       flashBadge('✗', '#f44336');
-      showNotification('Aria2 Bridge', '获取 HF 文件列表失败，请刷新页面后重试');
+      showNotification('Aria2 Bridge', chrome.i18n.getMessage('notifHfError'));
     }
     return;
   }
@@ -486,11 +486,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   try {
     const gid = await aria2AddUri(url, options);
     const label = url.split('/').pop() || url;
-    showNotification('Aria2 Bridge — 已发送', label);
+    showNotification(chrome.i18n.getMessage('notifSentTitle'), label);
     flashBadge('✓', '#4caf50');
     setTimeout(() => chrome.notifications.clear(gid), 3000);
   } catch (err) {
-    showNotification('Aria2 Bridge — 发送失败', err.message);
+    showNotification(chrome.i18n.getMessage('notifFailTitle'), err.message);
     flashBadge('✗', '#f44336');
   }
 });

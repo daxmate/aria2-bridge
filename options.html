@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <title>设置 - Aria2 Bridge</title>
+  <title data-i18n="optionsTitle">设置 - Aria2 Bridge</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -46,69 +46,69 @@
   </style>
 </head>
 <body>
-  <h2>⚡ Aria2 Bridge 设置</h2>
+  <h2 data-i18n="optionsPageTitle">⚡ Aria2 Bridge 设置</h2>
 
   <!-- Connection -->
   <section>
-    <h3>连接</h3>
+    <h3 data-i18n="optionsSectionConnection">连接</h3>
     <div class="field">
-      <label for="rpcUrl">Aria2 RPC 地址</label>
-      <input type="url" id="rpcUrl" placeholder="http://localhost:6800/jsonrpc">
-      <div class="hint">aria2 JSON-RPC 接口地址。默认 http://localhost:6800/jsonrpc</div>
+      <label data-i18n="optionsRpcUrlLabel" for="rpcUrl">Aria2 RPC 地址</label>
+      <input type="url" id="rpcUrl" data-i18n-placeholder="optionsRpcUrlPlaceholder" placeholder="http://localhost:6800/jsonrpc">
+      <div class="hint" data-i18n="optionsRpcUrlHint">aria2 JSON-RPC 接口地址。默认 http://localhost:6800/jsonrpc</div>
     </div>
     <div class="field">
-      <label for="rpcSecret">RPC 密钥（可选）</label>
-      <input type="password" id="rpcSecret" placeholder="aria2 --rpc-secret 设置的密码">
-      <div class="hint">aria2 启动参数 <code>--rpc-secret=xxx</code> 中设置的密码，仅填密码本身即可（扩展自动加 <code>token:</code> 前缀）。留空表示无密码</div>
+      <label data-i18n="optionsSecretLabel" for="rpcSecret">RPC 密钥（可选）</label>
+      <input type="password" id="rpcSecret" data-i18n-placeholder="optionsSecretPlaceholder" placeholder="aria2 --rpc-secret 设置的密码">
+      <div class="hint" data-i18n="optionsSecretHint">aria2 启动参数 --rpc-secret=xxx 中设置的密码，仅填密码本身即可（扩展自动加 token: 前缀）。留空表示无密码</div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button class="btn-primary" id="testBtn">🔗 测试连接</button>
+      <button class="btn-primary" id="testBtn" data-i18n="optionsTestBtn">🔗 测试连接</button>
       <span id="testResult" style="font-size:13px;align-self:center;display:none"></span>
     </div>
   </section>
 
   <!-- Download -->
   <section>
-    <h3>下载</h3>
+    <h3 data-i18n="optionsSectionDownload">下载</h3>
     <div class="field">
-      <label for="defaultDir">默认下载目录（可选）</label>
-      <input type="text" id="defaultDir" placeholder="/path/to/downloads">
-      <div class="hint">留空则使用 aria2 配置文件中设定的目录</div>
+      <label data-i18n="optionsDefaultDirLabel" for="defaultDir">默认下载目录（可选）</label>
+      <input type="text" id="defaultDir" data-i18n-placeholder="optionsDefaultDirPlaceholder" placeholder="/path/to/downloads">
+      <div class="hint" data-i18n="optionsDefaultDirHint">留空则使用 aria2 配置文件中设定的目录</div>
     </div>
     <div class="field">
-      <label for="bypassDomains">不拦截的域名</label>
-      <textarea id="bypassDomains" rows="3" placeholder="example.com&#10;cdn.example.com"></textarea>
-      <div class="hint">每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载</div>
+      <label data-i18n="optionsBypassLabel" for="bypassDomains">不拦截的域名</label>
+      <textarea id="bypassDomains" rows="3" data-i18n-placeholder="optionsBypassPlaceholder" placeholder="example.com&#10;cdn.example.com"></textarea>
+      <div class="hint" data-i18n="optionsBypassHint">每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载</div>
     </div>
     <div class="field checkbox-row">
       <input type="checkbox" id="enabled">
-      <label for="enabled">启用下载自动拦截</label>
+      <label data-i18n="optionsEnabledLabel" for="enabled">启用下载自动拦截</label>
     </div>
   </section>
 
   <!-- AriaNg -->
   <section>
-    <h3>📊 AriaNg 管理面板</h3>
-    <p style="font-size:13px;color:#666;margin-bottom:12px">
+    <h3 data-i18n="optionsSectionAriaNg">📊 AriaNg 管理面板</h3>
+    <p style="font-size:13px;color:#666;margin-bottom:12px" data-i18n="optionsAriaNgDesc">
       AriaNg 是 aria2 的 Web 管理面板，可查看下载进度、管理任务、调整设置。
       已在插件中内置。
     </p>
-    <button class="btn-primary" id="openAriaNgBtn">📂 打开 AriaNg</button>
+    <button class="btn-primary" id="openAriaNgBtn" data-i18n="optionsOpenAriaNgBtn">📂 打开 AriaNg</button>
   </section>
 
   <!-- File types -->
   <section>
-    <h3>拦截的文件类型</h3>
+    <h3 data-i18n="optionsSectionFileTypes">拦截的文件类型</h3>
     <div class="field">
-      <label for="downloadExts">文件扩展名列表</label>
-      <textarea id="downloadExts" rows="6" placeholder=".zip&#10;.rar&#10;.7z"></textarea>
-      <div class="hint">每行一个扩展名（带点号）。Content Script 会拦截这些扩展名的链接点击。留空使用默认列表</div>
+      <label data-i18n="optionsExtsLabel" for="downloadExts">文件扩展名列表</label>
+      <textarea id="downloadExts" rows="6" data-i18n-placeholder="optionsExtsPlaceholder" placeholder=".zip&#10;.rar&#10;.7z"></textarea>
+      <div class="hint" data-i18n="optionsExtsHint">每行一个扩展名（带点号）。Content Script 会拦截这些扩展名的链接点击。留空使用默认列表</div>
     </div>
   </section>
 
   <div class="actions">
-    <button class="btn-primary" id="saveBtn">💾 保存设置</button>
-    <button class="btn-secondary" id="resetBtn">↻ 恢复默认</button>
+    <button class="btn-primary" id="saveBtn" data-i18n="optionsSaveBtn">💾 保存设置</button>
+    <button class="btn-secondary" id="resetBtn" data-i18n="optionsResetBtn">↻ 恢复默认</button>
     <div id="status"></div>
   </div>
 

@@ -1,0 +1,226 @@
+{
+  "extName": {
+    "message": "Aria2 Bridge",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Lightweight download interceptor. Automatically redirects browser downloads to local aria2 RPC, with right-click send and HuggingFace batch download.",
+    "description": "Extension description shown in Chrome extensions page"
+  },
+  "extDefaultTitle": {
+    "message": "Aria2 Bridge\nClick to open AriaNg",
+    "description": "Toolbar icon tooltip"
+  },
+
+  "menuSend": {
+    "message": "Download with Aria2",
+    "description": "Context menu item: send link to aria2"
+  },
+  "menuOpenAriaNg": {
+    "message": "📊 Open AriaNg Dashboard",
+    "description": "Context menu item: open AriaNg management panel"
+  },
+  "menuHfDownload": {
+    "message": "📥 Download all model files to Aria2",
+    "description": "Context menu item: batch download from HuggingFace model page"
+  },
+
+  "toastSent": {
+    "message": "Sent to Aria2",
+    "description": "Toast shown when download is sent to aria2"
+  },
+  "toastFallback": {
+    "message": "Fell back to browser",
+    "description": "Toast shown when aria2 is unavailable and download falls back to browser"
+  },
+
+  "notifHfModelIdFail": {
+    "message": "Cannot identify model ID. Please make sure the page is fully loaded.",
+    "description": "Notification when HF model ID extraction fails"
+  },
+  "notifHfNoFiles": {
+    "message": "No downloadable files found.",
+    "description": "Notification when no downloadable files are found on HF"
+  },
+  "notifHfError": {
+    "message": "Failed to fetch HF file list. Please refresh and try again.",
+    "description": "Notification when HF API call fails"
+  },
+  "notifSentTitle": {
+    "message": "Aria2 Bridge — Sent",
+    "description": "Notification title for successful send"
+  },
+  "notifSentAria2": {
+    "message": "Sent to Aria2",
+    "description": "Notification body: sent to aria2"
+  },
+  "notifSentFallback": {
+    "message": "Fell back to browser download",
+    "description": "Notification body: fell back to browser"
+  },
+  "notifFailTitle": {
+    "message": "Aria2 Bridge — Send Failed",
+    "description": "Notification title for failed send"
+  },
+  "notifHfSuccess": {
+    "message": "$count$ files added to aria2",
+    "description": "Notification after successful HF batch download",
+    "placeholders": {
+      "count": { "content": "$1", "example": "13" }
+    }
+  },
+  "notifHfPartial": {
+    "message": "$success$ succeeded, $failed$ failed",
+    "description": "Notification when some HF files failed",
+    "placeholders": {
+      "success": { "content": "$1", "example": "12" },
+      "failed": { "content": "$2", "example": "1" }
+    }
+  },
+
+  "optionsTitle": {
+    "message": "Settings - Aria2 Bridge",
+    "description": "Options page <title>"
+  },
+  "optionsPageTitle": {
+    "message": "⚡ Aria2 Bridge Settings",
+    "description": "Options page main heading"
+  },
+  "optionsSectionConnection": {
+    "message": "Connection",
+    "description": "Connection settings section heading"
+  },
+  "optionsRpcUrlLabel": {
+    "message": "Aria2 RPC URL",
+    "description": "Label for RPC URL input"
+  },
+  "optionsRpcUrlPlaceholder": {
+    "message": "http://localhost:6800/jsonrpc",
+    "description": "Placeholder for RPC URL input"
+  },
+  "optionsRpcUrlHint": {
+    "message": "aria2 JSON-RPC endpoint URL. Default http://localhost:6800/jsonrpc",
+    "description": "Hint text below RPC URL input"
+  },
+  "optionsSecretLabel": {
+    "message": "RPC Secret (optional)",
+    "description": "Label for RPC secret input"
+  },
+  "optionsSecretPlaceholder": {
+    "message": "Password set by aria2 --rpc-secret",
+    "description": "Placeholder for RPC secret input"
+  },
+  "optionsSecretHint": {
+    "message": "The password set via aria2 startup arg --rpc-secret=xxx. Enter the password only (the extension auto-prepends token:). Leave empty for no auth.",
+    "description": "Hint text below RPC secret input"
+  },
+  "optionsTestBtn": {
+    "message": "🔗 Test Connection",
+    "description": "Button to test RPC connection"
+  },
+  "optionsTestConnecting": {
+    "message": "⏳ Testing...",
+    "description": "Button text while testing connection"
+  },
+  "optionsTestSuccess": {
+    "message": "✅ Connected — aria2 $version$",
+    "description": "Successful connection test result",
+    "placeholders": {
+      "version": { "content": "$1", "example": "1.37.0" }
+    }
+  },
+  "optionsTestFail": {
+    "message": "❌ Connection failed: $error$",
+    "description": "Failed connection test result",
+    "placeholders": {
+      "error": { "content": "$1", "example": "HTTP 403" }
+    }
+  },
+
+  "optionsSectionDownload": {
+    "message": "Download",
+    "description": "Download settings section heading"
+  },
+  "optionsDefaultDirLabel": {
+    "message": "Default Download Directory (optional)",
+    "description": "Label for default download directory input"
+  },
+  "optionsDefaultDirPlaceholder": {
+    "message": "/path/to/downloads",
+    "description": "Placeholder for default directory input"
+  },
+  "optionsDefaultDirHint": {
+    "message": "Leave empty to use the directory configured in aria2.conf",
+    "description": "Hint text below default directory input"
+  },
+  "optionsBypassLabel": {
+    "message": "Bypassed Domains",
+    "description": "Label for bypass domains textarea"
+  },
+  "optionsBypassPlaceholder": {
+    "message": "example.com\ncdn.example.com",
+    "description": "Placeholder for bypass domains"
+  },
+  "optionsBypassHint": {
+    "message": "One domain per line. Downloads from these domains will bypass the interceptor and use the browser's native download.",
+    "description": "Hint text below bypass domains"
+  },
+  "optionsEnabledLabel": {
+    "message": "Enable download interception",
+    "description": "Label for enable checkbox"
+  },
+
+  "optionsSectionAriaNg": {
+    "message": "📊 AriaNg Dashboard",
+    "description": "AriaNg section heading"
+  },
+  "optionsAriaNgDesc": {
+    "message": "AriaNg is a web-based aria2 management dashboard. It lets you view progress, manage tasks, and adjust settings. Built into this extension.",
+    "description": "Description of AriaNg in options page"
+  },
+  "optionsOpenAriaNgBtn": {
+    "message": "📂 Open AriaNg",
+    "description": "Button to open AriaNg"
+  },
+
+  "optionsSectionFileTypes": {
+    "message": "Intercepted File Types",
+    "description": "File type settings section heading"
+  },
+  "optionsExtsLabel": {
+    "message": "File Extensions",
+    "description": "Label for file extensions textarea"
+  },
+  "optionsExtsPlaceholder": {
+    "message": ".zip\n.rar\n.7z",
+    "description": "Placeholder for file extensions textarea"
+  },
+  "optionsExtsHint": {
+    "message": "One extension per line (with dot). Content Script will intercept link clicks matching these extensions. Leave empty to use default list.",
+    "description": "Hint text below file extensions input"
+  },
+
+  "optionsSaveBtn": {
+    "message": "💾 Save Settings",
+    "description": "Save button text"
+  },
+  "optionsSaveSuccess": {
+    "message": "✅ Settings saved",
+    "description": "Status message after successful save"
+  },
+  "optionsSaveFail": {
+    "message": "❌ Save failed: $error$",
+    "description": "Status message when save fails",
+    "placeholders": {
+      "error": { "content": "$1", "example": "QUOTA_BYTES_PER_ITEM" }
+    }
+  },
+  "optionsResetBtn": {
+    "message": "↻ Restore Defaults",
+    "description": "Reset button text"
+  },
+  "optionsResetDone": {
+    "message": "↻ Defaults restored",
+    "description": "Status message after restoring defaults"
+  }
+}

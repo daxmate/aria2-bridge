@@ -1,0 +1,226 @@
+{
+  "extName": {
+    "message": "Aria2 Bridge",
+    "description": "扩展名称"
+  },
+  "extDescription": {
+    "message": "轻量 aria2 下载拦截插件。自动拦截浏览器下载并转发到本地 aria2 RPC，提供右键菜单快捷发送及 HuggingFace 批量下载。",
+    "description": "扩展描述，显示在 Chrome 扩展管理页面"
+  },
+  "extDefaultTitle": {
+    "message": "Aria2 Bridge\n点击打开 AriaNg 管理面板",
+    "description": "工具栏图标提示"
+  },
+
+  "menuSend": {
+    "message": "用 Aria2 下载",
+    "description": "右键菜单项：发送链接到 aria2"
+  },
+  "menuOpenAriaNg": {
+    "message": "📊 打开 AriaNg 管理面板",
+    "description": "右键菜单项：打开 AriaNg 管理面板"
+  },
+  "menuHfDownload": {
+    "message": "📥 下载该模型所有文件到 Aria2",
+    "description": "右键菜单项：从 HuggingFace 模型页面批量下载"
+  },
+
+  "toastSent": {
+    "message": "已发送到 Aria2",
+    "description": "Toast 提示：已发送到 aria2"
+  },
+  "toastFallback": {
+    "message": "已回退到浏览器",
+    "description": "Toast 提示：aria2 不可用，回退到浏览器下载"
+  },
+
+  "notifHfModelIdFail": {
+    "message": "无法识别模型 ID，请确认页面已完全加载",
+    "description": "通知：HF 模型 ID 提取失败"
+  },
+  "notifHfNoFiles": {
+    "message": "未找到可下载的模型文件",
+    "description": "通知：未找到可下载的 HF 文件"
+  },
+  "notifHfError": {
+    "message": "获取 HF 文件列表失败，请刷新页面后重试",
+    "description": "通知：HF API 调用失败"
+  },
+  "notifSentTitle": {
+    "message": "Aria2 Bridge — 已发送",
+    "description": "通知标题：发送成功"
+  },
+  "notifSentAria2": {
+    "message": "已发送到 Aria2",
+    "description": "通知正文：已发送到 aria2"
+  },
+  "notifSentFallback": {
+    "message": "已回退到浏览器下载",
+    "description": "通知正文：已回退到浏览器"
+  },
+  "notifFailTitle": {
+    "message": "Aria2 Bridge — 发送失败",
+    "description": "通知标题：发送失败"
+  },
+  "notifHfSuccess": {
+    "message": "$count$ 个文件已添加到 aria2",
+    "description": "通知：HF 批量下载成功",
+    "placeholders": {
+      "count": { "content": "$1", "example": "13" }
+    }
+  },
+  "notifHfPartial": {
+    "message": "$success$ 个成功, $failed$ 个失败",
+    "description": "通知：部分 HF 文件发送失败",
+    "placeholders": {
+      "success": { "content": "$1", "example": "12" },
+      "failed": { "content": "$2", "example": "1" }
+    }
+  },
+
+  "optionsTitle": {
+    "message": "设置 - Aria2 Bridge",
+    "description": "设置页标题"
+  },
+  "optionsPageTitle": {
+    "message": "⚡ Aria2 Bridge 设置",
+    "description": "设置页主标题"
+  },
+  "optionsSectionConnection": {
+    "message": "连接",
+    "description": "连接设置区块标题"
+  },
+  "optionsRpcUrlLabel": {
+    "message": "Aria2 RPC 地址",
+    "description": "RPC 地址输入标签"
+  },
+  "optionsRpcUrlPlaceholder": {
+    "message": "http://localhost:6800/jsonrpc",
+    "description": "RPC 地址占位符"
+  },
+  "optionsRpcUrlHint": {
+    "message": "aria2 JSON-RPC 接口地址。默认 http://localhost:6800/jsonrpc",
+    "description": "RPC 地址提示"
+  },
+  "optionsSecretLabel": {
+    "message": "RPC 密钥（可选）",
+    "description": "RPC 密钥输入标签"
+  },
+  "optionsSecretPlaceholder": {
+    "message": "aria2 --rpc-secret 设置的密码",
+    "description": "RPC 密钥占位符"
+  },
+  "optionsSecretHint": {
+    "message": "aria2 启动参数 --rpc-secret=xxx 中设置的密码，仅填密码本身即可（扩展自动加 token: 前缀）。留空表示无密码",
+    "description": "RPC 密钥提示"
+  },
+  "optionsTestBtn": {
+    "message": "🔗 测试连接",
+    "description": "测试连接按钮"
+  },
+  "optionsTestConnecting": {
+    "message": "⏳ 测试中...",
+    "description": "测试中按钮文字"
+  },
+  "optionsTestSuccess": {
+    "message": "✅ 连接成功 — aria2 $version$",
+    "description": "连接成功结果",
+    "placeholders": {
+      "version": { "content": "$1", "example": "1.37.0" }
+    }
+  },
+  "optionsTestFail": {
+    "message": "❌ 连接失败: $error$",
+    "description": "连接失败结果",
+    "placeholders": {
+      "error": { "content": "$1", "example": "HTTP 403" }
+    }
+  },
+
+  "optionsSectionDownload": {
+    "message": "下载",
+    "description": "下载设置区块标题"
+  },
+  "optionsDefaultDirLabel": {
+    "message": "默认下载目录（可选）",
+    "description": "默认下载目录输入标签"
+  },
+  "optionsDefaultDirPlaceholder": {
+    "message": "/path/to/downloads",
+    "description": "默认目录占位符"
+  },
+  "optionsDefaultDirHint": {
+    "message": "留空则使用 aria2 配置文件中设定的目录",
+    "description": "默认目录提示"
+  },
+  "optionsBypassLabel": {
+    "message": "不拦截的域名",
+    "description": "白名单域名字段标签"
+  },
+  "optionsBypassPlaceholder": {
+    "message": "example.com\ncdn.example.com",
+    "description": "白名单域名占位符"
+  },
+  "optionsBypassHint": {
+    "message": "每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载",
+    "description": "白名单域名提示"
+  },
+  "optionsEnabledLabel": {
+    "message": "启用下载自动拦截",
+    "description": "启用拦截复选框标签"
+  },
+
+  "optionsSectionAriaNg": {
+    "message": "📊 AriaNg 管理面板",
+    "description": "AriaNg 区块标题"
+  },
+  "optionsAriaNgDesc": {
+    "message": "AriaNg 是 aria2 的 Web 管理面板，可查看下载进度、管理任务、调整设置。已在插件中内置。",
+    "description": "AriaNg 描述"
+  },
+  "optionsOpenAriaNgBtn": {
+    "message": "📂 打开 AriaNg",
+    "description": "打开 AriaNg 按钮"
+  },
+
+  "optionsSectionFileTypes": {
+    "message": "拦截的文件类型",
+    "description": "文件类型设置区块标题"
+  },
+  "optionsExtsLabel": {
+    "message": "文件扩展名列表",
+    "description": "文件扩展名字段标签"
+  },
+  "optionsExtsPlaceholder": {
+    "message": ".zip\n.rar\n.7z",
+    "description": "文件扩展名占位符"
+  },
+  "optionsExtsHint": {
+    "message": "每行一个扩展名（带点号）。Content Script 会拦截这些扩展名的链接点击。留空使用默认列表",
+    "description": "文件扩展名提示"
+  },
+
+  "optionsSaveBtn": {
+    "message": "💾 保存设置",
+    "description": "保存按钮文字"
+  },
+  "optionsSaveSuccess": {
+    "message": "✅ 设置已保存",
+    "description": "保存成功状态"
+  },
+  "optionsSaveFail": {
+    "message": "❌ 保存失败: $error$",
+    "description": "保存失败状态",
+    "placeholders": {
+      "error": { "content": "$1", "example": "QUOTA_BYTES_PER_ITEM" }
+    }
+  },
+  "optionsResetBtn": {
+    "message": "↻ 恢复默认",
+    "description": "恢复默认按钮文字"
+  },
+  "optionsResetDone": {
+    "message": "↻ 已恢复默认设置",
+    "description": "恢复默认状态"
+  }
+}
