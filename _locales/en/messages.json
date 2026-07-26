@@ -191,22 +191,6 @@
     "message": "📂 Open AriaNg",
     "description": "Button to open AriaNg"
   },
-  "optionsSectionFileTypes": {
-    "message": "Intercepted File Types",
-    "description": "File type settings section heading"
-  },
-  "optionsExtsLabel": {
-    "message": "File Extensions",
-    "description": "Label for file extensions textarea"
-  },
-  "optionsExtsPlaceholder": {
-    "message": ".zip\n.rar\n.7z",
-    "description": "Placeholder for file extensions textarea"
-  },
-  "optionsExtsHint": {
-    "message": "One extension per line (with dot). Content Script will intercept link clicks matching these extensions. Leave empty to use default list.",
-    "description": "Hint text below file extensions input"
-  },
   "optionsSaveBtn": {
     "message": "💾 Save Settings",
     "description": "Save button text"

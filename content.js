@@ -5,33 +5,6 @@
 // at the navigation level, preventing blank-page
 // navigation before aria2 gets the URL.
 
-// Default file extensions (override via extension settings)
-const DEFAULT_EXTS = [
-  '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
-  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-  '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
-  '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
-  '.torrent', '.nzb',
-  '.csv', '.json', '.xml',
-  '.psd', '.ai', '.skp',
-  '.epub', '.mobi', '.cbr'
-];
-
-// Mutable, loaded from storage on script start
-let downloadExts = new Set(DEFAULT_EXTS);
-
-// Load user-configured extensions from storage
-(async () => {
-  try {
-    const { downloadExts: stored } = await chrome.storage.sync.get({ downloadExts: DEFAULT_EXTS });
-    if (stored && Array.isArray(stored) && stored.length > 0) {
-      downloadExts = new Set(stored.map(s => s.startsWith('.') ? s : '.' + s));
-    }
-  } catch {
-    // Fall back to defaults
-  }
-})();
-
 // ========================================
 // Toast feedback helper
 // ========================================
@@ -114,10 +87,11 @@ function looksLikeDownload(url) {
     const u = new URL(url);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
     const path = u.pathname.toLowerCase();
-    const match = path.match(/\.([a-z0-9]+)(?:[?#]|$)/);
-    return match ? downloadExts.has('.' + match[1]) : false;
+    // 只要有文件扩展名就拦截，不限制特定后缀
+    return /\/[^/]+\.[a-z0-9]{2,}(?:[?#]|$)/.test(path);
   } catch {
     return false;
+  }
   }
 }
 

@@ -110,22 +110,6 @@
     <button class="btn-primary" id="openAriaNgBtn" data-i18n="optionsOpenAriaNgBtn">📂 打开 AriaNg</button>
   </section>
 
-  <!-- File types -->
-  <section>
-    <h3 data-i18n="optionsSectionFileTypes">拦截的文件类型</h3>
-    <div class="field">
-      <label data-i18n="optionsExtsLabel" for="downloadExts">文件扩展名列表</label>
-      <textarea id="downloadExts" rows="6" data-i18n-placeholder="optionsExtsPlaceholder" placeholder=".zip&#10;.rar&#10;.7z"></textarea>
-      <div class="hint" data-i18n="optionsExtsHint">每行一个扩展名（带点号）。Content Script 会拦截这些扩展名的链接点击。留空使用默认列表</div>
-    </div>
-  </section>
-
-  <div class="actions">
-    <button class="btn-primary" id="saveBtn" data-i18n="optionsSaveBtn">💾 保存设置</button>
-    <button class="btn-secondary" id="resetBtn" data-i18n="optionsResetBtn">↻ 恢复默认</button>
-    <div id="status"></div>
-  </div>
-
   <script src="js/i18n.js"></script>
   <script src="options.js"></script>
 </body>

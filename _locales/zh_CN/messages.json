@@ -191,22 +191,6 @@
     "message": "📂 打开 AriaNg",
     "description": "打开 AriaNg 按钮"
   },
-  "optionsSectionFileTypes": {
-    "message": "拦截的文件类型",
-    "description": "文件类型设置区块标题"
-  },
-  "optionsExtsLabel": {
-    "message": "文件扩展名列表",
-    "description": "文件扩展名字段标签"
-  },
-  "optionsExtsPlaceholder": {
-    "message": ".zip\n.rar\n.7z",
-    "description": "文件扩展名占位符"
-  },
-  "optionsExtsHint": {
-    "message": "每行一个扩展名（带点号）。Content Script 会拦截这些扩展名的链接点击。留空使用默认列表",
-    "description": "文件扩展名提示"
-  },
   "optionsSaveBtn": {
     "message": "💾 保存设置",
     "description": "保存按钮文字"

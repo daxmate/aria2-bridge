@@ -2,24 +2,12 @@
 // Aria2 Bridge — Options page
 // ========================================
 
-const DEFAULT_EXTS = [
-  '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
-  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-  '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
-  '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
-  '.torrent', '.nzb',
-  '.csv', '.json', '.xml',
-  '.psd', '.ai', '.skp',
-  '.epub', '.mobi', '.cbr'
-];
-
 const DEFAULT_CONFIG = {
   rpcUrl: 'http://localhost:6800/jsonrpc',
   rpcSecret: '',
   enabled: true,
   defaultDir: '',
   bypassDomains: [],
-  downloadExts: DEFAULT_EXTS,
   locale: 'auto'
 };
 
@@ -58,7 +46,6 @@ async function loadSettings() {
   $('rpcSecret').value = data.rpcSecret || '';
   $('defaultDir').value = data.defaultDir;
   $('bypassDomains').value = (data.bypassDomains || []).join('\n');
-  $('downloadExts').value = (data.downloadExts || DEFAULT_EXTS).join('\n');
   $('enabled').checked = data.enabled;
   $('localeSelect').value = data.locale || 'auto';
 }
@@ -73,19 +60,9 @@ async function saveSettings() {
       .split('\n')
       .map(function (s) { return s.trim(); })
       .filter(Boolean),
-    downloadExts: $('downloadExts').value
-      .split('\n')
-      .map(function (s) { return s.trim().toLowerCase(); })
-      .filter(function (s) { return s.startsWith('.'); })
-      .filter(Boolean),
     enabled: $('enabled').checked,
     locale: $('localeSelect').value
   };
-
-  // If downloadExts is empty after cleaning, keep default
-  if (updates.downloadExts.length === 0) {
-    updates.downloadExts = DEFAULT_EXTS;
-  }
 
   await chrome.storage.sync.set(updates);
   return updates;
@@ -144,17 +121,14 @@ $('saveBtn').addEventListener('click', async function () {
     var updates = await saveSettings();
     showStatus(t('optionsSaveSuccess'), 'success');
 
-    // 语言变了 → 热生效，不刷新页面
+    // 语言变了 → 热生效
     var prevLocale = $('localeSelect').dataset._originalLocale || 'auto';
     if (updates.locale !== prevLocale) {
       await Aria2I18n.reload();
       applyI18n();
-      // 通知 background 更新右键菜单
       try {
         await chrome.runtime.sendMessage({ action: 'updateLocale' });
-      } catch (e) {
-        // background 可能还没就绪，忽略
-      }
+      } catch (e) { /* background not ready, ignore */ }
       $('localeSelect').dataset._originalLocale = updates.locale;
     }
   } catch (err) {
@@ -182,7 +156,6 @@ $('testBtn').addEventListener('click', async function () {
 
 $('resetBtn').addEventListener('click', async function () {
   await chrome.storage.sync.clear();
-  // 重置后刷新以恢复默认语言
   location.reload();
 });
 
@@ -217,7 +190,7 @@ $('openAriaNgBtn').addEventListener('click', async function () {
     '&host=' + encodeURIComponent(host) +
     '&port=' + encodeURIComponent(port) +
     '&interface=' + encodeURIComponent(iface) +
-    '&secret=' + encodeURIComponent(secret);
+    '&secret=*** + encodeURIComponent(secret);
 
   var base = chrome.runtime.getURL('aria-ng/index.html');
   chrome.tabs.create({ url: base + hash });
@@ -232,6 +205,5 @@ document.addEventListener('DOMContentLoaded', async function () {
   await Aria2I18n.init();
   applyI18n();
   await loadSettings();
-  // 记住原始语言以检测变化
   $('localeSelect').dataset._originalLocale = $('localeSelect').value;
 });
