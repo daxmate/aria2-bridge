@@ -30,6 +30,7 @@
   };
 
   I18n._load = async function (locale) {
+    I18n._ready = false;
     // 不加载、自动模式、或与 Chrome 语言相同时，直接使用 chrome.i18n
     if (!locale || locale === 'auto') {
       I18n._messages = null;

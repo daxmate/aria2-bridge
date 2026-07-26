@@ -144,11 +144,18 @@ $('saveBtn').addEventListener('click', async function () {
     var updates = await saveSettings();
     showStatus(t('optionsSaveSuccess'), 'success');
 
-    // 如果语言变了，提示刷新
-    if (updates.locale !== ($('localeSelect').dataset._originalLocale || 'auto')) {
-      setTimeout(function () {
-        location.reload();
-      }, 1200);
+    // 语言变了 → 热生效，不刷新页面
+    var prevLocale = $('localeSelect').dataset._originalLocale || 'auto';
+    if (updates.locale !== prevLocale) {
+      await Aria2I18n.init();
+      applyI18n();
+      // 通知 background 更新右键菜单
+      try {
+        await chrome.runtime.sendMessage({ action: 'updateLocale' });
+      } catch (e) {
+        // background 可能还没就绪，忽略
+      }
+      $('localeSelect').dataset._originalLocale = updates.locale;
     }
   } catch (err) {
     showStatus(t('optionsSaveFail', [err.message]), 'error');

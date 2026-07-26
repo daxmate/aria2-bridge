@@ -246,7 +246,7 @@
     "description": "自动检测语言选项"
   },
   "optionsLocaleHint": {
-    "message": "选择扩展界面的显示语言。需要刷新设置页生效。",
+    "message": "选择扩展界面的显示语言。修改后立即生效。",
     "description": "语言选择器提示"
   }
 }

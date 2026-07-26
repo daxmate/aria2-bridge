@@ -246,7 +246,7 @@
     "description": "Auto-detect language option"
   },
   "optionsLocaleHint": {
-    "message": "Select the display language for the extension. Refresh the settings page to apply.",
+    "message": "Select the display language for the extension. Applied immediately.",
     "description": "Hint text below language selector"
   }
 }
