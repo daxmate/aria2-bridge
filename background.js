@@ -290,7 +290,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // 更新右键菜单语言
 async function updateContextMenus() {
   await Aria2I18n.reload();
-  _hfMenuCreated = false;  // 下次 onShown 会以新语言重新创建
   try {
     chrome.contextMenus.update(MENU_ID_SEND, { title: Aria2I18n.t('menuSend') });
     chrome.contextMenus.update(MENU_ID_OPEN, { title: Aria2I18n.t('menuOpenAriaNg') });
@@ -374,7 +373,6 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
 const MENU_ID_SEND = 'aria2-bridge-send';
 const MENU_ID_OPEN = 'aria2-bridge-open-ariang';
-const MENU_ID_HF_DOWNLOAD = 'aria2-bridge-hf-download';
 
 chrome.runtime.onInstalled.addListener(async () => {
   // 等待 i18n 初始化完成，确保菜单使用正确的语言
@@ -390,34 +388,6 @@ chrome.runtime.onInstalled.addListener(async () => {
     title: Aria2I18n.t('menuOpenAriaNg'),
     contexts: ['action']
   });
-});
-
-// HF 菜单：仅在 HF 页面显示
-// 不在 onInstalled 中创建，由 onShown 动态管理
-let _hfMenuCreated = false;
-
-chrome.contextMenus.onShown.addListener((info, tab) => {
-  const onHf = tab?.url?.startsWith('https://huggingface.co/');
-
-  if (onHf && !_hfMenuCreated) {
-    chrome.contextMenus.create({
-      id: MENU_ID_HF_DOWNLOAD,
-      title: Aria2I18n.t('menuHfDownload'),
-      contexts: ['page']
-    }, () => {
-      if (!chrome.runtime.lastError) {
-        _hfMenuCreated = true;
-        chrome.contextMenus.refresh();
-      }
-    });
-  } else if (!onHf && _hfMenuCreated) {
-    chrome.contextMenus.remove(MENU_ID_HF_DOWNLOAD, () => {
-      if (!chrome.runtime.lastError) {
-        _hfMenuCreated = false;
-        chrome.contextMenus.refresh();
-      }
-    });
-  }
 });
 
 /**
@@ -465,61 +435,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     chrome.tabs.create({ url });
     return;
   }
-
-  // Menu: Hugging Face — download all model files
-  if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
-    // 不在 HF 页面就不响应
-    if (!tab?.url?.startsWith('https://huggingface.co/')) return;
-
-    chrome.action.setBadgeBackgroundColor({ color: '#2196f3' });
-    chrome.action.setBadgeText({ text: '···' });
-
-    try {
-      // 先从 content script 获取 model ID
-      const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
-      if (!idResponse || !idResponse.modelId) {
-        flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfModelIdFail'));
-        return;
-      }
-
-      const modelId = idResponse.modelId;
-      const files = await fetchHfFileList(modelId);
-
-      if (!files || files.length === 0) {
-        flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfNoFiles'));
-        return;
-      }
-
-      const modelName = modelId.split('/').pop() || modelId;
-      const baseDir = config.defaultDir || undefined;
-
-      // Badge 显示文件总数
-      chrome.action.setBadgeText({ text: String(files.length) });
-
-      // 批量发送
-      const results = await Promise.allSettled(files.map(file => {
-        const outPath = modelName + '/' + file.path;
-        return aria2AddUri(file.url, { dir: baseDir, out: outPath });
-      }));
-
-      const successCount = results.filter(r => r.status === 'fulfilled').length;
-      const failCount = results.filter(r => r.status === 'rejected').length;
-
-      flashBadge(failCount > 0 ? '⚠' : '✓', failCount > 0 ? '#ff9800' : '#4caf50');
-      showNotification('Aria2 Bridge — HF',
-        failCount > 0
-          ? Aria2I18n.t('notifHfPartial', [String(successCount), String(failCount)])
-          : Aria2I18n.t('notifHfSuccess', [String(successCount)]));
-    } catch (err) {
-      console.warn('[Aria2 Bridge] HF context menu error:', err.message);
-      flashBadge('✗', '#f44336');
-      showNotification('Aria2 Bridge', Aria2I18n.t('notifHfError'));
-    }
-    return;
-  }
-
 
   // Menu: Send to aria2
   const url = info.linkUrl || info.srcUrl;
