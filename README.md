@@ -6,9 +6,10 @@
 
 - **自动拦截下载** — 开启后浏览器中的文件下载自动交给 aria2 处理，不占浏览器带宽
 - **右键发送** — 在链接、图片、视频上右键 →「用 Aria2 下载」一键发送
+- **Hugging Face 一键下载** — 在 Hugging Face 模型页面右键 →「📥 下载该模型所有文件到 Aria2」，自动获取完整文件树并批量发送
 - **智能回退** — aria2 不可用时自动回退到浏览器原生下载，不丢文件
 - **域名白名单** — 配置不拦截的域名，某些站点仍走浏览器下载
-- **工具栏开关** — 点击扩展图标一键切换拦截开关，Badge 显示当前状态
+- **工具栏直达 AriaNg** — 点击扩展图标直接打开 AriaNg 管理面板，Badge 显示当前状态
 - **弹窗通知** — 发送成功/失败时弹出系统通知
 - **点击反馈** — 拦截下载时在点击位置弹出 Toast（绿色=已发送到 Aria2，橙色=已回退），工具栏 Badge 同步闪烁
 - **RPC 密钥支持** — 支持 `--rpc-secret` 认证，连接有密码保护的 aria2
@@ -69,10 +70,11 @@ aria2c --conf-path=/path/to/aria2.conf
 
 ## 使用
 
-1. 安装后在扩展栏点击 Aria2 Bridge 图标可切换拦截开关
-2. 右键任意链接/图片/视频 →「用 Aria2 下载」发送任务
-3. 右键扩展图标 →「📊 打开 AriaNg 管理面板」打开 Web 管理面板
-4. 右键扩展图标 →「选项」进入设置页
+1. 右键任意链接/图片/视频 →「用 Aria2 下载」发送任务
+2. 点击扩展工具栏图标 → 直接打开 AriaNg 管理面板
+3. 右键扩展图标 → 「📊 打开 AriaNg 管理面板」
+4. 右键 Hugging Face 模型页面 → 「📥 下载该模型所有文件到 Aria2」
+5. 右键扩展图标 →「选项」进入设置页
 
 ### 设置项
 
@@ -99,6 +101,8 @@ aria2c --conf-path=/path/to/aria2.conf
 
 **自动同步 RPC 配置**：打开 AriaNg 时，插件会自动将设置页中配置的 RPC 地址和密钥通过 URL 参数传递给 AriaNg，无需手动重新配置 RPC 连接。
 
+**Chrome 扩展兼容**：内置了对 `chrome-extension://` 协议的支持，通过 `scripts/aria-ng-fix.js` 解决了 AngularJS $sce 将 `chrome-extension://` 链接标记为不安全的问题。
+
 支持的功能：
 
 - 查看下载进度和速度
@@ -112,13 +116,14 @@ aria2c --conf-path=/path/to/aria2.conf
 aria2-bridge/
 ├── manifest.json            # 扩展清单 (Manifest V3)
 ├── background.js            # Service Worker — RPC 通信、下载拦截、右键菜单
-├── content.js               # Content Script — 页面点击拦截
+├── content.js               # Content Script — 页面点击拦截、HF 模型 ID 提取
 ├── options.html             # 设置页
 ├── options.js               # 设置页逻辑（含连接测试）
 ├── submodules/
 │   └── AriaNg/              # AriaNg 源码 submodule
 ├── scripts/
 │   ├── update-aria-ng.sh    # 从 submodule 构建并拷贝 AriaNg 到 aria-ng/
+│   ├── aria-ng-fix.js       # Angular $sce chrome-extension 协议白名单（构建时注入）
 │   └── package.sh           # 打包 release zip
 └── icons/                   # 图标 (16/48/128)
 
@@ -166,6 +171,8 @@ aria2-bridge/
 - `cookies` 权限仅用于读取当前访问站点的 Cookie 并转发给 aria2，不会被记录或上传
 - Content Script 只拦截左键（及中键 `<a download>`），不影响右键菜单和快捷键
 - 拦截下载时会在点击位置弹出 Toast 提示，同时工具栏 Badge 会短暂闪烁
+- Hugging Face 下载会跳过 `.gitattributes`、`README.md` 等元数据文件，只下载模型文件
+- 批量下载时工具栏 Badge 会显示文件总数，完成后闪烁 ✓
 
 ## License
 
