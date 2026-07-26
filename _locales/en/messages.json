@@ -11,7 +11,6 @@
     "message": "Aria2 Bridge\nClick to open AriaNg",
     "description": "Toolbar icon tooltip"
   },
-
   "menuSend": {
     "message": "Download with Aria2",
     "description": "Context menu item: send link to aria2"
@@ -24,7 +23,6 @@
     "message": "📥 Download all model files to Aria2",
     "description": "Context menu item: batch download from HuggingFace model page"
   },
-
   "toastSent": {
     "message": "Sent to Aria2",
     "description": "Toast shown when download is sent to aria2"
@@ -33,7 +31,6 @@
     "message": "Fell back to browser",
     "description": "Toast shown when aria2 is unavailable and download falls back to browser"
   },
-
   "notifHfModelIdFail": {
     "message": "Cannot identify model ID. Please make sure the page is fully loaded.",
     "description": "Notification when HF model ID extraction fails"
@@ -66,18 +63,26 @@
     "message": "$count$ files added to aria2",
     "description": "Notification after successful HF batch download",
     "placeholders": {
-      "count": { "content": "$1", "example": "13" }
+      "count": {
+        "content": "$1",
+        "example": "13"
+      }
     }
   },
   "notifHfPartial": {
     "message": "$success$ succeeded, $failed$ failed",
     "description": "Notification when some HF files failed",
     "placeholders": {
-      "success": { "content": "$1", "example": "12" },
-      "failed": { "content": "$2", "example": "1" }
+      "success": {
+        "content": "$1",
+        "example": "12"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "1"
+      }
     }
   },
-
   "optionsTitle": {
     "message": "Settings - Aria2 Bridge",
     "description": "Options page <title>"
@@ -126,17 +131,22 @@
     "message": "✅ Connected — aria2 $version$",
     "description": "Successful connection test result",
     "placeholders": {
-      "version": { "content": "$1", "example": "1.37.0" }
+      "version": {
+        "content": "$1",
+        "example": "1.37.0"
+      }
     }
   },
   "optionsTestFail": {
     "message": "❌ Connection failed: $error$",
     "description": "Failed connection test result",
     "placeholders": {
-      "error": { "content": "$1", "example": "HTTP 403" }
+      "error": {
+        "content": "$1",
+        "example": "HTTP 403"
+      }
     }
   },
-
   "optionsSectionDownload": {
     "message": "Download",
     "description": "Download settings section heading"
@@ -169,7 +179,6 @@
     "message": "Enable download interception",
     "description": "Label for enable checkbox"
   },
-
   "optionsSectionAriaNg": {
     "message": "📊 AriaNg Dashboard",
     "description": "AriaNg section heading"
@@ -182,7 +191,6 @@
     "message": "📂 Open AriaNg",
     "description": "Button to open AriaNg"
   },
-
   "optionsSectionFileTypes": {
     "message": "Intercepted File Types",
     "description": "File type settings section heading"
@@ -199,7 +207,6 @@
     "message": "One extension per line (with dot). Content Script will intercept link clicks matching these extensions. Leave empty to use default list.",
     "description": "Hint text below file extensions input"
   },
-
   "optionsSaveBtn": {
     "message": "💾 Save Settings",
     "description": "Save button text"
@@ -212,7 +219,10 @@
     "message": "❌ Save failed: $error$",
     "description": "Status message when save fails",
     "placeholders": {
-      "error": { "content": "$1", "example": "QUOTA_BYTES_PER_ITEM" }
+      "error": {
+        "content": "$1",
+        "example": "QUOTA_BYTES_PER_ITEM"
+      }
     }
   },
   "optionsResetBtn": {
@@ -222,5 +232,21 @@
   "optionsResetDone": {
     "message": "↻ Defaults restored",
     "description": "Status message after restoring defaults"
+  },
+  "optionsSectionLanguage": {
+    "message": "Language",
+    "description": "Language settings section heading"
+  },
+  "optionsLocaleLabel": {
+    "message": "Interface Language",
+    "description": "Label for language selector"
+  },
+  "optionsLocaleAuto": {
+    "message": "Follow browser (Auto)",
+    "description": "Auto-detect language option"
+  },
+  "optionsLocaleHint": {
+    "message": "Select the display language for the extension. Refresh the settings page to apply.",
+    "description": "Hint text below language selector"
   }
 }

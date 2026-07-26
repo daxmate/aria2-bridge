@@ -19,63 +19,67 @@ const DEFAULT_CONFIG = {
   enabled: true,
   defaultDir: '',
   bypassDomains: [],
-  downloadExts: DEFAULT_EXTS
+  downloadExts: DEFAULT_EXTS,
+  locale: 'auto'
 };
 
 const $ = (id) => document.getElementById(id);
+const t = function (key, subs) {
+  return Aria2I18n ? Aria2I18n.t(key, subs) : chrome.i18n.getMessage(key, subs) || key;
+};
 
 // --- i18n ---
 
 function applyI18n() {
-  // Replace textContent of elements with data-i18n
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    const msg = chrome.i18n.getMessage(key);
+  document.querySelectorAll('[data-i18n]').forEach(function (el) {
+    var key = el.getAttribute('data-i18n');
+    var msg = t(key);
     if (msg) el.textContent = msg;
   });
 
-  // Replace placeholder of inputs with data-i18n-placeholder
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-placeholder');
-    const msg = chrome.i18n.getMessage(key);
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+    var key = el.getAttribute('data-i18n-placeholder');
+    var msg = t(key);
     if (msg) el.placeholder = msg;
   });
 
-  // Set document title
-  const titleKey = document.querySelector('title')?.getAttribute('data-i18n');
+  var titleEl = document.querySelector('title');
+  var titleKey = titleEl && titleEl.getAttribute('data-i18n');
   if (titleKey) {
-    const titleMsg = chrome.i18n.getMessage(titleKey);
+    var titleMsg = t(titleKey);
     if (titleMsg) document.title = titleMsg;
   }
 }
 
 // --- Load ---
 async function loadSettings() {
-  const data = await chrome.storage.sync.get(DEFAULT_CONFIG);
+  var data = await chrome.storage.sync.get(DEFAULT_CONFIG);
   $('rpcUrl').value = data.rpcUrl;
   $('rpcSecret').value = data.rpcSecret || '';
   $('defaultDir').value = data.defaultDir;
   $('bypassDomains').value = (data.bypassDomains || []).join('\n');
   $('downloadExts').value = (data.downloadExts || DEFAULT_EXTS).join('\n');
   $('enabled').checked = data.enabled;
+  $('localeSelect').value = data.locale || 'auto';
 }
 
 // --- Save ---
 async function saveSettings() {
-  const updates = {
+  var updates = {
     rpcUrl: $('rpcUrl').value.trim() || DEFAULT_CONFIG.rpcUrl,
     rpcSecret: $('rpcSecret').value.trim(),
     defaultDir: $('defaultDir').value.trim(),
     bypassDomains: $('bypassDomains').value
       .split('\n')
-      .map(s => s.trim())
+      .map(function (s) { return s.trim(); })
       .filter(Boolean),
     downloadExts: $('downloadExts').value
       .split('\n')
-      .map(s => s.trim().toLowerCase())
-      .filter(s => s.startsWith('.'))
+      .map(function (s) { return s.trim().toLowerCase(); })
+      .filter(function (s) { return s.startsWith('.'); })
       .filter(Boolean),
-    enabled: $('enabled').checked
+    enabled: $('enabled').checked,
+    locale: $('localeSelect').value
   };
 
   // If downloadExts is empty after cleaning, keep default
@@ -84,74 +88,82 @@ async function saveSettings() {
   }
 
   await chrome.storage.sync.set(updates);
+  return updates;
 }
 
 // --- Status feedback ---
-function showStatus(message, type = 'success') {
-  const el = $('status');
+function showStatus(message, type) {
+  if (!type) type = 'success';
+  var el = $('status');
   el.textContent = message;
   el.className = type;
   clearTimeout(el._timeout);
-  el._timeout = setTimeout(() => { el.className = ''; }, 3000);
+  el._timeout = setTimeout(function () { el.className = ''; }, 3000);
 }
 
-function showTestResult(message, type = 'success') {
-  const el = $('testResult');
+function showTestResult(message, type) {
+  if (!type) type = 'success';
+  var el = $('testResult');
   el.textContent = message;
   el.style.display = 'inline-block';
   el.style.color = type === 'success' ? '#155724' : type === 'warn' ? '#856404' : '#721c24';
   clearTimeout(el._hideTimer);
-  el._hideTimer = setTimeout(() => { el.style.display = 'none'; }, 5000);
+  el._hideTimer = setTimeout(function () { el.style.display = 'none'; }, 5000);
 }
 
 // --- Test RPC connection ---
 async function testConnection() {
-  const rpcUrl = $('rpcUrl').value.trim() || DEFAULT_CONFIG.rpcUrl;
-  const rpcSecret = $('rpcSecret').value.trim();
-
-  const params = rpcSecret
-    ? ['token:' + rpcSecret]
-    : [];
+  var rpcUrl = $('rpcUrl').value.trim() || DEFAULT_CONFIG.rpcUrl;
+  var rpcSecret = $('rpcSecret').value.trim();
+  var params = rpcSecret ? ['token:' + rpcSecret] : [];
 
   try {
-    const resp = await fetch(rpcUrl, {
+    var resp = await fetch(rpcUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         jsonrpc: '2.0',
         id: 'test',
         method: 'aria2.getVersion',
-        params
+        params: params
       })
     });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const data = await resp.json();
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var data = await resp.json();
     if (data.error) throw new Error(data.error.message);
-    return chrome.i18n.getMessage('optionsTestSuccess', [data.result.version]);
+    return t('optionsTestSuccess', [data.result.version]);
   } catch (err) {
-    throw new Error(chrome.i18n.getMessage('optionsTestFail', [err.message]));
+    throw new Error(t('optionsTestFail', [err.message]));
   }
 }
 
 // --- Event handlers ---
-$('saveBtn').addEventListener('click', async () => {
+
+$('saveBtn').addEventListener('click', async function () {
   try {
-    await saveSettings();
-    showStatus(chrome.i18n.getMessage('optionsSaveSuccess'), 'success');
+    var updates = await saveSettings();
+    showStatus(t('optionsSaveSuccess'), 'success');
+
+    // 如果语言变了，提示刷新
+    if (updates.locale !== ($('localeSelect').dataset._originalLocale || 'auto')) {
+      setTimeout(function () {
+        location.reload();
+      }, 1200);
+    }
   } catch (err) {
-    showStatus(chrome.i18n.getMessage('optionsSaveFail', [err.message]), 'error');
+    showStatus(t('optionsSaveFail', [err.message]), 'error');
   }
 });
 
-$('testBtn').addEventListener('click', async () => {
-  const btn = $('testBtn');
-  const originalText = btn.textContent;
+$('testBtn').addEventListener('click', async function () {
+  var btn = $('testBtn');
+  var originalText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = chrome.i18n.getMessage('optionsTestConnecting');
+  btn.textContent = t('optionsTestConnecting');
   showTestResult('');
 
   try {
-    const msg = await testConnection();
+    var msg = await testConnection();
     showTestResult(msg, 'success');
   } catch (err) {
     showTestResult(err.message, 'error');
@@ -161,58 +173,58 @@ $('testBtn').addEventListener('click', async () => {
   }
 });
 
-$('resetBtn').addEventListener('click', async () => {
+$('resetBtn').addEventListener('click', async function () {
   await chrome.storage.sync.clear();
-  await loadSettings();
-  showStatus(chrome.i18n.getMessage('optionsResetDone'), 'info');
+  // 重置后刷新以恢复默认语言
+  location.reload();
 });
 
-// Also keep the old dblclick test on RPC URL for power users
-$('openAriaNgBtn').addEventListener('click', async () => {
-  const data = await chrome.storage.sync.get(DEFAULT_CONFIG);
+// AriaNg button
+$('openAriaNgBtn').addEventListener('click', async function () {
+  var data = await chrome.storage.sync.get(DEFAULT_CONFIG);
 
-  // Parse RPC URL into components for AriaNg command hash
-  let protocol = 'http';
-  let host = 'localhost';
-  let port = '6800';
-  let iface = 'jsonrpc';
-  let secret = '';
+  var protocol = 'http';
+  var host = 'localhost';
+  var port = '6800';
+  var iface = 'jsonrpc';
+  var secret = '';
 
   try {
-    const url = new URL(data.rpcUrl || DEFAULT_CONFIG.rpcUrl);
+    var url = new URL(data.rpcUrl || DEFAULT_CONFIG.rpcUrl);
     protocol = url.protocol.replace(':', '') || 'http';
     host = url.hostname || 'localhost';
     port = url.port || '6800';
-    // Extract interface from path
-    const match = url.pathname.match(/\/([^/]+)$/);
+    var match = url.pathname.match(/\/([^/]+)$/);
     if (match) iface = match[1];
-  } catch {}
+  } catch (e) {}
 
   if (data.rpcSecret) {
-    // URL-safe base64 (matches AriaNg's base64.urlencode)
     secret = btoa(data.rpcSecret)
       .replace(/\+/g, '-')
       .replace(/\//g, '_')
       .replace(/=+$/, '');
   }
 
-  const hash = '#/settings/rpc/set' +
+  var hash = '#/settings/rpc/set' +
     '?protocol=' + encodeURIComponent(protocol) +
     '&host=' + encodeURIComponent(host) +
     '&port=' + encodeURIComponent(port) +
     '&interface=' + encodeURIComponent(iface) +
     '&secret=' + encodeURIComponent(secret);
 
-  const base = chrome.runtime.getURL('aria-ng/index.html');
+  var base = chrome.runtime.getURL('aria-ng/index.html');
   chrome.tabs.create({ url: base + hash });
 });
 
-$('rpcUrl').addEventListener('dblclick', async () => {
+$('rpcUrl').addEventListener('dblclick', function () {
   $('testBtn').click();
 });
 
 // --- Init ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async function () {
+  await Aria2I18n.init();
   applyI18n();
-  loadSettings();
+  await loadSettings();
+  // 记住原始语言以检测变化
+  $('localeSelect').dataset._originalLocale = $('localeSelect').value;
 });

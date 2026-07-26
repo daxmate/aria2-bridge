@@ -11,7 +11,6 @@
     "message": "Aria2 Bridge\n点击打开 AriaNg 管理面板",
     "description": "工具栏图标提示"
   },
-
   "menuSend": {
     "message": "用 Aria2 下载",
     "description": "右键菜单项：发送链接到 aria2"
@@ -24,7 +23,6 @@
     "message": "📥 下载该模型所有文件到 Aria2",
     "description": "右键菜单项：从 HuggingFace 模型页面批量下载"
   },
-
   "toastSent": {
     "message": "已发送到 Aria2",
     "description": "Toast 提示：已发送到 aria2"
@@ -33,7 +31,6 @@
     "message": "已回退到浏览器",
     "description": "Toast 提示：aria2 不可用，回退到浏览器下载"
   },
-
   "notifHfModelIdFail": {
     "message": "无法识别模型 ID，请确认页面已完全加载",
     "description": "通知：HF 模型 ID 提取失败"
@@ -66,18 +63,26 @@
     "message": "$count$ 个文件已添加到 aria2",
     "description": "通知：HF 批量下载成功",
     "placeholders": {
-      "count": { "content": "$1", "example": "13" }
+      "count": {
+        "content": "$1",
+        "example": "13"
+      }
     }
   },
   "notifHfPartial": {
     "message": "$success$ 个成功, $failed$ 个失败",
     "description": "通知：部分 HF 文件发送失败",
     "placeholders": {
-      "success": { "content": "$1", "example": "12" },
-      "failed": { "content": "$2", "example": "1" }
+      "success": {
+        "content": "$1",
+        "example": "12"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "1"
+      }
     }
   },
-
   "optionsTitle": {
     "message": "设置 - Aria2 Bridge",
     "description": "设置页标题"
@@ -126,17 +131,22 @@
     "message": "✅ 连接成功 — aria2 $version$",
     "description": "连接成功结果",
     "placeholders": {
-      "version": { "content": "$1", "example": "1.37.0" }
+      "version": {
+        "content": "$1",
+        "example": "1.37.0"
+      }
     }
   },
   "optionsTestFail": {
     "message": "❌ 连接失败: $error$",
     "description": "连接失败结果",
     "placeholders": {
-      "error": { "content": "$1", "example": "HTTP 403" }
+      "error": {
+        "content": "$1",
+        "example": "HTTP 403"
+      }
     }
   },
-
   "optionsSectionDownload": {
     "message": "下载",
     "description": "下载设置区块标题"
@@ -169,7 +179,6 @@
     "message": "启用下载自动拦截",
     "description": "启用拦截复选框标签"
   },
-
   "optionsSectionAriaNg": {
     "message": "📊 AriaNg 管理面板",
     "description": "AriaNg 区块标题"
@@ -182,7 +191,6 @@
     "message": "📂 打开 AriaNg",
     "description": "打开 AriaNg 按钮"
   },
-
   "optionsSectionFileTypes": {
     "message": "拦截的文件类型",
     "description": "文件类型设置区块标题"
@@ -199,7 +207,6 @@
     "message": "每行一个扩展名（带点号）。Content Script 会拦截这些扩展名的链接点击。留空使用默认列表",
     "description": "文件扩展名提示"
   },
-
   "optionsSaveBtn": {
     "message": "💾 保存设置",
     "description": "保存按钮文字"
@@ -212,7 +219,10 @@
     "message": "❌ 保存失败: $error$",
     "description": "保存失败状态",
     "placeholders": {
-      "error": { "content": "$1", "example": "QUOTA_BYTES_PER_ITEM" }
+      "error": {
+        "content": "$1",
+        "example": "QUOTA_BYTES_PER_ITEM"
+      }
     }
   },
   "optionsResetBtn": {
@@ -222,5 +232,21 @@
   "optionsResetDone": {
     "message": "↻ 已恢复默认设置",
     "description": "恢复默认状态"
+  },
+  "optionsSectionLanguage": {
+    "message": "语言",
+    "description": "语言设置区块标题"
+  },
+  "optionsLocaleLabel": {
+    "message": "界面语言",
+    "description": "语言选择器标签"
+  },
+  "optionsLocaleAuto": {
+    "message": "跟随浏览器",
+    "description": "自动检测语言选项"
+  },
+  "optionsLocaleHint": {
+    "message": "选择扩展界面的显示语言。需要刷新设置页生效。",
+    "description": "语言选择器提示"
   }
 }

@@ -67,6 +67,20 @@
     </div>
   </section>
 
+
+  <!-- Language -->
+  <section>
+    <h3 data-i18n="optionsSectionLanguage">语言</h3>
+    <div class="field">
+      <label data-i18n="optionsLocaleLabel" for="localeSelect">界面语言</label>
+      <select id="localeSelect" style="width:100%;padding:8px 10px;border:1px solid #ccc;border-radius:6px;font-size:13px;background:#fff">
+        <option value="auto" data-i18n="optionsLocaleAuto">跟随浏览器</option>
+        <option value="zh_CN">中文</option>
+        <option value="en">English</option>
+      </select>
+      <div class="hint" data-i18n="optionsLocaleHint">选择扩展界面的显示语言。需要刷新设置页生效。</div>
+    </div>
+  </section>
   <!-- Download -->
   <section>
     <h3 data-i18n="optionsSectionDownload">下载</h3>
@@ -112,6 +126,7 @@
     <div id="status"></div>
   </div>
 
+  <script src="js/i18n.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

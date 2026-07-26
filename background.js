@@ -2,6 +2,10 @@
 // Aria2 Bridge — Service Worker
 // ========================================
 
+importScripts('js/i18n.js');
+
+let _i18nReady = Aria2I18n.init();
+
 const DEFAULT_CONFIG = {
   rpcUrl: 'http://localhost:6800/jsonrpc',
   rpcSecret: '',
@@ -354,20 +358,23 @@ const MENU_ID_SEND = 'aria2-bridge-send';
 const MENU_ID_OPEN = 'aria2-bridge-open-ariang';
 const MENU_ID_HF_DOWNLOAD = 'aria2-bridge-hf-download';
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
+  // 等待 i18n 初始化完成，确保菜单使用正确的语言
+  await _i18nReady;
+
   chrome.contextMenus.create({
     id: MENU_ID_SEND,
-    title: chrome.i18n.getMessage('menuSend'),
+    title: Aria2I18n.t('menuSend'),
     contexts: ['link', 'image', 'video', 'audio']
   });
   chrome.contextMenus.create({
     id: MENU_ID_OPEN,
-    title: chrome.i18n.getMessage('menuOpenAriaNg'),
+    title: Aria2I18n.t('menuOpenAriaNg'),
     contexts: ['action']
   });
   chrome.contextMenus.create({
     id: MENU_ID_HF_DOWNLOAD,
-    title: chrome.i18n.getMessage('menuHfDownload'),
+    title: Aria2I18n.t('menuHfDownload'),
     contexts: ['page'],
     documentUrlPatterns: ['https://huggingface.co/*']
   });
@@ -429,7 +436,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
       if (!idResponse || !idResponse.modelId) {
         flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', chrome.i18n.getMessage('notifHfModelIdFail'));
+        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfModelIdFail'));
         return;
       }
 
@@ -438,7 +445,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
       if (!files || files.length === 0) {
         flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', chrome.i18n.getMessage('notifHfNoFiles'));
+        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfNoFiles'));
         return;
       }
 
@@ -458,14 +465,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const failCount = results.filter(r => r.status === 'rejected').length;
 
       flashBadge(failCount > 0 ? '⚠' : '✓', failCount > 0 ? '#ff9800' : '#4caf50');
-      showNotification('Aria2 Bridge — HF ' + chrome.i18n.getMessage('notifSentTitle'),
+      showNotification('Aria2 Bridge — HF',
         failCount > 0
-          ? chrome.i18n.getMessage('notifHfPartial', [String(successCount), String(failCount)])
-          : chrome.i18n.getMessage('notifHfSuccess', [String(successCount)]));
+          ? Aria2I18n.t('notifHfPartial', [String(successCount), String(failCount)])
+          : Aria2I18n.t('notifHfSuccess', [String(successCount)]));
     } catch (err) {
       console.warn('[Aria2 Bridge] HF context menu error:', err.message);
       flashBadge('✗', '#f44336');
-      showNotification('Aria2 Bridge', chrome.i18n.getMessage('notifHfError'));
+      showNotification('Aria2 Bridge', Aria2I18n.t('notifHfError'));
     }
     return;
   }
@@ -486,11 +493,11 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   try {
     const gid = await aria2AddUri(url, options);
     const label = url.split('/').pop() || url;
-    showNotification(chrome.i18n.getMessage('notifSentTitle'), label);
+    showNotification(Aria2I18n.t('notifSentTitle'), label);
     flashBadge('✓', '#4caf50');
     setTimeout(() => chrome.notifications.clear(gid), 3000);
   } catch (err) {
-    showNotification(chrome.i18n.getMessage('notifFailTitle'), err.message);
+    showNotification(Aria2I18n.t('notifFailTitle'), err.message);
     flashBadge('✗', '#f44336');
   }
 });
