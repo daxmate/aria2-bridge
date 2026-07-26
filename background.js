@@ -192,6 +192,60 @@ function showNotification(title, message) {
 }
 
 // ========================================
+// Hugging Face — 获取模型文件列表
+// ========================================
+
+// 跳过常见的元数据文件
+const HF_SKIP_PATTERNS = [
+  /^\.gitattributes$/,
+  /^\.gitignore$/,
+  /^README\.md$/,
+  /^LICENSE(\..*)?$/,
+  /^CONTRIBUTING\.md$/,
+  /^SECURITY\.md$/,
+  /^CODE_OF_CONDUCT\.md$/,
+  /^\.git\/.*/,
+  /^\.huggingface$/,
+  /^model_cards\/.*/
+];
+
+function shouldSkipHfFile(path) {
+  return HF_SKIP_PATTERNS.some(p => p.test(path));
+}
+
+async function fetchHfFileList(modelId) {
+  try {
+    // modelId 如 "org/model"，API 路径需要保留 /
+    const resp = await fetch(
+      `https://huggingface.co/api/models/${modelId}/tree/main?recursive=1`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const items = await resp.json();
+
+    const files = [];
+    for (const item of items) {
+      if (item.type !== 'file') continue;
+      if (shouldSkipHfFile(item.path)) continue;
+
+      const pathParts = item.path.split('/');
+      const encodedPath = pathParts.map(encodeURIComponent).join('/');
+
+      files.push({
+        path: item.path,
+        size: item.size,
+        url: `https://huggingface.co/${modelId}/resolve/main/${encodedPath}`
+      });
+    }
+
+    return files;
+  } catch (e) {
+    console.error('[Aria2 Bridge] HF file list error:', e);
+    return null;
+  }
+}
+
+// ========================================
 // Guard: prevent infinite loop when falling
 // back to browser-native download.
 // ========================================
@@ -368,19 +422,27 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   // Menu: Hugging Face — download all model files
   if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
     try {
-      const response = await chrome.tabs.sendMessage(tab.id, { action: 'getHfFileList' });
-      if (!response || !response.files || response.files.length === 0) {
+      // 先从 content script 获取 model ID
+      const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
+      if (!idResponse || !idResponse.modelId) {
+        showNotification('Aria2 Bridge', '无法识别模型 ID，请确认页面已完全加载');
+        return;
+      }
+
+      const modelId = idResponse.modelId;
+      const files = await fetchHfFileList(modelId);
+
+      if (!files || files.length === 0) {
         showNotification('Aria2 Bridge', '未找到可下载的模型文件');
         return;
       }
 
-      const modelName = response.modelId.split('/').pop() || response.modelId;
+      const modelName = modelId.split('/').pop() || modelId;
       const baseDir = config.defaultDir || undefined;
       let count = 0;
 
-      for (const file of response.files) {
+      for (const file of files) {
         try {
-          // 以模型名作为子目录，保持原始路径结构
           const outPath = modelName + '/' + file.path;
           await aria2AddUri(file.url, { dir: baseDir, out: outPath });
           count++;
@@ -389,7 +451,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
         }
       }
 
-      showNotification('Aria2 Bridge — HF 下载', `已发送 ${count}/${response.files.length} 个文件到 aria2`);
+      showNotification('Aria2 Bridge — HF 下载', `已发送 ${count}/${files.length} 个文件到 aria2`);
       flashBadge('✓', '#4caf50');
     } catch (err) {
       console.warn('[Aria2 Bridge] HF context menu error:', err.message);
