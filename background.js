@@ -421,6 +421,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   // Menu: Hugging Face — download all model files
   if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
+    showNotification('Aria2 Bridge — HF 下载', '正在获取模型文件列表...');
+
     try {
       // 先从 content script 获取 model ID
       const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
@@ -439,19 +441,23 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
       const modelName = modelId.split('/').pop() || modelId;
       const baseDir = config.defaultDir || undefined;
-      let count = 0;
 
-      for (const file of files) {
-        try {
-          const outPath = modelName + '/' + file.path;
-          await aria2AddUri(file.url, { dir: baseDir, out: outPath });
-          count++;
-        } catch (err) {
-          console.warn('[Aria2 Bridge] HF file failed:', file.path, err.message);
-        }
-      }
+      showNotification('Aria2 Bridge — HF 下载',
+        `找到 ${files.length} 个文件，正在发送到 aria2...`);
 
-      showNotification('Aria2 Bridge — HF 下载', `已发送 ${count}/${files.length} 个文件到 aria2`);
+      // 批量发送，并行处理提高速度
+      const results = await Promise.allSettled(files.map(file => {
+        const outPath = modelName + '/' + file.path;
+        return aria2AddUri(file.url, { dir: baseDir, out: outPath });
+      }));
+
+      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const failCount = results.filter(r => r.status === 'rejected').length;
+
+      const msg = failCount > 0
+        ? `已完成: ${successCount} 个成功, ${failCount} 个失败`
+        : `已完成: ${successCount} 个文件已添加到 aria2`;
+      showNotification('Aria2 Bridge — HF 下载', msg);
       flashBadge('✓', '#4caf50');
     } catch (err) {
       console.warn('[Aria2 Bridge] HF context menu error:', err.message);
