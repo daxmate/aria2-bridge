@@ -310,6 +310,7 @@ chrome.runtime.onInstalled.addListener(() => {
     title: '📊 打开 AriaNg 管理面板',
     contexts: ['action']
   });
+
 });
 
 /**
@@ -338,14 +339,16 @@ function buildAriaNgUrl() {
       .replace(/=+$/, '');
   }
 
-  const hash = '#/settings/rpc/set' +
-    '?protocol=' + encodeURIComponent(protocol) +
-    '&host=' + encodeURIComponent(host) +
-    '&port=' + encodeURIComponent(port) +
-    '&interface=' + encodeURIComponent(iface) +
-    '&secret=' + encodeURIComponent(secret);
+  // 用 AriaNg 的路径式路由，比 query 参数更稳定
+  // 能避免 chrome-extension:// 协议下 $location.search() 的解析问题
+  const hashPath = '#!/settings/rpc/set/' +
+    encodeURIComponent(protocol) + '/' +
+    encodeURIComponent(host) + '/' +
+    encodeURIComponent(port) + '/' +
+    encodeURIComponent(iface) +
+    (secret ? '/' + encodeURIComponent(secret) : '');
 
-  return chrome.runtime.getURL('aria-ng/index.html') + hash;
+  return chrome.runtime.getURL('aria-ng/index.html') + hashPath;
 }
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -355,6 +358,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     chrome.tabs.create({ url });
     return;
   }
+
 
   // Menu: Send to aria2
   const url = info.linkUrl || info.srcUrl;

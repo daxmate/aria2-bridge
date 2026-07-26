@@ -36,6 +36,13 @@ rm -rf "$DIST_DIR"
 cp -r dist "$DIST_DIR"
 
 echo ""
+echo "==> Applying Chrome Extension fixes..."
+# 添加 Angular $sce 修复（chrome-extension:// 协议白名单）
+cp "$ROOT_DIR/scripts/aria-ng-fix.js" "$DIST_DIR/js/aria-ng-fix.js"
+# 在 index.html 中注入 fix 脚本引用（在 aria-ng 主 JS 之后、</body> 之前）
+sed -i '' 's|aria-ng-b351331f1a\.min\.js"></script></body>|aria-ng-b351331f1a.min.js"></script><script src="js/aria-ng-fix.js"></script></body>|' "$DIST_DIR/index.html"
+
+echo ""
 echo "==> Done! AriaNg updated to $(git describe --tags 2>/dev/null || echo 'latest master')"
 echo "    Files in: $DIST_DIR"
 echo ""
