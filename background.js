@@ -290,10 +290,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // 更新右键菜单语言
 async function updateContextMenus() {
   await Aria2I18n.reload();
+  _hfMenuCreated = false;  // 下次 onShown 会以新语言重新创建
   try {
     chrome.contextMenus.update(MENU_ID_SEND, { title: Aria2I18n.t('menuSend') });
     chrome.contextMenus.update(MENU_ID_OPEN, { title: Aria2I18n.t('menuOpenAriaNg') });
-    chrome.contextMenus.update(MENU_ID_HF_DOWNLOAD, { title: Aria2I18n.t('menuHfDownload') });
   } catch (e) {
     console.warn('[Aria2 Bridge] Failed to update context menus:', e.message);
   }
@@ -390,12 +390,34 @@ chrome.runtime.onInstalled.addListener(async () => {
     title: Aria2I18n.t('menuOpenAriaNg'),
     contexts: ['action']
   });
-  chrome.contextMenus.create({
-    id: MENU_ID_HF_DOWNLOAD,
-    title: Aria2I18n.t('menuHfDownload'),
-    contexts: ['page'],
-    documentUrlPatterns: ['https://huggingface.co/*']
-  });
+});
+
+// HF 菜单：仅在 HF 页面显示
+// 不在 onInstalled 中创建，由 onShown 动态管理
+let _hfMenuCreated = false;
+
+chrome.contextMenus.onShown.addListener((info, tab) => {
+  const onHf = tab?.url?.startsWith('https://huggingface.co/');
+
+  if (onHf && !_hfMenuCreated) {
+    chrome.contextMenus.create({
+      id: MENU_ID_HF_DOWNLOAD,
+      title: Aria2I18n.t('menuHfDownload'),
+      contexts: ['page']
+    }, () => {
+      if (!chrome.runtime.lastError) {
+        _hfMenuCreated = true;
+        chrome.contextMenus.refresh();
+      }
+    });
+  } else if (!onHf && _hfMenuCreated) {
+    chrome.contextMenus.remove(MENU_ID_HF_DOWNLOAD, () => {
+      if (!chrome.runtime.lastError) {
+        _hfMenuCreated = false;
+        chrome.contextMenus.refresh();
+      }
+    });
+  }
 });
 
 /**
