@@ -446,6 +446,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   // Menu: Hugging Face — download all model files
   if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
+    // 不在 HF 页面就不响应
+    if (!tab?.url?.startsWith('https://huggingface.co/')) return;
+
     chrome.action.setBadgeBackgroundColor({ color: '#2196f3' });
     chrome.action.setBadgeText({ text: '···' });
 
