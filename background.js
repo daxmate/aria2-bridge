@@ -496,12 +496,26 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 // ========================================
-// Toolbar action — 打开 AriaNg 管理界面
+// Toolbar action — 打开 AriaNg 管理界面（复用已有标签页）
 // ========================================
 
 chrome.action.onClicked.addListener(async () => {
-  const url = buildAriaNgUrl();
-  chrome.tabs.create({ url });
+  const baseUrl = chrome.runtime.getURL('aria-ng/index.html');
+
+  // 查找已有的 AriaNg 标签页（不管 hash 部分是什么）
+  const tabs = await chrome.tabs.query({
+    url: baseUrl + '*'
+  });
+
+  if (tabs.length > 0) {
+    // 已有 → 切换到第一个
+    await chrome.tabs.update(tabs[0].id, { active: true });
+    await chrome.windows.update(tabs[0].windowId, { focused: true });
+  } else {
+    // 没有 → 新建
+    const url = buildAriaNgUrl();
+    chrome.tabs.create({ url });
+  }
 });
 
 function updateBadge() {
