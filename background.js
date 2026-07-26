@@ -293,6 +293,7 @@ async function updateContextMenus() {
   try {
     chrome.contextMenus.update(MENU_ID_SEND, { title: Aria2I18n.t('menuSend') });
     chrome.contextMenus.update(MENU_ID_OPEN, { title: Aria2I18n.t('menuOpenAriaNg') });
+    chrome.contextMenus.update(MENU_ID_HF_DOWNLOAD, { title: Aria2I18n.t('menuHfDownload') });
   } catch (e) {
     console.warn('[Aria2 Bridge] Failed to update context menus:', e.message);
   }
@@ -373,6 +374,7 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
 const MENU_ID_SEND = 'aria2-bridge-send';
 const MENU_ID_OPEN = 'aria2-bridge-open-ariang';
+const MENU_ID_HF_DOWNLOAD = 'aria2-bridge-hf-download';
 
 chrome.runtime.onInstalled.addListener(async () => {
   // 等待 i18n 初始化完成，确保菜单使用正确的语言
@@ -387,6 +389,12 @@ chrome.runtime.onInstalled.addListener(async () => {
     id: MENU_ID_OPEN,
     title: Aria2I18n.t('menuOpenAriaNg'),
     contexts: ['action']
+  });
+  chrome.contextMenus.create({
+    id: MENU_ID_HF_DOWNLOAD,
+    title: Aria2I18n.t('menuHfDownload'),
+    contexts: ['page'],
+    documentUrlPatterns: ['https://huggingface.co/*']
   });
 });
 
@@ -433,6 +441,57 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === MENU_ID_OPEN) {
     const url = buildAriaNgUrl();
     chrome.tabs.create({ url });
+    return;
+  }
+
+  // Menu: Hugging Face — download all model files
+  if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
+    chrome.action.setBadgeBackgroundColor({ color: '#2196f3' });
+    chrome.action.setBadgeText({ text: '···' });
+
+    try {
+      // 先从 content script 获取 model ID
+      const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
+      if (!idResponse || !idResponse.modelId) {
+        flashBadge('✗', '#f44336');
+        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfModelIdFail'));
+        return;
+      }
+
+      const modelId = idResponse.modelId;
+      const files = await fetchHfFileList(modelId);
+
+      if (!files || files.length === 0) {
+        flashBadge('✗', '#f44336');
+        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfNoFiles'));
+        return;
+      }
+
+      const modelName = modelId.split('/').pop() || modelId;
+      const baseDir = config.defaultDir || undefined;
+
+      // Badge 显示文件总数
+      chrome.action.setBadgeText({ text: String(files.length) });
+
+      // 批量发送
+      const results = await Promise.allSettled(files.map(file => {
+        const outPath = modelName + '/' + file.path;
+        return aria2AddUri(file.url, { dir: baseDir, out: outPath });
+      }));
+
+      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const failCount = results.filter(r => r.status === 'rejected').length;
+
+      flashBadge(failCount > 0 ? '⚠' : '✓', failCount > 0 ? '#ff9800' : '#4caf50');
+      showNotification('Aria2 Bridge — HF',
+        failCount > 0
+          ? Aria2I18n.t('notifHfPartial', [String(successCount), String(failCount)])
+          : Aria2I18n.t('notifHfSuccess', [String(successCount)]));
+    } catch (err) {
+      console.warn('[Aria2 Bridge] HF context menu error:', err.message);
+      flashBadge('✗', '#f44336');
+      showNotification('Aria2 Bridge', Aria2I18n.t('notifHfError'));
+    }
     return;
   }
 
