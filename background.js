@@ -421,12 +421,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   // Menu: Hugging Face — download all model files
   if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
-    showNotification('Aria2 Bridge — HF 下载', '正在获取模型文件列表...');
+    chrome.action.setBadgeBackgroundColor({ color: '#2196f3' });
+    chrome.action.setBadgeText({ text: '···' });
 
     try {
       // 先从 content script 获取 model ID
       const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
       if (!idResponse || !idResponse.modelId) {
+        flashBadge('✗', '#f44336');
         showNotification('Aria2 Bridge', '无法识别模型 ID，请确认页面已完全加载');
         return;
       }
@@ -435,6 +437,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const files = await fetchHfFileList(modelId);
 
       if (!files || files.length === 0) {
+        flashBadge('✗', '#f44336');
         showNotification('Aria2 Bridge', '未找到可下载的模型文件');
         return;
       }
@@ -442,10 +445,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const modelName = modelId.split('/').pop() || modelId;
       const baseDir = config.defaultDir || undefined;
 
-      showNotification('Aria2 Bridge — HF 下载',
-        `找到 ${files.length} 个文件，正在发送到 aria2...`);
+      // Badge 显示文件总数
+      chrome.action.setBadgeText({ text: String(files.length) });
 
-      // 批量发送，并行处理提高速度
+      // 批量发送
       const results = await Promise.allSettled(files.map(file => {
         const outPath = modelName + '/' + file.path;
         return aria2AddUri(file.url, { dir: baseDir, out: outPath });
@@ -454,13 +457,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const successCount = results.filter(r => r.status === 'fulfilled').length;
       const failCount = results.filter(r => r.status === 'rejected').length;
 
-      const msg = failCount > 0
-        ? `已完成: ${successCount} 个成功, ${failCount} 个失败`
-        : `已完成: ${successCount} 个文件已添加到 aria2`;
-      showNotification('Aria2 Bridge — HF 下载', msg);
-      flashBadge('✓', '#4caf50');
+      flashBadge(failCount > 0 ? '⚠' : '✓', failCount > 0 ? '#ff9800' : '#4caf50');
+      showNotification('Aria2 Bridge — HF 下载',
+        failCount > 0
+          ? `${successCount} 个成功, ${failCount} 个失败`
+          : `${successCount} 个文件已添加到 aria2`);
     } catch (err) {
       console.warn('[Aria2 Bridge] HF context menu error:', err.message);
+      flashBadge('✗', '#f44336');
       showNotification('Aria2 Bridge', '获取 HF 文件列表失败，请刷新页面后重试');
     }
     return;
