@@ -93,7 +93,6 @@ function looksLikeDownload(url) {
     return false;
   }
   }
-}
 
 // Send download to background, then show toast
 function sendToAria2(url, referer, mouseX, mouseY) {
