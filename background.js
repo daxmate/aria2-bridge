@@ -172,18 +172,104 @@ function shouldBypass(url) {
   }
 }
 
-function extractFilename(url, fallback) {
+/**
+ * Common MIME types → file extension mapping.
+ * Used to guess a reasonable extension when the server doesn't
+ * provide one in the URL or Content-Disposition header.
+ */
+const MIME_EXT_MAP = {
+  'application/pdf': '.pdf',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+  'application/msword': '.doc',
+  'application/vnd.ms-excel': '.xls',
+  'application/vnd.ms-powerpoint': '.ppt',
+  'application/zip': '.zip',
+  'application/x-rar-compressed': '.rar',
+  'application/x-7z-compressed': '.7z',
+  'application/gzip': '.gz',
+  'application/x-tar': '.tar',
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/gif': '.gif',
+  'image/webp': '.webp',
+  'image/svg+xml': '.svg',
+  'text/csv': '.csv',
+  'text/plain': '.txt',
+  'application/json': '.json',
+  'application/xml': '.xml',
+  'application/octet-stream': ''
+};
+
+/**
+ * Guess file extension from MIME type.
+ * Returns empty string if unknown.
+ */
+function guessExtFromMime(mime) {
+  if (!mime) return '';
+  const key = mime.toLowerCase().split(';')[0].trim();
+  return MIME_EXT_MAP[key] || '';
+}
+
+/**
+ * Extract a filename from URL or fallback path, optionally
+ * appending an extension guessed from the MIME type if missing.
+ *
+ * @param {string} url      - The download URL
+ * @param {string} [fallback] - Full path from chrome.downloads
+ * @param {string} [mime]    - MIME type from Content-Type header
+ * @returns {string|null} Suggested output filename, or null
+ */
+function extractFilename(url, fallback, mime) {
+  let name = null;
+
   if (fallback) {
     const parts = fallback.replace(/\\/g, '/').split('/');
-    const name = parts.pop();
-    if (name) return name;
+    name = parts.pop();
+    if (!name) name = null;
   }
+
+  if (!name) {
+    try {
+      const path = new URL(url).pathname;
+      name = path.split('/').pop();
+      if (!name || !name.includes('.')) name = null;
+    } catch {}
+  }
+
+  // If we got a name but it has no extension, try appending one from MIME
+  if (name && !name.includes('.') && mime) {
+    const ext = guessExtFromMime(mime);
+    if (ext) name += ext;
+  }
+
+  return name;
+}
+
+/**
+ * 通过 content script（同源环境）获取下载 URL 的响应头。
+ * 绕过 service worker fetch 的 CORS 限制，自动携带页面 Cookies。
+ */
+async function fetchDownloadHeadersFromTab(url, referrer) {
+  if (!referrer) return {};
   try {
-    const path = new URL(url).pathname;
-    const name = path.split('/').pop();
-    if (name && name.includes('.')) return name;
+    const origin = new URL(url).origin;
+    // 查找与 referrer 同源的标签页
+    const tabs = await chrome.tabs.query({ url: origin + '/*' });
+    for (const tab of tabs) {
+      try {
+        const result = await chrome.tabs.sendMessage(tab.id, {
+          action: 'fetchDownloadHeaders',
+          url
+        });
+        if (result && result.contentType) return result;
+      } catch {
+        // 该标签页可能未加载 content script，继续下一个
+      }
+    }
   } catch {}
-  return null;
+  return {};
 }
 
 function showNotification(title, message) {
@@ -345,7 +431,34 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
   try {
     const options = {};
-    const filename = extractFilename(url, downloadItem.filename);
+    let filename = extractFilename(url, downloadItem.filename, downloadItem.mime);
+
+    // 如果提取到的文件名没有扩展名，尝试 HEAD 请求获取服务端文件名
+    // 常见于 SPA 下载（税务发票等），URL 无后缀且浏览器 MIME 字段可能为空
+    // 如果文件名没有扩展名，通过 content script（同源环境）获取响应头
+    // 绕过 CORS 限制，且自动携带页面 Cookies → 能正确拿到 Content-Disposition
+    if (!filename || !filename.includes('.')) {
+      const headers = await fetchDownloadHeadersFromTab(url, downloadItem.referrer);
+      if (headers.contentDisposition) {
+        const d = headers.contentDisposition;
+        // 优先取 filename*=UTF-8''xxx（RFC 5987），再取 filename="xxx"
+        const starMatch = d.match(/filename\*\s*=\s*(?:UTF-8|ISO-8859-1)''([^;]+)/i);
+        const plainMatch = d.match(/filename\s*=\s*"([^"]+)"/i) ||
+                           d.match(/filename\s*=\s*([^;]+)/i);
+        const cdName = starMatch
+          ? decodeURIComponent(starMatch[1])
+          : (plainMatch ? plainMatch[1].trim() : null);
+        if (cdName) {
+          filename = cdName;
+        }
+      }
+      // Content-Disposition 没有文件名 → 从 Content-Type 补扩展名
+      if (filename && !filename.includes('.')) {
+        const ext = guessExtFromMime(headers.contentType);
+        if (ext) filename += ext;
+      }
+    }
+
     if (filename) options.out = filename;
     if (downloadItem.referrer) options.referer = downloadItem.referrer;
     if (config.defaultDir) options.dir = config.defaultDir;

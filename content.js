@@ -160,26 +160,43 @@ document.addEventListener('click', (e) => {
   if (url.startsWith('chrome://') || url.startsWith('vivaldi://') ||
       url.startsWith('about:') || url.startsWith('edge://')) return;
 
-  const shouldIntercept =
-    link.hasAttribute('download') ||          // <a download> always triggers a download
-    looksLikeDownload(url);                    // Known file extension
+  const hasDownloadAttr = link.hasAttribute('download');
+  const isFileUrl = looksLikeDownload(url);
 
-  if (!shouldIntercept) return;
-
-  // Intercept!
-  e.preventDefault();
-  e.stopPropagation();
-
-  sendToAria2(url, location.href, e.clientX, e.clientY);
+  /**
+   * 三档拦截策略：
+   *
+   * 1. URL 含文件扩展名（.pdf / .zip 等）→ 直接拦截，送往 aria2。
+   *    这类 URL 一般是直接的文件下载地址，可以安全截获。
+   *
+   * 2. URL 无扩展名但链接有 download 属性 → 不拦截，交由页面 JS 处理。
+   *    常见于 SPA（如税务发票系统），页面用 canvas→toBlob→createObjectURL
+   *    生成 blob URL 再触发下载。如果此时 stopPropagation，会阻止页面
+   *    click handler 执行，导致下载流程中断。背景脚本的 downloads.onCreated
+   *    会兜底捕获 HTTP 下载；blob 下载由浏览器原生处理。
+   *
+   * 3. 非下载链接 → 跳过。
+   */
+  if (isFileUrl) {
+    // 有文件后缀 → 直接拦截
+    e.preventDefault();
+    e.stopPropagation();
+    sendToAria2(url, location.href, e.clientX, e.clientY);
+  }
+  // 无后缀 + download 属性 → 不拦截，让页面 JS 自己处理
+  // 背景脚本会通过 downloads.onCreated 兜底
 }, true); // useCapture to intercept before page handlers
 
 // Also intercept middle-clicks on <a download> links
+// 中键只拦截有文件后缀的链接
+// eslint-disable-next-line max-len
 document.addEventListener('auxclick', (e) => {
   if (e.button !== 1) return;
 
   const link = e.target.closest('a');
   if (!link || !link.href) return;
   if (!link.hasAttribute('download')) return;
+  if (!looksLikeDownload(link.href)) return;
 
   e.preventDefault();
   sendToAria2(link.href, location.href, e.clientX, e.clientY);
@@ -201,5 +218,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getHfModelId') {
     // 只负责从 URL 提取 model ID，API 调用由 background 完成
     sendResponse({ modelId: getHfModelId() });
+  }
+
+  /**
+   * background 在 onCreated 兜底时，URL 可能无后缀且 MIME 未知。
+   * content script 与页面同源，没有 CORS 和 Cookie 问题，
+   * 可以获取真实的 Content-Disposition / Content-Type。
+   */
+  if (message.action === 'fetchDownloadHeaders') {
+    fetch(message.url, { method: 'HEAD' })
+      .then(resp => sendResponse({
+        contentDisposition: resp.headers.get('Content-Disposition'),
+        contentType: resp.headers.get('Content-Type')
+      }))
+      .catch(() => sendResponse({}));
+    return true; // async response
   }
 });
