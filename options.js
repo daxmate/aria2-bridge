@@ -3,9 +3,21 @@
 // ========================================
 
 const DEFAULT_CONFIG = {
+  rpcUrl: 'http://localhost:6800/jsonrpc',
+  rpcSecret: '',
   enabled: true,
   bypassDomains: [],
-  locale: 'auto'
+  locale: 'auto',
+  downloadExts: [
+    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
+    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+    '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
+    '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
+    '.torrent', '.nzb',
+    '.csv', '.json', '.xml',
+    '.psd', '.ai', '.skp',
+    '.epub', '.mobi', '.cbr'
+  ]
 };
 
 const $ = (id) => document.getElementById(id);
@@ -39,7 +51,10 @@ function applyI18n() {
 // --- Load ---
 async function loadSettings() {
   var data = await chrome.storage.sync.get(DEFAULT_CONFIG);
+  $('rpcUrl').value = data.rpcUrl || '';
+  $('rpcSecret').value = data.rpcSecret || '';
   $('bypassDomains').value = (data.bypassDomains || []).join('\n');
+  $('downloadExts').value = (data.downloadExts || []).join('\n');
   $('enabled').checked = data.enabled;
   $('localeSelect').value = data.locale || 'auto';
 }
@@ -47,10 +62,17 @@ async function loadSettings() {
 // --- Save ---
 async function saveSettings() {
   var updates = {
+    rpcUrl: $('rpcUrl').value.trim() || 'http://localhost:6800/jsonrpc',
+    rpcSecret: $('rpcSecret').value,
     bypassDomains: $('bypassDomains').value
       .split('\n')
       .map(function (s) { return s.trim(); })
       .filter(Boolean),
+    downloadExts: $('downloadExts').value
+      .split('\n')
+      .map(function (s) { return s.trim().toLowerCase(); })
+      .filter(Boolean)
+      .map(function (s) { return s.startsWith('.') ? s : '.' + s; }),
     enabled: $('enabled').checked,
     locale: $('localeSelect').value
   };
@@ -76,6 +98,9 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   // 自动保存其余字段
+  $('rpcUrl').addEventListener('change', saveSettings);
+  $('rpcSecret').addEventListener('change', saveSettings);
   $('bypassDomains').addEventListener('change', saveSettings);
+  $('downloadExts').addEventListener('change', saveSettings);
   $('enabled').addEventListener('change', saveSettings);
 });

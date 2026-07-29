@@ -178,6 +178,33 @@
         </div>
       </div>
     </section>
+    <!-- Aria2 RPC -->
+    <section>
+      <h3 data-i18n="optionsSectionRpc">Aria2 RPC</h3>
+      <div class="field">
+        <label data-i18n="optionsRpcUrlLabel" for="rpcUrl"
+          >RPC 地址</label
+        >
+        <input
+          type="url"
+          id="rpcUrl"
+          placeholder="http://localhost:6800/jsonrpc"
+        />
+        <div class="hint" data-i18n="optionsRpcUrlHint">
+          Aria2 JSON-RPC 地址，运行 aria2 的主机地址和端口
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="optionsRpcSecretLabel" for="rpcSecret"
+          >RPC 密钥</label
+        >
+        <input type="password" id="rpcSecret" />
+        <div class="hint" data-i18n="optionsRpcSecretHint">
+          Aria2 RPC 连接密钥（Secret Token），与 aria2.conf 中 rpc-secret 一致。
+          修改后需重新打开 AriaNg 使新配置生效。
+        </div>
+      </div>
+    </section>
     <!-- Download -->
     <section>
       <h3 data-i18n="optionsSectionDownload">下载</h3>
@@ -193,6 +220,22 @@
         ></textarea>
         <div class="hint" data-i18n="optionsBypassHint">
           每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载
+        </div>
+      </div>
+      <div class="field">
+        <label data-i18n="optionsDownExtsLabel" for="downloadExts"
+          >拦截的文件后缀</label
+        >
+        <textarea
+          id="downloadExts"
+          rows="6"
+          data-i18n-placeholder="optionsDownExtsPlaceholder"
+          placeholder=".zip
+.exe
+.mp4"
+        ></textarea>
+        <div class="hint" data-i18n="optionsDownExtsHint">
+          每行一个后缀。只有这些后缀的链接会被拦截转发到 aria2。留空则不拦截任何链接
         </div>
       </div>
       <div class="field checkbox-row">

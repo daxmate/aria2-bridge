@@ -175,6 +175,18 @@
     "message": "One domain per line. Downloads from these domains will bypass the interceptor and use the browser's native download.",
     "description": "Hint text below bypass domains"
   },
+  "optionsDownExtsLabel": {
+    "message": "Intercepted File Suffixes",
+    "description": "Download extension whitelist label"
+  },
+  "optionsDownExtsPlaceholder": {
+    "message": ".zip\n.exe\n.mp4",
+    "description": "Download extension whitelist placeholder"
+  },
+  "optionsDownExtsHint": {
+    "message": "One suffix per line. Only URLs ending with these suffixes will be intercepted and forwarded to aria2. Leave empty to only intercept links with the download attribute.",
+    "description": "Download extension whitelist hint"
+  },
   "optionsEnabledLabel": {
     "message": "Enable download interception",
     "description": "Label for enable checkbox"

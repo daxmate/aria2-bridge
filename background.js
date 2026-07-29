@@ -402,11 +402,16 @@ chrome.runtime.onInstalled.addListener(async () => {
  * Build AriaNg URL with RPC settings passed via hash params.
  */
 function buildAriaNgUrl() {
+  // 没配 secret 时不传 hash 路由，让 AriaNg 用自己的 localStorage 中的设置
+  // 否则每次打开都会用空 secret 覆盖用户手工保存的密钥
+  if (!config.rpcSecret) {
+    return chrome.runtime.getURL('aria-ng/index.html');
+  }
+
   let protocol = 'http';
   let host = 'localhost';
   let port = '6800';
   let iface = 'jsonrpc';
-  let secret = '';
 
   try {
     const url = new URL(config.rpcUrl || 'http://localhost:6800/jsonrpc');
@@ -417,23 +422,18 @@ function buildAriaNgUrl() {
     if (match) iface = match[1];
   } catch {}
 
-  if (config.rpcSecret) {
-    secret = btoa(config.rpcSecret)
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
-  }
+  const secret = btoa(config.rpcSecret)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 
-  // 用 AriaNg 的路径式路由，比 query 参数更稳定
-  // 能避免 chrome-extension:// 协议下 $location.search() 的解析问题
-  const hashPath = '#!/settings/rpc/set/' +
+  return chrome.runtime.getURL('aria-ng/index.html') +
+    '#!/settings/rpc/set/' +
     encodeURIComponent(protocol) + '/' +
     encodeURIComponent(host) + '/' +
     encodeURIComponent(port) + '/' +
-    encodeURIComponent(iface) +
-    (secret ? '/' + encodeURIComponent(secret) : '');
-
-  return chrome.runtime.getURL('aria-ng/index.html') + hashPath;
+    encodeURIComponent(iface) + '/' +
+    encodeURIComponent(secret);
 }
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {

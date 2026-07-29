@@ -81,18 +81,53 @@ function showToast(x, y, type) {
 // Click interception helpers
 // ========================================
 
+// 默认拦截的下载文件后缀（正匹配 — 只拦截这些后缀）
+const DEFAULT_DOWNLOAD_EXTS = [
+  '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+  '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
+  '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
+  '.torrent', '.nzb',
+  '.csv', '.json', '.xml',
+  '.psd', '.ai', '.skp',
+  '.epub', '.mobi', '.cbr'
+];
+
+let downloadExts = null;
+
+// 从 storage 读取拦截后缀列表
+chrome.storage.sync.get({ downloadExts: DEFAULT_DOWNLOAD_EXTS }).then(result => {
+  downloadExts = result.downloadExts;
+});
+
+// 监听配置变化，实时更新
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.downloadExts) {
+    downloadExts = changes.downloadExts.newValue;
+  }
+});
+
 // Check if a URL looks like a downloadable file
 function looksLikeDownload(url) {
   try {
     const u = new URL(url);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
     const path = u.pathname.toLowerCase();
-    // 只要有文件扩展名就拦截，不限制特定后缀
-    return /\/[^/]+\.[a-z0-9]{2,}(?:[?#]|$)/.test(path);
+
+    // 提取文件扩展名
+    const extMatch = path.match(/\/[^/]+(\.[a-z0-9]{2,})(?:[?#]|$)/);
+    if (!extMatch) return false;
+
+    const ext = extMatch[1];
+
+    // 只拦截 downloadExts 中列出的后缀
+    if (downloadExts && downloadExts.includes(ext)) return true;
+
+    return false;
   } catch {
     return false;
   }
-  }
+}
 
 // Send download to background, then show toast
 function sendToAria2(url, referer, mouseX, mouseY) {

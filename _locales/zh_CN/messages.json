@@ -175,6 +175,18 @@
     "message": "每行一个域名。这些域名触发的下载不会被拦截，使用浏览器原生下载",
     "description": "白名单域名提示"
   },
+  "optionsDownExtsLabel": {
+    "message": "拦截的文件后缀",
+    "description": "下载后缀白名单标签"
+  },
+  "optionsDownExtsPlaceholder": {
+    "message": ".zip\n.exe\n.mp4",
+    "description": "下载后缀白名单占位符"
+  },
+  "optionsDownExtsHint": {
+    "message": "每行一个后缀。只有这些后缀的链接会被拦截转发到 aria2。留空则只拦截设置了 download 属性的链接",
+    "description": "下载后缀白名单提示"
+  },
   "optionsEnabledLabel": {
     "message": "启用下载自动拦截",
     "description": "启用拦截复选框标签"
