@@ -10,7 +10,6 @@ const DEFAULT_CONFIG = {
   rpcUrl: 'http://localhost:6800/jsonrpc',
   rpcSecret: '',
   enabled: true,
-  defaultDir: '',
   bypassDomains: [],
   downloadExts: [
     '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
@@ -390,7 +389,6 @@ async function processDownload(url, referer) {
   if (!url.startsWith('http://') && !url.startsWith('https://')) return;
 
   const options = { referer };
-  if (config.defaultDir) options.dir = config.defaultDir;
 
   const filename = extractFilename(url);
   if (filename) options.out = filename;
@@ -461,7 +459,6 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
     if (filename) options.out = filename;
     if (downloadItem.referrer) options.referer = downloadItem.referrer;
-    if (config.defaultDir) options.dir = config.defaultDir;
 
     await aria2AddUri(url, options);
     flashBadge('✓', '#4caf50');
@@ -581,7 +578,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       }
 
       const modelName = modelId.split('/').pop() || modelId;
-      const baseDir = config.defaultDir || undefined;
 
       // Badge 显示文件总数
       chrome.action.setBadgeText({ text: String(files.length) });
@@ -589,7 +585,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       // 批量发送
       const results = await Promise.allSettled(files.map(file => {
         const outPath = modelName + '/' + file.path;
-        return aria2AddUri(file.url, { dir: baseDir, out: outPath });
+        return aria2AddUri(file.url, { out: outPath });
       }));
 
       const successCount = results.filter(r => r.status === 'fulfilled').length;
@@ -618,7 +614,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   const filename = extractFilename(url);
   if (filename) options.out = filename;
-  if (config.defaultDir) options.dir = config.defaultDir;
 
   try {
     const gid = await aria2AddUri(url, options);

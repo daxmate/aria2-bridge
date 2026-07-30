@@ -47,7 +47,7 @@
 1. 克隆或下载本项目
 2. 打开 Chrome → `chrome://extensions`
 3. 开启右上角「开发者模式」
-4. 点击「加载已解压的扩展程序」→ 选择项目目录
+4. 点击「加载已解压的扩展程序」→ 选择 `plugin/` 目录
 5. ✅ 完成
 
 ### 前提条件
@@ -82,7 +82,7 @@ aria2c --conf-path=/path/to/aria2.conf
 |------|------|
 | **Aria2 RPC 地址** | aria2 JSON-RPC 接口地址，默认 `http://localhost:6800/jsonrpc` |
 | **RPC 密钥** | `--rpc-secret=xxx` 中设置的密码，仅填密码本身（扩展自动加 `token:` 前缀）。留空表示无密码 |
-| **默认下载目录** | 可选，留空则使用 aria2 配置中的 `dir` |
+| **默认下载目录** | 扩展不提供此设置项。请在 aria2 配置文件或启动参数中设置 `dir`（见下方注意事项） |
 | **不拦截的域名** | 每行一个，匹配的域名走浏览器原生下载 |
 | **拦截的文件类型** | 每行一个扩展名，Content Script 拦截这些扩展名的链接点击。留空使用默认列表 |
 | **启用自动拦截** | 下载拦截总开关 |
@@ -114,21 +114,25 @@ aria2c --conf-path=/path/to/aria2.conf
 
 ```
 aria2-bridge/
-├── manifest.json            # 扩展清单 (Manifest V3)
-├── background.js            # Service Worker — RPC 通信、下载拦截、右键菜单
-├── content.js               # Content Script — 页面点击拦截、HF 模型 ID 提取
-├── options.html             # 设置页
-├── options.js               # 设置页逻辑（含连接测试）
+├── plugin/                   # 扩展目录 — Chrome 加载此文件夹
+│   ├── manifest.json         # 扩展清单 (Manifest V3)
+│   ├── background.js         # Service Worker — RPC 通信、下载拦截、右键菜单
+│   ├── content.js            # Content Script — 页面点击拦截、HF 模型 ID 提取
+│   ├── options.html          # 设置页
+│   ├── options.js            # 设置页逻辑（含连接测试）
+│   ├── _locales/             # 多语言资源
+│   ├── icons/                # 图标 (16/48/128)
+│   └── aria-ng/              # AriaNg 管理面板（构建产物）
 ├── submodules/
-│   └── AriaNg/              # AriaNg 源码 submodule
+│   └── AriaNg/               # AriaNg 源码 submodule
 ├── scripts/
-│   ├── update-aria-ng.sh    # 从 submodule 构建并拷贝 AriaNg 到 aria-ng/
-│   ├── aria-ng-fix.js       # Angular $sce chrome-extension 协议白名单（构建时注入）
-│   └── package.sh           # 打包 release zip
-└── icons/                   # 图标 (16/48/128)
+│   ├── update-aria-ng.sh     # 从 submodule 构建并拷贝 AriaNg 到 plugin/aria-ng/
+│   ├── aria-ng-fix.js        # Angular $sce chrome-extension 协议白名单（构建时注入）
+│   └── package.sh            # 打包 release zip
+└── README.md / LICENSE
 
-> `aria-ng/` 为构建产物，不提交到仓库。克隆后先运行 `./scripts/update-aria-ng.sh` 生成。
-```
+> `plugin/aria-ng/` 为构建产物，不提交到仓库。克隆后先运行 `./scripts/update-aria-ng.sh` 生成。
+
 
 ## 开发
 

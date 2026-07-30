@@ -8,7 +8,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 SUBMODULE_DIR="$ROOT_DIR/submodules/AriaNg"
-DIST_DIR="$ROOT_DIR/aria-ng"
+DIST_DIR="$ROOT_DIR/plugin/aria-ng"
 
 echo "==> Updating AriaNg submodule..."
 cd "$SUBMODULE_DIR"

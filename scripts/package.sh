@@ -21,22 +21,9 @@ mkdir -p "$OUTPUT_DIR/aria2-bridge"
 
 cd "$ROOT_DIR"
 
-# Copy project files (exclude dev artifacts)
-cp \
-  manifest.json \
-  background.js \
-  content.js \
-  options.html \
-  options.js \
-  README.md \
-  LICENSE \
-  "$OUTPUT_DIR/aria2-bridge/"
-
-# Copy assets
-cp -r \
-  icons \
-  aria-ng \
-  "$OUTPUT_DIR/aria2-bridge/"
+# Copy the complete plugin directory + project docs
+cp -r plugin/* "$OUTPUT_DIR/aria2-bridge/"
+cp README.md LICENSE "$OUTPUT_DIR/aria2-bridge/"
 
 cd "$OUTPUT_DIR"
 
