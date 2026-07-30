@@ -26,14 +26,14 @@ jobs:
           npm install
           npm run build
           cd ../..
-          rm -rf aria-ng
-          cp -r submodules/AriaNg/dist aria-ng
-          cp scripts/aria-ng-fix.js aria-ng/js/aria-ng-fix.js
+          rm -rf plugin/aria-ng
+          cp -r submodules/AriaNg/dist plugin/aria-ng
+          cp scripts/aria-ng-fix.js plugin/aria-ng/js/aria-ng-fix.js
           # Inject fix script into index.html
-          MAIN_JS=$(ls aria-ng/js/aria-ng-*.min.js 2>/dev/null | head -1)
+          MAIN_JS=$(ls plugin/aria-ng/js/aria-ng-*.min.js 2>/dev/null | head -1)
           if [ -n "$MAIN_JS" ]; then
             MAIN_FILE=$(basename "$MAIN_JS")
-            sed -i "s|$MAIN_FILE\"></script>|&<script src=\"js/aria-ng-fix.js\"></script>|" aria-ng/index.html
+            sed -i "s|$MAIN_FILE\"></script>|&<script src=\"js/aria-ng-fix.js\"></script>|" plugin/aria-ng/index.html
           fi
 
       - name: Package extension zip
@@ -42,21 +42,8 @@ jobs:
           VERSION="${TAG#v}"
           DIR="aria2-bridge-$VERSION"
           mkdir -p "dist/$DIR"
-          cp \
-            manifest.json \
-            background.js \
-            content.js \
-            options.html \
-            options.js \
-            README.md \
-            LICENSE \
-            "dist/$DIR/"
-          cp -r \
-            icons \
-            aria-ng \
-            js \
-            _locales \
-            "dist/$DIR/"
+          cp -r plugin/* "dist/$DIR/"
+          cp README.md LICENSE "dist/$DIR/"
           cd dist
           zip -r "$DIR.zip" "$DIR" > /dev/null
           ls -lh "$DIR.zip"
