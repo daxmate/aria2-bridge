@@ -48,8 +48,32 @@ jobs:
           zip -r "$DIR.zip" "$DIR" > /dev/null
           ls -lh "$DIR.zip"
 
+      - name: Generate Release Notes
+        run: |
+          TAG="${{ github.ref_name }}"
+          PREV_TAG=$(git describe --tags --abbrev=0 "$TAG^" 2>/dev/null || echo "")
+          {
+            echo "## 更新内容"
+            echo ""
+            if [ -n "$PREV_TAG" ]; then
+              # 按类型归类 commit
+              echo "### 🚀 新功能"
+              git log "$PREV_TAG..$TAG" --oneline --no-decorate | grep -i 'feat:\|add:\|new' | sed 's/^[a-f0-9]* /- /' || echo "  （无）"
+              echo ""
+              echo "### 🐛 修复"
+              git log "$PREV_TAG..$TAG" --oneline --no-decorate | grep -i 'fix:\|修复\|bug' | sed 's/^[a-f0-9]* /- /' || echo "  （无）"
+              echo ""
+              echo "### 🔧 其他"
+              git log "$PREV_TAG..$TAG" --oneline --no-decorate | grep -vi 'feat:\|add:\|new\|fix:\|修复\|bug' | sed 's/^[a-f0-9]* /- /' || echo "  （无）"
+            else
+              echo "首次发布"
+            fi
+          } > /tmp/release-notes.md
+          cat /tmp/release-notes.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          name: Aria2 Bridge ${{ github.ref_name }}
+          body_path: /tmp/release-notes.md
           files: dist/aria2-bridge-*.zip
-          generate_release_notes: true
