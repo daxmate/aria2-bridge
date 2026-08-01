@@ -87,7 +87,7 @@ const DEFAULT_DOWNLOAD_EXTS = [
   '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
   '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
   '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
-  '.torrent', '.nzb',
+  '.pkg', '.torrent', '.nzb',
   '.csv', '.json', '.xml',
   '.psd', '.ai', '.skp',
   '.epub', '.mobi', '.cbr'
