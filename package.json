@@ -1,0 +1,15 @@
+{
+  "name": "aria2-bridge",
+  "version": "1.3.0",
+  "private": true,
+  "description": "Aria2 Bridge — Chrome extension that forwards browser downloads to aria2",
+  "scripts": {
+    "test": "playwright test tests/",
+    "test:ui": "playwright test --ui tests/",
+    "pretest": "npm run check:i18n",
+    "check:i18n": "node scripts/check-i18n.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}
