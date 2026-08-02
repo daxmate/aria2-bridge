@@ -118,7 +118,7 @@ test.describe("点击拦截", () => {
     // 防止 product 代码改了默认列表而测试没跟上（一致性守卫）
     expect(DEFAULT_DOWNLOAD_EXTS).toContain(".zip");
     expect(DEFAULT_DOWNLOAD_EXTS).toContain(".pdf");
-    expect(DEFAULT_DOWNLOAD_EXTS).toContain(".json");
+    expect(DEFAULT_DOWNLOAD_EXTS).not.toContain(".json");
     expect(DEFAULT_DOWNLOAD_EXTS).not.toContain(".bin");
   });
 
