@@ -3,6 +3,16 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.4.1] - 2026-08-02
+
+### 🔧 重构
+
+- **background.js 拆分为模块** — 880 行单文件拆成 `plugin/lib/` 六个模块（config / rpc / removed / hf / intercept / context-menu），background.js 瘦身为入口（importScripts + 事件监听 + 初始化）；eslint 以 globals 声明 SW 共享符号，39 个 E2E 全绿兜底
+
+### ⚙️ 其他
+
+- README 移除未实现的「连接测试」功能描述（该能力由 AriaNg 提供），目录结构同步 lib/ 布局
+
 ## [1.4.0] - 2026-08-02
 
 ### ✨ 新增
@@ -66,3 +76,4 @@
 [1.2.2]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.2.2
 [1.3.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.3.0
 [1.4.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.4.0
+[1.4.1]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.4.1
