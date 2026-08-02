@@ -69,6 +69,6 @@ test.describe("aria2 不可用 → 浏览器回退", () => {
 
     // 无 Toast（onCreated 路径没有 toast 反馈）
     await page.waitForTimeout(400);
-    expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
+    expect(await page.locator(".swal2-toast").count()).toBe(0);
   });
 });

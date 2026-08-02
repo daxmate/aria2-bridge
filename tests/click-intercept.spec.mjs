@@ -41,7 +41,7 @@ test.describe("点击拦截", () => {
   test("hash 链接 → 不拦截", async ({ page, mock }) => {
     await page.click("#link-hash");
     await expect(page).toHaveURL(/#section$/);
-    expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
+    expect(await page.locator(".swal2-toast").count()).toBe(0);
     const { requests } = await mock.requests();
     expect(requests.length).toBe(0);
   });
@@ -54,7 +54,7 @@ test.describe("点击拦截", () => {
 
     // content script 不拦截 → 无 Toast
     await page.waitForTimeout(600);
-    expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
+    expect(await page.locator(".swal2-toast").count()).toBe(0);
 
     // 浏览器发起下载 → onCreated 兜底转发（带 Content-Disposition 文件名）
     await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
@@ -66,7 +66,7 @@ test.describe("点击拦截", () => {
   test("中键点击 download 属性 + .zip 链接 → 拦截", async ({ page, mock }) => {
     await page.click("#link-mid", { button: "middle" });
 
-    await expect(page.locator("#__aria2_bridge_toast")).toBeVisible();
+    await expect(page.locator(".swal2-toast")).toBeVisible();
     await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     const add = (await mock.addUris())[0];
     expect(add.params[0][0]).toBe(`${PAGE}files/mid.zip`);
@@ -82,7 +82,7 @@ test.describe("点击拦截", () => {
     await expect(newPage).toHaveURL(/\/page$/);
     await newPage.close();
 
-    expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
+    expect(await page.locator(".swal2-toast").count()).toBe(0);
     const { requests } = await mock.requests();
     expect(requests.length).toBe(0);
   });
@@ -93,7 +93,7 @@ test.describe("点击拦截", () => {
     await gotoTestPage(page);
     await page.click("#link-bin");
 
-    await expect(page.locator("#__aria2_bridge_toast")).toBeVisible();
+    await expect(page.locator(".swal2-toast")).toBeVisible();
     await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     const add = (await mock.addUris())[0];
     expect(add.params[0][0]).toBe(`${PAGE}hold.bin`);
@@ -107,7 +107,7 @@ test.describe("点击拦截", () => {
 
     // content 不拦截 → 无 Toast
     await page.waitForTimeout(600);
-    expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
+    expect(await page.locator(".swal2-toast").count()).toBe(0);
 
     // 浏览器下载被 onCreated 兜底转发到 aria2（挂起下载保证 cancel 成功）
     await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
@@ -143,7 +143,7 @@ test.describe("点击拦截", () => {
     await page.click("#link-magnet");
 
     await page.waitForTimeout(600);
-    expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
+    expect(await page.locator(".swal2-toast").count()).toBe(0);
     const { requests } = await mock.requests();
     expect(requests.length).toBe(0);
   });

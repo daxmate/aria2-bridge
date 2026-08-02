@@ -3,6 +3,12 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [Unreleased]
+
+### 🔧 重构
+
+- **Toast 替换为 SweetAlert2** — content script 点击反馈从自绘 toast（40 行）换成 SweetAlert2（`plugin/vendor/sweetalert2/`，MIT 许可，72.6KB），保留原有绿/橙配色与 1.8s 时长；toast 位置改为右上角固定（原为点击位置弹出）；鼠标悬停可暂停计时。43 个 E2E 全绿
+
 ## [1.5.0] - 2026-08-02
 
 ### ✨ 新功能

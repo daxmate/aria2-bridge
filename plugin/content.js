@@ -9,79 +9,32 @@
 Aria2I18n.init();
 
 // ========================================
-// Toast feedback helper
+// Toast feedback helper（SweetAlert2 toast）
 // ========================================
 
-// Temporary icons for feedback
-const TOAST_ICON_OK =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">' +
-      '<circle cx="8" cy="8" r="7" fill="#4caf50"/>' +
-      '<path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" d="M4.5 8l2.5 2.5 4.5-4.5"/>' +
-      "</svg>"
-  );
-const TOAST_ICON_FALLBACK =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">' +
-      '<circle cx="8" cy="8" r="7" fill="#ff9800"/>' +
-      '<path fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" d="M8 4.5v4M8 10.5v1"/>' +
-      "</svg>"
-  );
+// 背景/文字色与旧自绘 toast 保持一致：
+// 绿色 = 已发送到 aria2，橙色 = 已回退浏览器下载
+// （颜色硬编码，测试断言语言无关）
+const Toast = Sweetalert2.mixin({
+  toast: true,
+  position: "top-end",
+  showConfirmButton: false,
+  timer: 1800,
+  timerProgressBar: false,
+  didOpen: (toast) => {
+    toast.addEventListener("mouseenter", Sweetalert2.stopTimer);
+    toast.addEventListener("mouseleave", Sweetalert2.resumeTimer);
+  },
+});
 
-let toastTimeout = null;
-
-function showToast(x, y, type) {
-  if (toastTimeout) clearTimeout(toastTimeout);
-
-  // Remove any existing toast
-  const existing = document.getElementById("__aria2_bridge_toast");
-  if (existing) existing.remove();
-
+function showToast(type) {
   const isSuccess = type === "success";
-  const icon = isSuccess ? TOAST_ICON_OK : TOAST_ICON_FALLBACK;
-  const text = isSuccess ? Aria2I18n.t("toastSent") : Aria2I18n.t("toastFallback");
-
-  const toast = document.createElement("div");
-  toast.id = "__aria2_bridge_toast";
-  toast.style.cssText = [
-    "position: fixed",
-    "z-index: 2147483647",
-    "left:" + x + "px",
-    "top:" + (y - 36) + "px",
-    "transform: translateX(-50%)",
-    "display: flex",
-    "align-items: center",
-    "gap: 6px",
-    "padding: 6px 12px",
-    "border-radius: 8px",
-    "background: " + (isSuccess ? "#e8f5e9" : "#fff3e0"),
-    "color: " + (isSuccess ? "#2e7d32" : "#e65100"),
-    "font-size: 13px",
-    "font-weight: 500",
-    'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
-    "box-shadow: 0 2px 8px rgba(0,0,0,.15)",
-    "pointer-events: none",
-    "white-space: nowrap",
-    "transition: opacity 0.3s ease",
-    "opacity: 0",
-  ].join(";");
-
-  toast.innerHTML = '<img src="' + icon + '" width="16" height="16" alt=""> ' + text;
-
-  document.body.appendChild(toast);
-
-  // Fade in
-  requestAnimationFrame(() => {
-    toast.style.opacity = "1";
+  Toast.fire({
+    icon: isSuccess ? "success" : "warning",
+    background: isSuccess ? "#e8f5e9" : "#fff3e0",
+    color: isSuccess ? "#2e7d32" : "#e65100",
+    title: isSuccess ? Aria2I18n.t("toastSent") : Aria2I18n.t("toastFallback"),
   });
-
-  toastTimeout = setTimeout(() => {
-    toast.style.opacity = "0";
-    setTimeout(() => toast.remove(), 300);
-    toastTimeout = null;
-  }, 1800);
 }
 
 // ========================================
@@ -178,10 +131,10 @@ function looksLikeDownload(url) {
 }
 
 // Send download to background, then show toast
-function sendToAria2(url, referer, mouseX, mouseY) {
+function sendToAria2(url, referer) {
   chrome.runtime.sendMessage({ action: "download", url, referer }, (response) => {
     const type = response && response.success ? "success" : "fallback";
-    showToast(mouseX, mouseY, type);
+    showToast(type);
   });
 }
 
@@ -203,7 +156,7 @@ document.addEventListener(
       if (!interceptMagnet) return; // 开关关闭 → 交给浏览器默认行为（本地 BT 客户端）
       e.preventDefault();
       e.stopPropagation();
-      sendToAria2(url, location.href, e.clientX, e.clientY);
+      sendToAria2(url, location.href);
       return;
     }
 
@@ -242,7 +195,7 @@ document.addEventListener(
       // 有文件后缀 → 直接拦截
       e.preventDefault();
       e.stopPropagation();
-      sendToAria2(url, location.href, e.clientX, e.clientY);
+      sendToAria2(url, location.href);
     }
     // 无后缀 + download 属性 → 不拦截，让页面 JS 自己处理
     // 背景脚本会通过 downloads.onCreated 兜底
@@ -263,7 +216,7 @@ document.addEventListener(
     if (!looksLikeDownload(link.href)) return;
 
     e.preventDefault();
-    sendToAria2(link.href, location.href, e.clientX, e.clientY);
+    sendToAria2(link.href, location.href);
   },
   true
 );

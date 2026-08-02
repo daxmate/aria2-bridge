@@ -45,6 +45,8 @@ export default [
         requestAnimationFrame: "readonly",
         // 项目内部全局（i18n.js 导出，被其他文件共享引用）
         Aria2I18n: "readonly",
+        // vendor/sweetalert2（content script 注入，UMD 挂载全局）
+        Sweetalert2: "readonly",
         // ---- SW 模块（lib/*.js + background.js）共享的顶层符号 ----
         // 定义在哪个文件见 lib/ 头部注释；no-redeclare off 允许 globals 与本地声明重叠
         config: "writable", // lib/config.js（loadConfig / storage.onChanged 赋值）

@@ -5,7 +5,7 @@ const PAGE = TEST_PAGE;
 
 async function clickZip(page) {
   await page.click("#link-zip");
-  await expect(page.locator("#__aria2_bridge_toast")).toBeVisible();
+  await expect(page.locator(".swal2-toast")).toBeVisible();
 }
 
 async function addUriRequests(mock) {

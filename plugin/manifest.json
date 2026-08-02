@@ -31,6 +31,7 @@
       ],
       "js": [
         "js/i18n.js",
+        "vendor/sweetalert2/sweetalert2.all.min.js",
         "content.js"
       ],
       "run_at": "document_idle",
