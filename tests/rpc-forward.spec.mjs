@@ -1,7 +1,7 @@
 // RPC 转发细节测试：请求格式、rpc-secret、headers（UA/Referer/Cookie）、文件名提取
-import { test, expect } from "./fixtures.mjs";
+import { test, expect, gotoTestPage, TEST_PAGE } from "./fixtures.mjs";
 
-const PAGE = `http://127.0.0.1:${process.env.MOCK_PORT}/`;
+const PAGE = TEST_PAGE;
 
 async function clickZip(page) {
   await page.click("#link-zip");
@@ -16,7 +16,7 @@ async function addUriRequests(mock) {
 test.describe("RPC 转发", () => {
   test.beforeEach(async ({ page, setupConfig }) => {
     await setupConfig();
-    await page.goto(PAGE, { waitUntil: "domcontentloaded" });
+    await gotoTestPage(page);
   });
 
   test("addUri 请求体符合 aria2 JSON-RPC 规范", async ({ page, mock }) => {
@@ -34,7 +34,7 @@ test.describe("RPC 转发", () => {
 
   test("配置 rpcSecret → 请求带 token: 前缀参数", async ({ page, mock, setupConfig }) => {
     await setupConfig({ rpcSecret: "MySecret" });
-    await page.goto(PAGE, { waitUntil: "domcontentloaded" });
+    await gotoTestPage(page);
     await clickZip(page);
 
     const [add] = await addUriRequests(mock);
@@ -51,7 +51,7 @@ test.describe("RPC 转发", () => {
   test("透传 User-Agent / Referer / Cookie 头部", async ({ page, mock, context }) => {
     // 给 mock 域种一个 cookie（模拟登录态下载）
     await context.addCookies([{ name: "sid", value: "abc123", url: PAGE }]);
-    await page.goto(PAGE, { waitUntil: "domcontentloaded" });
+    await gotoTestPage(page);
     await clickZip(page);
 
     const [add] = await addUriRequests(mock);

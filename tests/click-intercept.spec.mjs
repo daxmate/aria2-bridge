@@ -1,12 +1,12 @@
 // 点击拦截测试：content script 三档拦截策略 + Toast 反馈
-import { test, expect, DEFAULT_DOWNLOAD_EXTS } from "./fixtures.mjs";
+import { test, expect, DEFAULT_DOWNLOAD_EXTS, gotoTestPage, TEST_PAGE } from "./fixtures.mjs";
 
-const PAGE = `http://127.0.0.1:${process.env.MOCK_PORT}/`;
+const PAGE = TEST_PAGE;
 
 test.describe("点击拦截", () => {
   test.beforeEach(async ({ page, setupConfig }) => {
     await setupConfig();
-    await page.goto(PAGE, { waitUntil: "domcontentloaded" });
+    await gotoTestPage(page);
   });
 
   test("左键点击 .zip 链接 → 拦截并发送到 aria2 + 绿色 Toast", async ({ page, mock }) => {
@@ -85,7 +85,7 @@ test.describe("点击拦截", () => {
   test("自定义 downloadExts → 仅拦截配置的后缀", async ({ page, mock, setupConfig }) => {
     // 只配置 .bin：/hold.bin 应被 content script 拦截（默认列表里没有 .bin）
     await setupConfig({ downloadExts: [".bin"] });
-    await page.goto(PAGE, { waitUntil: "domcontentloaded" });
+    await gotoTestPage(page);
     await page.click("#link-bin");
 
     await expect(page.locator("#__aria2_bridge_toast")).toBeVisible();

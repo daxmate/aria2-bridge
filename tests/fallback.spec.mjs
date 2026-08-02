@@ -1,7 +1,7 @@
 // 回退测试：aria2 不可用（RPC error / HTTP 500）时自动回退浏览器原生下载
-import { test, expect } from "./fixtures.mjs";
+import { test, expect, gotoTestPage, TEST_PAGE } from "./fixtures.mjs";
 
-const PAGE = `http://127.0.0.1:${process.env.MOCK_PORT}/`;
+const PAGE = TEST_PAGE;
 const ZIP_URL = `${PAGE}files/pack.zip`;
 
 // 在 SW 里 patch chrome.downloads.download，记录回退调用
@@ -24,7 +24,7 @@ async function fallbackDownloads(sw) {
 test.describe("aria2 不可用 → 浏览器回退", () => {
   test.beforeEach(async ({ page, setupConfig }) => {
     await setupConfig();
-    await page.goto(PAGE, { waitUntil: "domcontentloaded" });
+    await gotoTestPage(page);
   });
 
   test("点击拦截路径：RPC 返回 error → 橙色 Toast + 浏览器原生下载", async ({ page, sw, mock }) => {

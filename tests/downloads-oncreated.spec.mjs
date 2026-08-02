@@ -1,14 +1,14 @@
 // downloads.onCreated 兜底测试：JS 触发下载 → 取消浏览器下载并转发 aria2
 // 去重窗口、已删除任务防复活（本地记忆 + aria2 实时查询）
-import { test, expect } from "./fixtures.mjs";
+import { test, expect, gotoTestPage, TEST_PAGE } from "./fixtures.mjs";
 
-const PAGE = `http://127.0.0.1:${process.env.MOCK_PORT}/`;
+const PAGE = TEST_PAGE;
 const HOLD_URL = `${PAGE}hold.bin`;
 
 test.describe("onCreated 兜底拦截", () => {
   test.beforeEach(async ({ page, setupConfig }) => {
     await setupConfig();
-    await page.goto(PAGE, { waitUntil: "domcontentloaded" });
+    await gotoTestPage(page);
   });
 
   test("JS 触发浏览器下载 → 取消浏览器下载并转发 aria2", async ({ page, mock }) => {

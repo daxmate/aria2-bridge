@@ -50,6 +50,17 @@ export const DEFAULT_DOWNLOAD_EXTS = [
   ".cbr",
 ];
 
+export const TEST_PAGE = `${MOCK_BASE}/`;
+
+// 打开测试页并等待 content script 就绪。
+// content script 是 document_idle 注入（load 事件之后），慢机器（CI）上
+// domcontentloaded 后立即点击可能还没注入 → 点击不被拦截 → 无 Toast。
+// 因此等 load 事件 + 固定缓冲后再交互。
+export async function gotoTestPage(page) {
+  await page.goto(TEST_PAGE, { waitUntil: "load" });
+  await page.waitForTimeout(500);
+}
+
 // 扩展 context fixture（每次测试独立临时 profile）
 export const test = base.extend({
   context: async ({}, use) => {
