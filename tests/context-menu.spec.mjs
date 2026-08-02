@@ -2,7 +2,7 @@
 import { test, expect } from "./fixtures.mjs";
 
 test.describe("右键菜单", () => {
-  test("三个菜单项创建成功", async ({ sw }) => {
+  test("四个菜单项创建成功", async ({ sw }) => {
     // chrome.contextMenus 没有枚举 API：用重复 id 创建报错来验证菜单已存在
     const check = (id) =>
       sw.evaluate(
@@ -23,6 +23,8 @@ test.describe("右键菜单", () => {
     expect(openErr).toMatch(/duplicate/i);
     const hfErr = await check("aria2-bridge-hf-download");
     expect(hfErr).toMatch(/duplicate/i);
+    const quarkErr = await check("aria2-bridge-quark-download");
+    expect(quarkErr).toMatch(/duplicate/i);
   });
 
   test("切换语言 → 菜单标题实时更新", async ({ sw, setupConfig }) => {

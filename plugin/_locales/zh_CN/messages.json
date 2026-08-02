@@ -292,5 +292,51 @@
   "optionsLocaleHint": {
     "message": "选择扩展界面的显示语言。修改后立即生效。",
     "description": "语言选择器提示"
+  },
+  "menuQuarkDownload": {
+    "message": "📥 发送选中文件到 Aria2",
+    "description": "右键菜单项：夸克网盘页面发送选中文件"
+  },
+  "quarkNoSelection": {
+    "message": "请先在夸克网盘勾选要下载的文件",
+    "description": "Toast：未选中文件"
+  },
+  "quarkFetchFail": {
+    "message": "获取下载直链失败：$error$",
+    "description": "Toast：获取直链失败",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "请先登录夸克网盘！"
+      }
+    }
+  },
+  "quarkSent": {
+    "message": "$count$ 个文件已发送到 Aria2",
+    "description": "Toast：批量发送成功",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "quarkPartial": {
+    "message": "$success$ 个成功, $failed$ 个失败",
+    "description": "Toast：部分发送失败",
+    "placeholders": {
+      "success": {
+        "content": "$1",
+        "example": "2"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "1"
+      }
+    }
+  },
+  "notifQuarkNotReady": {
+    "message": "夸克网盘页面未就绪，请刷新后重试",
+    "description": "通知：content script 未响应"
   }
 }

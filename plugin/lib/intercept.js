@@ -35,7 +35,7 @@ async function fetchDownloadHeadersFromTab(url, referrer) {
   return {};
 }
 
-async function processDownload(url, referer) {
+async function processDownload(url, referer, out) {
   if (!config.enabled) return;
   // 支持 http(s) 文件与 magnet 磁力链（aria2 原生支持）
   if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("magnet:"))
@@ -50,7 +50,8 @@ async function processDownload(url, referer) {
 
   const options = { referer };
 
-  const filename = extractFilename(url);
+  // 优先使用调用方指定的文件名（如夸克直链带签名参数，URL 本身无文件后缀）
+  const filename = out || extractFilename(url);
   if (filename) options.out = filename;
 
   const gid = await aria2AddUri(url, options);

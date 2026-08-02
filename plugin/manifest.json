@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "__MSG_extDescription__",
   "default_locale": "zh_CN",
   "permissions": [
@@ -11,7 +11,8 @@
     "notifications",
     "cookies",
     "tabs",
-    "alarms"
+    "alarms",
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "http://*/*",
@@ -41,6 +42,16 @@
   "action": {
     "default_title": "__MSG_extDefaultTitle__"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "quark.js"
+      ],
+      "matches": [
+        "https://pan.quark.cn/*"
+      ]
+    }
+  ],
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

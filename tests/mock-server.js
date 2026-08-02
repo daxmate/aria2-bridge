@@ -43,6 +43,48 @@ const TEST_PAGE = `<!DOCTYPE html>
 </body>
 </html>`;
 
+// ---- 夸克网盘模拟页面（测试 quark.js 直链提取链路）----
+// 模拟夸克 React 页面：.file-list 元素挂 __reactFiber$ 属性（fiber 结构）
+// noselect=1 → selectedRowKeys 为空（未勾选场景）
+function quarkPageHtml(noSelect) {
+  const selected = noSelect ? "[]" : '["fid-1", "fid-2"]';
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>Quark Drive Mock</title></head>
+<body>
+  <div class="file-list" id="file-list"></div>
+  <script>
+    // 测试覆盖：quark.js 的 API 指向 mock server（同源，避免跨域 CORS）
+    window.__QUARK_API_BASE__ = "http://127.0.0.1:${PORT}/quark-api";
+  </script>
+  <script src="/quark.js"></script>
+  <script>
+    // 模拟夸克页面的文件列表数据（React fiber 的 props）
+    const fileList = [
+      { fid: "fid-1", file_name: "report.pdf", size: 12345 },
+      { fid: "fid-2", file_name: "data.zip", size: 67890 },
+      { fid: "fid-3", file_name: "photo.jpg", size: 1000 }
+    ];
+    // 分享页场景：文件带 share_fid_token（pathname 以 /s/ 开头）
+    if (/^\\/s\\//.test(location.pathname)) {
+      fileList.forEach((f) => { f.share_fid_token = "share-token-" + f.fid; f.pdir_fid = "0"; });
+    }
+    const selectedRowKeys = ${selected};
+    // 构造 fiber 链：DOM 元素 → __reactFiber$xxx → return(组件 fiber, props 含 list/selectedRowKeys)
+    const fiber = {
+      return: {
+        type: function FileListComponent() {},
+        stateNode: null,
+        props: { list: fileList, selectedRowKeys: selectedRowKeys }
+      }
+    };
+    const el = document.getElementById("file-list");
+    el["__reactFiber$mock"] = fiber;
+  </script>
+</body>
+</html>`;
+}
+
 const server = http.createServer((req, res) => {
   // ---- 控制端点 ----
   if (req.url.startsWith("/__mock/")) {
@@ -58,6 +100,7 @@ const server = http.createServer((req, res) => {
         state.failMode = null;
         state.stopped = [];
         state.tasks = {};
+        state.quarkShareSortCalls = 0;
         sendJson(res, 200, { ok: true });
       } else {
         sendJson(res, 404, { error: "unknown mock endpoint" });
@@ -75,6 +118,146 @@ const server = http.createServer((req, res) => {
   if (req.method === "GET" && req.url === "/page") {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end("<!DOCTYPE html><html><body><h1>Plain Page</h1><p>no downloads here</p></body></html>");
+    return;
+  }
+
+  // ---- 夸克网盘模拟页面 ----
+  if (req.method === "GET" && req.url.startsWith("/quark")) {
+    const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
+    if (url.pathname === "/quark") {
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      res.end(quarkPageHtml(url.searchParams.get("noselect") === "1"));
+      return;
+    }
+    if (url.pathname === "/quark.js") {
+      const fs = require("fs");
+      const path = require("path");
+      const js = fs.readFileSync(path.join(__dirname, "..", "plugin", "quark.js"), "utf8");
+      res.writeHead(200, { "Content-Type": "application/javascript; charset=utf-8" });
+      res.end(js);
+      return;
+    }
+  }
+
+  // ---- 请求头回显（测试 DNR 改 UA 用）----
+  if (req.method === "GET" && req.url === "/echo") {
+    sendJson(res, 200, req.headers);
+    return;
+  }
+
+  // ---- 夸克分享页模拟（/s/xxx 路径 → quark.js 检测为分享页）----
+  if (req.method === "GET" && /^\/s\//.test(req.url)) {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+    res.end(quarkPageHtml(false));
+    return;
+  }
+
+  // ---- 夸克 API mock（/quark-api/* → 模拟 drive-pc.quark.cn 接口）----
+  if (req.url.startsWith("/quark-api/")) {
+    const path = req.url.replace("/quark-api", "/1/clouddrive");
+    // 用临时 server 逻辑：直接按 path 分发
+    if (req.method === "POST" && path.includes("/file/download")) {
+      collectBody(req, (body) => {
+        const parsed = JSON.parse(body || "{}");
+        // 文件名映射：fid-1→report.pdf, fid-2→data.zip, saved-1→report.pdf, saved-2→data.zip
+        const NAME_MAP = {
+          "fid-1": "report.pdf",
+          "fid-2": "data.zip",
+          "saved-1": "report.pdf",
+          "saved-2": "data.zip",
+        };
+        sendJson(res, 200, {
+          code: 0,
+          data: (parsed.fids || []).map((fid) => ({
+            fid,
+            file_name: NAME_MAP[fid] || "file-" + fid + ".zip",
+            download_url: `https://mock-cdn.quark.cn/dl/${NAME_MAP[fid] || fid}?sign=abc`,
+            size: 12345,
+          })),
+        });
+      });
+      return;
+    }
+    if (req.method === "GET" && path.includes("/share/sharepage/detail")) {
+      // 分享页当前目录文件列表（模拟 /s/share123#/list/share/dir123 场景）
+      sendJson(res, 200, {
+        code: 0,
+        data: {
+          list: [
+            {
+              fid: "fid-1",
+              file_name: "report.pdf",
+              size: 12345,
+              file: true,
+              share_fid_token: "st-1",
+              pdir_fid: "dir123",
+            },
+            {
+              fid: "fid-2",
+              file_name: "data.zip",
+              size: 67890,
+              file: true,
+              share_fid_token: "st-2",
+              pdir_fid: "dir123",
+            },
+          ],
+        },
+        metadata: { _total: 2 },
+      });
+      return;
+    }
+    if (req.method === "POST" && path.includes("/share/sharepage/token")) {
+      collectBody(req, (body) => {
+        sendJson(res, 200, { code: 0, data: { stoken: "mock-stoken-abc" } });
+      });
+      return;
+    }
+    if (req.method === "POST" && path.includes("/share/sharepage/save")) {
+      collectBody(req, (body) => {
+        sendJson(res, 200, { code: 0, data: { task_id: "mock-task-1" } });
+      });
+      return;
+    }
+    if (req.method === "GET" && path.includes("/task")) {
+      sendJson(res, 200, { code: 0, data: { status: 2 } });
+      return;
+    }
+    if (req.method === "GET" && path.includes("/file/sort")) {
+      const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
+      const pdir = url.searchParams.get("pdir_fid");
+      if (pdir === "0") {
+        // 根目录：包含"来自：分享"文件夹
+        sendJson(res, 200, {
+          code: 0,
+          data: { list: [{ fid: "folder-share", file_name: "来自：分享", file_type: 0 }] },
+          metadata: { _total: 1 },
+        });
+        return;
+      }
+      if (pdir === "folder-share") {
+        // 转存目标文件夹：第一次（转存前）为空，之后（转存后）返回转存文件
+        // 用 state 记录查询次数，模拟"转存后出现新文件"
+        state.quarkShareSortCalls = (state.quarkShareSortCalls || 0) + 1;
+        const list =
+          state.quarkShareSortCalls > 1
+            ? [
+                { fid: "saved-1", file_name: "report.pdf", size: 12345 },
+                { fid: "saved-2", file_name: "data.zip", size: 67890 },
+              ]
+            : [];
+        sendJson(res, 200, { code: 0, data: { list }, metadata: { _total: list.length } });
+        return;
+      }
+      sendJson(res, 200, { code: 0, data: { list: [] }, metadata: { _total: 0 } });
+      return;
+    }
+    if (req.method === "POST" && path.includes("/file?")) {
+      collectBody(req, (body) => {
+        sendJson(res, 200, { code: 0, data: { fid: "folder-share" } });
+      });
+      return;
+    }
+    sendJson(res, 404, { error: "unknown quark api: " + path });
     return;
   }
 

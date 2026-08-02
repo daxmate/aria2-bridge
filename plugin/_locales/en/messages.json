@@ -292,5 +292,51 @@
   "optionsLocaleHint": {
     "message": "Select the display language for the extension. Applied immediately.",
     "description": "Hint text below language selector"
+  },
+  "menuQuarkDownload": {
+    "message": "📥 Send selected files to Aria2",
+    "description": "Context menu: send selected Quark Drive files"
+  },
+  "quarkNoSelection": {
+    "message": "Please select files in Quark Drive first",
+    "description": "Toast: no file selected"
+  },
+  "quarkFetchFail": {
+    "message": "Failed to get download links: $error$",
+    "description": "Toast: failed to fetch direct links",
+    "placeholders": {
+      "error": {
+        "content": "$1",
+        "example": "Please log in to Quark Drive"
+      }
+    }
+  },
+  "quarkSent": {
+    "message": "$count$ files sent to Aria2",
+    "description": "Toast: batch sent successfully",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "3"
+      }
+    }
+  },
+  "quarkPartial": {
+    "message": "$success$ succeeded, $failed$ failed",
+    "description": "Toast: partial failure",
+    "placeholders": {
+      "success": {
+        "content": "$1",
+        "example": "2"
+      },
+      "failed": {
+        "content": "$2",
+        "example": "1"
+      }
+    }
+  },
+  "notifQuarkNotReady": {
+    "message": "Quark Drive page is not ready, please refresh and retry",
+    "description": "Notification: content script did not respond"
   }
 }

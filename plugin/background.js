@@ -15,6 +15,7 @@ importScripts(
   "lib/rpc.js",
   "lib/removed.js",
   "lib/hf.js",
+  "lib/quark-net.js",
   "lib/intercept.js",
   "lib/context-menu.js",
   "lib/notify.js"
@@ -28,7 +29,7 @@ const _i18nReady = Aria2I18n.init();
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "download") {
-    processDownload(message.url, message.referer)
+    processDownload(message.url, message.referer, message.out)
       .then(() => {
         flashBadge("✓", "#4caf50");
         sendResponse({ success: true });
@@ -98,6 +99,9 @@ loadRemovedUrls().then(() => {
   syncRemovedTasks();
 });
 loadTrackedDownloads();
+
+// 夸克直链接口需要夸克客户端 UA（fetch 无法设置 UA，用 DNR 网络层改写）
+registerQuarkUaRule();
 
 // 定期同步：捕获用户在 AriaNg 里删除的任务（status=removed）
 chrome.alarms.create("aria2-sync-removed", { periodInMinutes: 1 });

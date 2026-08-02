@@ -6,6 +6,7 @@
 const MENU_ID_SEND = "aria2-bridge-send";
 const MENU_ID_OPEN = "aria2-bridge-open-ariang";
 const MENU_ID_HF_DOWNLOAD = "aria2-bridge-hf-download";
+const MENU_ID_QUARK_DOWNLOAD = "aria2-bridge-quark-download";
 
 chrome.runtime.onInstalled.addListener(async () => {
   // 等待 i18n 初始化完成，确保菜单使用正确的语言
@@ -26,6 +27,12 @@ chrome.runtime.onInstalled.addListener(async () => {
     title: Aria2I18n.t("menuHfDownload"),
     contexts: ["page"],
     documentUrlPatterns: ["https://huggingface.co/*"],
+  });
+  chrome.contextMenus.create({
+    id: MENU_ID_QUARK_DOWNLOAD,
+    title: Aria2I18n.t("menuQuarkDownload"),
+    contexts: ["page"],
+    documentUrlPatterns: ["https://pan.quark.cn/*"],
   });
 });
 
@@ -94,6 +101,7 @@ async function updateContextMenus() {
     chrome.contextMenus.update(MENU_ID_SEND, { title: Aria2I18n.t("menuSend") });
     chrome.contextMenus.update(MENU_ID_OPEN, { title: Aria2I18n.t("menuOpenAriaNg") });
     chrome.contextMenus.update(MENU_ID_HF_DOWNLOAD, { title: Aria2I18n.t("menuHfDownload") });
+    chrome.contextMenus.update(MENU_ID_QUARK_DOWNLOAD, { title: Aria2I18n.t("menuQuarkDownload") });
   } catch (e) {
     console.warn("[Aria2 Bridge] Failed to update context menus:", e.message);
   }
@@ -156,6 +164,24 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       console.warn("[Aria2 Bridge] HF context menu error:", err.message);
       flashBadge("✗", "#f44336");
       showNotification("Aria2 Bridge", Aria2I18n.t("notifHfError"));
+    }
+    return;
+  }
+
+  // Menu: Quark — download selected files
+  if (info.menuItemId === MENU_ID_QUARK_DOWNLOAD) {
+    try {
+      // content script 负责注入 quark.js 并批量发送
+      const response = await chrome.tabs.sendMessage(tab.id, { action: "quarkDownload" });
+      if (!response || !response.ok) {
+        flashBadge("✗", "#f44336");
+        showNotification("Aria2 Bridge", Aria2I18n.t("notifQuarkNotReady"));
+      }
+    } catch (err) {
+      // 页面未加载 content script（如夸克网盘首页未完成渲染）
+      console.warn("[Aria2 Bridge] Quark download error:", err.message);
+      flashBadge("✗", "#f44336");
+      showNotification("Aria2 Bridge", Aria2I18n.t("notifQuarkNotReady"));
     }
     return;
   }

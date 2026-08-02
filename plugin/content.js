@@ -255,4 +255,106 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       .catch(() => sendResponse({}));
     return true; // async response
   }
+
+  // 右键菜单触发：在夸克网盘页面提取选中文件直链并批量发送
+  if (message.action === "quarkDownload") {
+    injectQuarkScript().then(() => {
+      // 等注入脚本加载完成后再发指令（脚本 onload 后监听器才就绪）
+      window.postMessage({ type: "FETCH_QUARK_LINKS" }, "*");
+    });
+    sendResponse({ ok: true });
+  }
 });
+
+// ========================================
+// Quark 网盘 — 选中文件批量发送
+// ========================================
+
+let quarkInjected = false;
+
+/**
+ * 把 quark.js 注入页面上下文（MAIN world）。
+ * 只有页面上下文才能访问夸克页面的 React fiber 变量。
+ * 注入脚本通过 window.postMessage 与 content script 通信。
+ */
+function injectQuarkScript() {
+  if (quarkInjected) return Promise.resolve();
+  quarkInjected = true;
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = chrome.runtime.getURL("quark.js");
+    script.onload = () => {
+      script.remove();
+      resolve();
+    };
+    (document.head || document.documentElement).appendChild(script);
+  });
+}
+
+// 监听注入脚本回传的直链结果
+window.addEventListener("message", (event) => {
+  // 只接受本页面（window 自身）发来的消息，防止其他 frame/扩展伪造
+  if (event.source !== window) return;
+  const data = event.data;
+  if (!data || typeof data.type !== "string") return;
+
+  if (data.type === "QUARK_SUCCESS") {
+    sendQuarkLinks(data.data || []);
+  } else if (data.type === "QUARK_ERROR") {
+    const isNoSelection = data.message === "no-selection";
+    showQuarkToast(
+      isNoSelection
+        ? Aria2I18n.t("quarkNoSelection")
+        : Aria2I18n.t("quarkFetchFail", [data.message])
+    );
+  }
+});
+
+/**
+ * 批量发送夸克直链到 aria2。
+ * 直链 URL 带签名参数（无文件后缀），必须用 API 返回的 file_name 作为 out，
+ * 否则 aria2 保存的文件名会是签名 URL 的路径名。
+ */
+function sendQuarkLinks(items) {
+  if (!items || items.length === 0) {
+    showQuarkToast(Aria2I18n.t("quarkNoSelection"));
+    return;
+  }
+
+  let done = 0;
+  let success = 0;
+  const total = items.length;
+
+  items.forEach((item) => {
+    chrome.runtime.sendMessage(
+      {
+        action: "download",
+        url: item.download_url,
+        referer: location.href,
+        out: item.file_name || undefined,
+      },
+      (response) => {
+        done++;
+        if (response && response.success) success++;
+        // 全部返回后再统一提示，避免连续弹多个 toast
+        if (done === total) {
+          const message =
+            success === total
+              ? Aria2I18n.t("quarkSent", [String(total)])
+              : Aria2I18n.t("quarkPartial", [String(success), String(total - success)]);
+          showQuarkToast(message, success === total ? "success" : "warning");
+        }
+      }
+    );
+  });
+}
+
+// 夸克相关 toast：绿色=成功，橙色=失败/未选中（与全局 Toast 配色一致）
+function showQuarkToast(title, type = "warning") {
+  const isSuccess = type === "success";
+  Toast.fire({
+    icon: isSuccess ? "success" : "warning",
+    background: isSuccess ? "#e8f5e9" : "#fff3e0",
+    title,
+  });
+}

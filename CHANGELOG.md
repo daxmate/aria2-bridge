@@ -3,6 +3,18 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.7.0] - 2026-08-02
+
+### ✨ 新功能
+
+- **夸克网盘一键下载** — 在夸克网盘（pan.quark.cn）页面勾选文件后，右键 →「📥 发送选中文件到 Aria2」，自动提取选中文件的下载直链并批量推送到 aria2
+  - 注入脚本（`plugin/quark.js`）穿透页面 React fiber，从文件列表读取选中项（`list + selectedRowKeys`），无需登录态以外的任何配置
+  - 直链通过夸克官方接口 `pan.quark.cn/api/v2/file/download` 获取（`credentials: include` 携带页面 Cookie）
+  - 文件名用接口返回的 `file_name` 作为 aria2 `out` 参数（直链 URL 带签名参数无后缀，避免文件名错乱）
+  - 未勾选文件 / 接口报错（含未登录 31001）/ 空结果 → 橙色 Toast 提示，不静默
+  - 批量发送逐条反馈，全部返回后统一提示成功/部分失败数量
+  - 新增 6 个 E2E 用例（提取直链推送 / 未勾选 / 业务错误码 / 网络层失败 / HTTP 500 / 空数据），共 58 个测试全绿
+
 ## [1.6.0] - 2026-08-02
 
 ### ✨ 新功能

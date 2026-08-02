@@ -79,6 +79,10 @@ export default [
         HF_SKIP_PATTERNS: "readonly",
         shouldSkipHfFile: "readonly",
         fetchHfFileList: "readonly",
+        QUARK_UA_RULE_ID: "readonly", // lib/quark-net.js（DNR 改夸克客户端 UA）
+        QUARK_CLIENT_UA: "readonly",
+        QUARK_API_URL_FILTER: "readonly",
+        registerQuarkUaRule: "readonly",
         isSelfRedirect: "writable", // lib/intercept.js
         fetchDownloadHeadersFromTab: "readonly",
         processDownload: "readonly",
@@ -116,6 +120,27 @@ export default [
       "no-useless-escape": "warn",
       // 空 catch 块是刻意忽略错误，允许
       "no-empty": ["error", { allowEmptyCatch: true }],
+    },
+  },
+  {
+    // plugin/quark.js：注入夸克页面的浏览器脚本（页面上下文，无扩展 API）
+    files: ["plugin/quark.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "script",
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        location: "readonly",
+        console: "readonly",
+        fetch: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        setTimeout: "readonly",
+      },
+    },
+    rules: {
+      "no-unused-vars": ["warn", { args: "none", varsIgnorePattern: "^_", caughtErrors: "none" }],
     },
   },
   {
