@@ -3,6 +3,22 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.4.0] - 2026-08-02
+
+### ✨ 新增
+
+- **代码质量工具** — ESLint（flat config，按环境分区：扩展全局脚本 / AriaNg fix / CJS / Node ESM）+ Prettier（配置与 DeepPage 一致），`npm run lint` / `npm run format` / `npm run format:check`
+- **CI workflow** — push main / PR 时自动执行：AriaNg 构建 → 依赖安装 → 版本一致性检查 → ESLint → Prettier 检查 → 全部 E2E 测试（39 用例）
+
+### 🐛 修复
+
+- content script 漏调 `Aria2I18n.init()`：toast 文案一直跟随浏览器 UI 语言，用户设置的语言偏好不生效
+- 清理死代码：`background.js` 未使用的 `saveConfig`、`content.js` 死变量与多余转义、`options.js` 未使用变量
+
+### ⚙️ 其他
+
+- 测试框架平台兼容：固定语言无关断言（toast 颜色）、content script 注入时序缓冲、SW 启动竞态处理，CI（ubuntu）与本地（macOS）全部通过
+
 ## [1.3.0] - 2026-08-02
 
 ### ✨ 新增
@@ -49,3 +65,4 @@
 [1.2.1]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.2.1
 [1.2.2]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.2.2
 [1.3.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.3.0
+[1.4.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.4.0
