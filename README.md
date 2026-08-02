@@ -179,6 +179,30 @@ aria2-bridge/
 - Hugging Face 下载会跳过 `.gitattributes`、`README.md` 等元数据文件，只下载模型文件
 - 批量下载时工具栏 Badge 会显示文件总数，完成后闪烁 ✓
 
+## 测试
+
+项目使用 [Playwright](https://playwright.dev/) 做端到端测试（与 DeepPage 相同的模式）：
+
+```bash
+npm install          # 首次安装依赖
+npx playwright install chromium   # 首次安装浏览器（如未装过）
+npm test             # 一键跑全部测试（pretest 自动做 i18n 校验）
+```
+
+测试不依赖真实 aria2 —— `tests/mock-server.js` 模拟 aria2 JSON-RPC（端口 18951），可配置失败模式（RPC error / HTTP 500 / 挂起），并记录全部 RPC 请求供断言。
+
+### 覆盖的功能点
+
+- **点击拦截**：左键/中键/Cmd+点击、无后缀链接、hash 链接、自定义 downloadExts、Toast 反馈
+- **RPC 转发**：JSON-RPC 请求格式、`rpc-secret`（token: 前缀）、UA/Referer/Cookie 透传、文件名提取
+- **回退**：aria2 不可用（error/500）时自动回退浏览器原生下载（点击拦截 + onCreated 两条路径）
+- **onCreated 兜底**：JS 触发下载取消并转发、30s 去重、已删除任务防复活（本地记忆 + tellStopped 实时查询）、SPA 场景 Content-Disposition 中文文件名
+- **右键菜单**：菜单创建、语言切换实时更新标题
+- **Hugging Face**：文件树获取、元数据过滤、URL 编码、失败处理
+- **设置页**：默认值回显、自动保存、字段格式化、enabled → Badge OFF、语言切换
+- **AriaNg**：buildAriaNgUrl（secret → URL-safe base64 hash 路由）、页面渲染、aria-ng-fix.js 生效
+- **i18n**：zh_CN/en 的 key 一致性、非空、占位符完整性（`scripts/check-i18n.mjs`）
+
 ## License
 
 MIT

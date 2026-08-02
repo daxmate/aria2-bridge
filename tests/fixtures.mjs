@@ -1,0 +1,105 @@
+// Aria2 Bridge 测试共享 fixtures：扩展 context + mock aria2 控制
+import { test as base, chromium } from "playwright/test";
+
+const EXT_PATH = process.env.EXT_PATH;
+const MOCK_PORT = process.env.MOCK_PORT;
+const MOCK_BASE = `http://127.0.0.1:${MOCK_PORT}`;
+
+// 与 background.js 默认一致的下载后缀列表（storage 未配置时行为相同）
+export const DEFAULT_DOWNLOAD_EXTS = [
+  ".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".zst",
+  ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+  ".mp3", ".mp4", ".avi", ".mkv", ".mov", ".flv", ".wmv", ".webm",
+  ".iso", ".dmg", ".exe", ".msi", ".apk", ".deb", ".rpm",
+  ".torrent", ".nzb",
+  ".csv", ".json", ".xml",
+  ".psd", ".ai", ".skp",
+  ".epub", ".mobi", ".cbr",
+];
+
+// 扩展 context fixture（每次测试独立临时 profile）
+export const test = base.extend({
+  context: async ({}, use) => {
+    const context = await chromium.launchPersistentContext("", {
+      headless: false,
+      viewport: { width: 1600, height: 1000 },
+      args: [
+        "--headless=new",
+        `--disable-extensions-except=${EXT_PATH}`,
+        `--load-extension=${EXT_PATH}`,
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--autoplay-policy=no-user-gesture-required",
+      ],
+    });
+    await use(context);
+    await context.close();
+  },
+
+  // 扩展 ID（从 service worker 解析）
+  extensionId: async ({ context }, use) => {
+    let worker = context.serviceWorkers()[0];
+    if (!worker) worker = await context.waitForEvent("serviceworker", { timeout: 15000 });
+    await use(new URL(worker.url()).host);
+  },
+
+  // service worker（用于设置 chrome.storage / 调用扩展内部逻辑）
+  sw: async ({ context }, use) => {
+    let worker = context.serviceWorkers()[0];
+    if (!worker) worker = await context.waitForEvent("serviceworker", { timeout: 15000 });
+    await use(worker);
+  },
+
+  // 把扩展配置指向 mock aria2（可覆盖任意字段）
+  setupConfig: async ({ sw }, use) => {
+    const apply = async (extra = {}) => {
+      await sw.evaluate(
+        ({ base, extra }) =>
+          new Promise((resolve) => {
+            chrome.storage.sync.set(
+              {
+                rpcUrl: base + "/jsonrpc",
+                rpcSecret: "",
+                enabled: true,
+                bypassDomains: [],
+                locale: "auto",
+                // 注意：不默认写入 downloadExts — 留空会让 content script
+                // 读到空数组而完全不拦截。需要自定义后缀的用例通过 extra 传入。
+                ...extra,
+              },
+              resolve
+            );
+          }),
+        { base: MOCK_BASE, extra }
+      );
+      // storage.onChanged 同步 config 是异步的，给 background 一个 tick
+      await new Promise((r) => setTimeout(r, 100));
+    };
+    await use(apply);
+  },
+
+  // mock server 控制（设置失败模式/stopped 列表 / 读请求记录）
+  mock: async ({}, use) => {
+    const api = {
+      config: (cfg) =>
+        fetch(`${MOCK_BASE}/__mock/config`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(cfg),
+        }),
+      requests: async () => (await fetch(`${MOCK_BASE}/__mock/requests`)).json(),
+      reset: () => fetch(`${MOCK_BASE}/__mock/reset`, { method: "POST" }),
+      // 只取 aria2.addUri 请求（避免被 SW 启动时的 tellStopped 干扰）
+      addUris: async () => {
+        const { requests } = await api.requests();
+        return requests.filter((r) => r.method === "aria2.addUri");
+      },
+      base: MOCK_BASE,
+    };
+    await api.reset();
+    await use(api);
+    await api.reset();
+  },
+});
+
+export { expect } from "playwright/test";

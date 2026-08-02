@@ -1,6 +1,8 @@
 node_modules/
 .tmp/
 dist/
+test-results/
+playwright-report/
 plugin/aria-ng/
 *.log
 .DS_Store
