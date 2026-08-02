@@ -10,6 +10,7 @@ export default [
   {
     ignores: [
       "plugin/aria-ng/**", // 第三方 AriaNg 构建产物
+      "plugin/vendor/**", // 第三方库（sweetalert2 压缩版，不 lint）
       "test-results/**",
       "dist/**",
       "node_modules/**",
