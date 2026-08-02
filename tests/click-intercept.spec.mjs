@@ -1,5 +1,12 @@
 // 点击拦截测试：content script 三档拦截策略 + Toast 反馈
-import { test, expect, DEFAULT_DOWNLOAD_EXTS, gotoTestPage, TEST_PAGE, toastBackground } from "./fixtures.mjs";
+import {
+  test,
+  expect,
+  DEFAULT_DOWNLOAD_EXTS,
+  gotoTestPage,
+  TEST_PAGE,
+  toastBackground,
+} from "./fixtures.mjs";
 
 const PAGE = TEST_PAGE;
 
