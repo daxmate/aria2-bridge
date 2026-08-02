@@ -86,7 +86,18 @@ export default [
         MENU_ID_OPEN: "readonly",
         MENU_ID_HF_DOWNLOAD: "readonly",
         buildAriaNgUrl: "readonly",
+        openAriaNg: "readonly",
         updateContextMenus: "readonly",
+        NOTIFY_TRACK_TTL_MS: "readonly", // lib/notify.js
+        NOTIF_ID_PREFIX: "readonly",
+        trackedDownloads: "readonly",
+        loadTrackedDownloads: "readonly",
+        persistTrackedDownloads: "readonly",
+        trackDownload: "readonly",
+        untrackDownload: "readonly",
+        notifyDownloadComplete: "readonly",
+        notifyDownloadError: "readonly",
+        checkDownloadStatus: "readonly",
         flashBadge: "readonly", // background.js（intercept/context-menu 调用）
         _i18nReady: "readonly", // background.js（context-menu onInstalled 引用）
       },
@@ -174,6 +185,7 @@ export default [
         localStorage: "readonly",
         requestAnimationFrame: "readonly",
         chrome: "readonly",
+        self: "readonly",
         // evaluate 回调里访问的扩展内部全局（SW evaluate 可调 top-level 函数）
         markRemoved: "readonly",
         updateContextMenus: "readonly",
@@ -184,6 +196,12 @@ export default [
         fetchHfFileList: "readonly",
         aria2AddUri: "readonly",
         loadConfig: "readonly",
+        trackDownload: "readonly",
+        untrackDownload: "readonly",
+        checkDownloadStatus: "readonly",
+        trackedDownloads: "readonly",
+        persistTrackedDownloads: "readonly",
+        config: "readonly",
       },
     },
     rules: {

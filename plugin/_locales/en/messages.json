@@ -59,6 +59,46 @@
     "message": "Aria2 Bridge — Send Failed",
     "description": "Notification title for failed send"
   },
+  "notifCompleteTitle": {
+    "message": "Aria2 Bridge — Download Complete",
+    "description": "Notification title: download finished"
+  },
+  "notifCompleteBody": {
+    "message": "$name$ finished downloading",
+    "description": "Notification body: download complete",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "pack.zip"
+      }
+    }
+  },
+  "notifErrorTitle": {
+    "message": "Aria2 Bridge — Download Failed",
+    "description": "Notification title: download failed"
+  },
+  "notifErrorBody": {
+    "message": "$name$ failed: $error$",
+    "description": "Notification body: download failed",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "pack.zip"
+      },
+      "error": {
+        "content": "$2",
+        "example": "File not found"
+      }
+    }
+  },
+  "optionsNotifyCompleteLabel": {
+    "message": "Notify on download complete",
+    "description": "Setting: system notification for download complete/fail"
+  },
+  "optionsNotifyCompleteHint": {
+    "message": "Send a system notification when a forwarded download completes or fails",
+    "description": "Setting hint: download complete notification"
+  },
   "notifHfSuccess": {
     "message": "$count$ files added to aria2",
     "description": "Notification after successful HF batch download",

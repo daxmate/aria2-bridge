@@ -53,7 +53,9 @@ async function processDownload(url, referer) {
   const filename = extractFilename(url);
   if (filename) options.out = filename;
 
-  await aria2AddUri(url, options);
+  const gid = await aria2AddUri(url, options);
+  // 跟踪该任务：下载完成/失败时发系统通知
+  trackDownload(gid, filename, url);
   markForwarded(url);
 }
 
@@ -144,7 +146,9 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
     if (filename) options.out = filename;
     if (downloadItem.referrer) options.referer = downloadItem.referrer;
 
-    await aria2AddUri(url, options);
+    const gid = await aria2AddUri(url, options);
+    // 跟踪该任务：下载完成/失败时发系统通知
+    trackDownload(gid, filename, url);
     markForwarded(url);
     flashBadge("✓", "#4caf50");
     console.log(`[Aria2 Bridge] Download → aria2: ${url}`);

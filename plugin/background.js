@@ -16,7 +16,8 @@ importScripts(
   "lib/removed.js",
   "lib/hf.js",
   "lib/intercept.js",
-  "lib/context-menu.js"
+  "lib/context-menu.js",
+  "lib/notify.js"
 );
 
 const _i18nReady = Aria2I18n.init();
@@ -56,22 +57,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Toolbar action — 打开 AriaNg 管理界面（复用已有标签页）
 // ========================================
 
-chrome.action.onClicked.addListener(async () => {
-  const baseUrl = chrome.runtime.getURL("aria-ng/index.html");
-
-  // 查找已有的 AriaNg 标签页（tabs 权限支持按 URL 匹配）
-  const tabs = await chrome.tabs.query({ url: baseUrl + "*" });
-
-  if (tabs.length > 0) {
-    // 已有 → 切换到第一个
-    await chrome.tabs.update(tabs[0].id, { active: true });
-    await chrome.windows.update(tabs[0].windowId, { focused: true });
-  } else {
-    // 找不到才新建
-    const url = buildAriaNgUrl();
-    chrome.tabs.create({ url });
-  }
-});
+chrome.action.onClicked.addListener(openAriaNg);
 
 /**
  * Briefly flash a status badge icon then restore normal state.
@@ -111,9 +97,13 @@ loadRemovedUrls().then(() => {
   // 启动时同步一次：把用户已删除的任务 URL 记入黑名单
   syncRemovedTasks();
 });
+loadTrackedDownloads();
 
 // 定期同步：捕获用户在 AriaNg 里删除的任务（status=removed）
 chrome.alarms.create("aria2-sync-removed", { periodInMinutes: 1 });
+// 轮询跟踪任务状态：下载完成/失败 → 系统通知（MV3 alarms 最小周期 30s）
+chrome.alarms.create("aria2-download-status", { periodInMinutes: 0.5 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "aria2-sync-removed") syncRemovedTasks();
+  if (alarm.name === "aria2-download-status") checkDownloadStatus();
 });

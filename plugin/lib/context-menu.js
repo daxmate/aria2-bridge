@@ -70,6 +70,23 @@ function buildAriaNgUrl() {
   );
 }
 
+// 打开 AriaNg 管理界面（复用已有标签页，找不到才新建）
+async function openAriaNg() {
+  const baseUrl = chrome.runtime.getURL("aria-ng/index.html");
+
+  // 查找已有的 AriaNg 标签页（tabs 权限支持按 URL 匹配）
+  const tabs = await chrome.tabs.query({ url: baseUrl + "*" });
+
+  if (tabs.length > 0) {
+    // 已有 → 切换到第一个
+    await chrome.tabs.update(tabs[0].id, { active: true });
+    await chrome.windows.update(tabs[0].windowId, { focused: true });
+  } else {
+    // 找不到才新建
+    chrome.tabs.create({ url: buildAriaNgUrl() });
+  }
+}
+
 // 更新右键菜单语言
 async function updateContextMenus() {
   await Aria2I18n.reload();
@@ -85,8 +102,7 @@ async function updateContextMenus() {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   // Menu: Open AriaNg
   if (info.menuItemId === MENU_ID_OPEN) {
-    const url = buildAriaNgUrl();
-    chrome.tabs.create({ url });
+    openAriaNg();
     return;
   }
 
@@ -158,6 +174,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   try {
     const gid = await aria2AddUri(url, options);
     const label = url.split("/").pop() || url;
+    // 跟踪该任务：下载完成/失败时发系统通知
+    trackDownload(gid, label, url);
     showNotification(Aria2I18n.t("notifSentTitle"), label);
     flashBadge("✓", "#4caf50");
     setTimeout(() => chrome.notifications.clear(gid), 3000);

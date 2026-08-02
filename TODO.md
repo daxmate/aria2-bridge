@@ -14,7 +14,7 @@
 ## 🟡 P1 重要
 
 - [x] **磁力/种子链接支持（magnet:）** ✅ 已完成（v1.5.0）— content script 点击拦截 magnet: 链接（新增 `interceptMagnet` 设置项，默认开）+ 右键菜单发送；background `processDownload` 放行 `magnet:`；.torrent 原已在默认扩展名列表。AriaNg 侧 BT 任务展示子模块原生支持，无需改
-- [ ] **下载完成系统通知** — 目前只有「已发送/失败」即时通知，长下载完成时用户通常已切走。实现：`aria2.addUri` 成功后轮询 `aria2.tellStatus`（间隔可复用 alarms，或 per-task `setTimeout` + SW 生命周期内查询），status 变 `complete` 时发系统通知（notifications 权限已有）。注意 SW 休眠：轮询期间 SW 可能被回收，alarms 方式更可靠
+- [x] **下载完成系统通知** ✅ 已完成（v1.6.0）— 转发到 aria2 的任务被跟踪（GID 列表，`storage.session` 持久化），alarms 每 30s 轮询 `aria2.tellStatus`，complete → 完成通知（带文件名）、error → 失败通知（带错误信息）、removed → 静默清理；点击通知打开 AriaNg；跟踪超 24h 自动清理；设置项「下载完成时通知」默认开启（`notifyDownloadComplete`）；只跟踪本扩展转发的任务，HF 批量下载不跟踪（避免刷屏）
 - [ ] **按域名/文件类型自动分类目录** — options 加「下载目录规则」：域名或文件后缀 → 目标目录，`aria2.addUri` 时带 `dir` 参数（aria2 原生支持）。匹配顺序建议：域名精确 → 域名后缀 → 文件后缀 → 默认。规则 UI 可参考 bypassDomains 的 textarea 行格式
 
 ## 🟢 P2 无害

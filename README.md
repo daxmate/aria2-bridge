@@ -12,6 +12,7 @@
 - **域名白名单** — 配置不拦截的域名，某些站点仍走浏览器下载
 - **工具栏直达 AriaNg** — 点击扩展图标直接打开 AriaNg 管理面板，Badge 显示当前状态
 - **弹窗通知** — 发送成功/失败时弹出系统通知
+- **下载完成通知** — 转发到 aria2 的长任务下载完成或失败时发送系统通知（点击通知直达 AriaNg），可在设置页关闭
 - **点击反馈** — 拦截下载时在点击位置弹出 Toast（绿色=已发送到 Aria2，橙色=已回退），工具栏 Badge 同步闪烁
 - **RPC 密钥支持** — 支持 `--rpc-secret` 认证，连接有密码保护的 aria2
 - **Cookie/UA 透传** — 自动携带浏览器 Cookie 和 User-Agent，登录态下载无压力
@@ -170,7 +171,7 @@ aria2-bridge/
 | `downloads` | 拦截和取消浏览器下载 |
 | `contextMenus` | 添加右键菜单 |
 | `storage` | 持久化设置 |
-| `notifications` | 发送成功/失败通知 |
+| `notifications` | 发送成功/失败/下载完成通知 |
 | `cookies` | 读取目标域名 Cookie，传递到 aria2 以维持登录态 |
 | `tabs` | 管理 AriaNg 标签页（避免重复打开） |
 | `host_permissions` | 允许 cookies API 和 aria2 RPC 通信 |
@@ -215,6 +216,7 @@ npm run format:check # Prettier 检查
 - **onCreated 兜底**：JS 触发下载取消并转发、30s 去重、已删除任务防复活（本地记忆 + tellStopped 实时查询）、SPA 场景 Content-Disposition 中文文件名
 - **右键菜单**：菜单创建、语言切换实时更新标题
 - **Hugging Face**：文件树获取、元数据过滤、URL 编码、失败处理
+- **下载完成通知**：转发任务跟踪（storage.session 持久化）、tellStatus 轮询（complete/error/removed）、24h 超时清理、开关关闭不轮询、点击通知打开 AriaNg
 - **设置页**：默认值回显、自动保存、字段格式化、enabled → Badge OFF、语言切换
 - **AriaNg**：buildAriaNgUrl（secret → URL-safe base64 hash 路由）、页面渲染、aria-ng-fix.js 生效
 - **i18n**：zh_CN/en 的 key 一致性、非空、占位符完整性（`scripts/check-i18n.mjs`）

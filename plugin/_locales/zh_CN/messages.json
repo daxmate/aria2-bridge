@@ -59,6 +59,46 @@
     "message": "Aria2 Bridge — 发送失败",
     "description": "通知标题：发送失败"
   },
+  "notifCompleteTitle": {
+    "message": "Aria2 Bridge — 下载完成",
+    "description": "通知标题：任务下载完成"
+  },
+  "notifCompleteBody": {
+    "message": "$name$ 下载完成",
+    "description": "通知正文：下载完成",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "pack.zip"
+      }
+    }
+  },
+  "notifErrorTitle": {
+    "message": "Aria2 Bridge — 下载失败",
+    "description": "通知标题：任务下载失败"
+  },
+  "notifErrorBody": {
+    "message": "$name$ 下载失败：$error$",
+    "description": "通知正文：下载失败",
+    "placeholders": {
+      "name": {
+        "content": "$1",
+        "example": "pack.zip"
+      },
+      "error": {
+        "content": "$2",
+        "example": "File not found"
+      }
+    }
+  },
+  "optionsNotifyCompleteLabel": {
+    "message": "下载完成时通知",
+    "description": "设置项：下载完成/失败系统通知开关"
+  },
+  "optionsNotifyCompleteHint": {
+    "message": "转发到 aria2 的任务下载完成或失败时发送系统通知",
+    "description": "设置项提示：下载完成通知"
+  },
   "notifHfSuccess": {
     "message": "$count$ 个文件已添加到 aria2",
     "description": "通知：HF 批量下载成功",

@@ -45,6 +45,28 @@ test.describe("设置页", () => {
       .toBe(true);
   });
 
+  test("notifyDownloadComplete 开关 → change 自动保存到 storage", async ({ page, sw }) => {
+    // 默认开启（setupConfig 未覆盖该字段 → 走 DEFAULT_CONFIG）
+    await expect(page.locator("#notifyDownloadComplete")).toBeChecked();
+
+    await page.locator("#notifyDownloadComplete").uncheck();
+    await expect
+      .poll(async () => {
+        const data = await sw.evaluate(() => chrome.storage.sync.get("notifyDownloadComplete"));
+        return data.notifyDownloadComplete;
+      })
+      .toBe(false);
+
+    // 重新勾选 → 恢复 true
+    await page.locator("#notifyDownloadComplete").check();
+    await expect
+      .poll(async () => {
+        const data = await sw.evaluate(() => chrome.storage.sync.get("notifyDownloadComplete"));
+        return data.notifyDownloadComplete;
+      })
+      .toBe(true);
+  });
+
   test("修改 RPC 地址/密钥 → change 自动保存到 storage", async ({ page, sw }) => {
     await page.fill("#rpcUrl", "http://192.168.1.10:6800/jsonrpc");
     await page.fill("#rpcSecret", "s3cret");

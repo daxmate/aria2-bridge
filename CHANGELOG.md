@@ -3,6 +3,17 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.6.0] - 2026-08-02
+
+### ✨ 新功能
+
+- **下载完成通知** — 转发到 aria2 的长任务下载完成时发系统通知（带文件名），点击通知直达 AriaNg 管理面板；下载失败也会通知（显示错误信息）
+  - 只跟踪本扩展转发的任务（GID 列表，`storage.session` 持久化，SW 重启不丢），不动 AriaNg 里手动添加的任务
+  - 每 30s alarm 轮询 `aria2.tellStatus`（MV3 alarms 最小周期），无跟踪任务时不产生 RPC 请求
+  - 用户在 AriaNg 删除的任务（removed）静默移除跟踪；跟踪超 24h 未完成自动清理，防止列表膨胀
+  - 新增设置项「下载完成时通知」，默认开启
+  - 新增 9 个 E2E 用例（完整链路 / error / removed / active / 开关关闭 / 超时清理 / alarm 注册 / 通知点击监听 / 设置页开关），共 52 个测试全绿
+
 ## [1.5.1] - 2026-08-02
 
 ### 🔧 重构

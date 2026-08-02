@@ -9,6 +9,8 @@ const state = {
   errorMessage: "Mock aria2 error",
   // tellStopped 返回的任务列表（测试 removed 场景）
   stopped: [],
+  // tellStatus 返回的任务（gid → aria2 任务对象），测试下载完成/失败通知用
+  tasks: {},
   requests: [],
 };
 
@@ -55,6 +57,7 @@ const server = http.createServer((req, res) => {
         state.requests = [];
         state.failMode = null;
         state.stopped = [];
+        state.tasks = {};
         sendJson(res, 200, { ok: true });
       } else {
         sendJson(res, 404, { error: "unknown mock endpoint" });
@@ -164,6 +167,13 @@ const server = http.createServer((req, res) => {
           break;
         case "aria2.tellStopped":
           result = state.stopped;
+          break;
+        case "aria2.tellStatus":
+          // 未在 tasks 中注入的任务视为已删除（removed），与 aria2 删除后行为一致
+          result = state.tasks[parsed.params[0]] || {
+            gid: parsed.params[0],
+            status: "removed",
+          };
           break;
         case "aria2.getVersion":
           result = { version: "1.37.0", enabledFeatures: ["async-dns"] };
