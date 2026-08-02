@@ -9,8 +9,7 @@
 
 ## 🔴 P0 结构性债务
 
-- [ ] **设置页「连接测试」缺失** — README 功能列表声称支持「连接测试 — 设置页一键测试 aria2 RPC 连接是否正常」，但 `options.html` / `options.js` 从未实现。文档与实现不一致，用户找不到按钮会以为扩展坏了。补：options 加按钮 → `aria2.getVersion` 调用 → 成功/失败状态展示（复用 options.js 现有 saveSettings 模式 + i18n 新 key）
-- [ ] **background.js 880 行单文件** — SW 已接近 900 行，RPC / 拦截 / 右键菜单 / HF / removed 同步 / 通知混在一起，新功能定位成本变高。建议拆模块：`lib/rpc.js`（aria2Rpc/addUri/buildHeaders/文件名提取）、`lib/intercept.js`（onCreated 兜底）、`lib/context-menu.js`、`lib/hf.js`、`lib/removed.js`，沿用 `importScripts` 模式（MV3 SW 非 module），拆完跑全量测试兜底
+- [x] **background.js 880 行单文件** ✅ 已完成 — 拆分为 `plugin/lib/` 六个模块（config / rpc / removed / hf / intercept / context-menu），background.js 瘦身为入口（importScripts + 事件监听 + 初始化）。MV3 SW 共享全局作用域，顶层函数/const 跨文件可见；eslint 以 globals 声明 SW 共享符号（no-redeclare off），与 DeepPage content script 模式一致。39 个 E2E 全绿兜底
 
 ## 🟡 P1 重要
 

@@ -15,7 +15,6 @@
 - **RPC 密钥支持** — 支持 `--rpc-secret` 认证，连接有密码保护的 aria2
 - **Cookie/UA 透传** — 自动携带浏览器 Cookie 和 User-Agent，登录态下载无压力
 - **可配文件类型** — 自定义 Content Script 拦截的文件扩展名列表
-- **连接测试** — 设置页一键测试 aria2 RPC 连接是否正常
 
 ## 工作原理
 
@@ -116,10 +115,17 @@ aria2c --conf-path=/path/to/aria2.conf
 aria2-bridge/
 ├── plugin/                   # 扩展目录 — Chrome 加载此文件夹
 │   ├── manifest.json         # 扩展清单 (Manifest V3)
-│   ├── background.js         # Service Worker — RPC 通信、下载拦截、右键菜单
+│   ├── background.js         # Service Worker 入口 — 事件监听、初始化
+│   ├── lib/                  # SW 模块（importScripts 加载）
+│   │   ├── config.js         # 配置加载与 Badge 状态
+│   │   ├── rpc.js            # aria2 JSON-RPC 通信、文件名提取
+│   │   ├── removed.js        # 去重与已删除任务记忆
+│   │   ├── hf.js             # Hugging Face 一键下载
+│   │   ├── intercept.js      # 下载拦截（onCreated 兜底）
+│   │   └── context-menu.js   # 右键菜单与 AriaNg 入口
 │   ├── content.js            # Content Script — 页面点击拦截、HF 模型 ID 提取
 │   ├── options.html          # 设置页
-│   ├── options.js            # 设置页逻辑（含连接测试）
+│   ├── options.js            # 设置页逻辑
 │   ├── _locales/             # 多语言资源
 │   ├── icons/                # 图标 (16/48/128)
 │   └── aria-ng/              # AriaNg 管理面板（构建产物）

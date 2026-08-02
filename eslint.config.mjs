@@ -18,9 +18,10 @@ export default [
   eslintJs.configs.recommended,
   eslintConfigPrettier,
   {
-    // 扩展全局脚本：background.js（SW，importScripts 加载 i18n.js）、
-    // content.js（content script）、options.js（options.html 普通 script）、js/i18n.js
-    files: ["plugin/*.js", "plugin/js/*.js"],
+    // 扩展全局脚本：background.js（SW 入口，importScripts 加载）、
+    // content.js（content script）、options.js（options.html 普通 script）、
+    // js/i18n.js、lib/*.js（SW 模块，共享全局作用域）
+    files: ["plugin/*.js", "plugin/js/*.js", "plugin/lib/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",
@@ -44,6 +45,47 @@ export default [
         requestAnimationFrame: "readonly",
         // 项目内部全局（i18n.js 导出，被其他文件共享引用）
         Aria2I18n: "readonly",
+        // ---- SW 模块（lib/*.js + background.js）共享的顶层符号 ----
+        // 定义在哪个文件见 lib/ 头部注释；no-redeclare off 允许 globals 与本地声明重叠
+        config: "writable", // lib/config.js（loadConfig / storage.onChanged 赋值）
+        DEFAULT_CONFIG: "readonly",
+        loadConfig: "readonly",
+        updateBadge: "readonly",
+        aria2Rpc: "readonly",
+        getCookieString: "readonly",
+        buildHeaders: "readonly",
+        aria2AddUri: "readonly",
+        shouldBypass: "readonly",
+        MIME_EXT_MAP: "readonly",
+        guessExtFromMime: "readonly",
+        extractFilename: "readonly",
+        showNotification: "readonly",
+        DEDUPE_WINDOW_MS: "readonly",
+        recentForwards: "readonly",
+        isRecentlyForwarded: "readonly",
+        markForwarded: "readonly",
+        REMOVED_TTL_MS: "readonly",
+        removedUrls: "readonly",
+        loadRemovedUrls: "readonly",
+        persistRemovedUrls: "readonly",
+        isRemovedUrl: "readonly",
+        markRemoved: "readonly",
+        forgetRemoved: "readonly",
+        isRemovedInAria2: "readonly",
+        syncRemovedTasks: "readonly",
+        HF_SKIP_PATTERNS: "readonly",
+        shouldSkipHfFile: "readonly",
+        fetchHfFileList: "readonly",
+        isSelfRedirect: "writable", // lib/intercept.js
+        fetchDownloadHeadersFromTab: "readonly",
+        processDownload: "readonly",
+        MENU_ID_SEND: "readonly",
+        MENU_ID_OPEN: "readonly",
+        MENU_ID_HF_DOWNLOAD: "readonly",
+        buildAriaNgUrl: "readonly",
+        updateContextMenus: "readonly",
+        flashBadge: "readonly", // background.js（intercept/context-menu 调用）
+        _i18nReady: "readonly", // background.js（context-menu onInstalled 引用）
       },
     },
     rules: {

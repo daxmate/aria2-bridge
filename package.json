@@ -10,8 +10,8 @@
     "check:i18n": "node scripts/check-i18n.mjs",
     "lint": "eslint plugin/ tests/ scripts/ playwright.config.js",
     "lint:fix": "eslint plugin/ tests/ scripts/ playwright.config.js --fix",
-    "format": "prettier --write \"plugin/*.js\" \"plugin/js/*.js\" \"tests/*.mjs\" \"tests/*.js\" \"scripts/*.mjs\" \"playwright.config.js\"",
-    "format:check": "prettier --check \"plugin/*.js\" \"plugin/js/*.js\" \"tests/*.mjs\" \"tests/*.js\" \"scripts/*.mjs\" \"playwright.config.js\""
+    "format": "prettier --write \"plugin/*.js\" \"plugin/js/*.js\" \"plugin/lib/*.js\" \"tests/*.mjs\" \"tests/*.js\" \"scripts/*.mjs\" \"playwright.config.js\"",
+    "format:check": "prettier --check \"plugin/*.js\" \"plugin/js/*.js\" \"plugin/lib/*.js\" \"tests/*.mjs\" \"tests/*.js\" \"scripts/*.mjs\" \"playwright.config.js\""
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
