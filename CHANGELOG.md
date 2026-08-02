@@ -3,7 +3,7 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [Unreleased]
+## [1.5.1] - 2026-08-02
 
 ### 🔧 重构
 
@@ -92,3 +92,4 @@
 [1.4.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.4.0
 [1.4.1]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.4.1
 [1.5.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.5.0
+[1.5.1]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.5.1
