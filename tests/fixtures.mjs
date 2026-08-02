@@ -109,7 +109,10 @@ export const test = base.extend({
                 rpcSecret: "",
                 enabled: true,
                 bypassDomains: [],
-                locale: "auto",
+                // 固定 zh_CN：Aria2I18n 在 locale 非 auto 时会直接加载
+                // _locales/zh_CN/messages.json（不依赖浏览器 UI 语言的 chrome.i18n），
+                // 保证 toast/菜单文案在 CI 与本地一致
+                locale: "zh_CN",
                 // 注意：不默认写入 downloadExts — 留空会让 content script
                 // 读到空数组而完全不拦截。需要自定义后缀的用例通过 extra 传入。
                 ...extra,
