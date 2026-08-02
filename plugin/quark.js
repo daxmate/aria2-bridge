@@ -175,6 +175,23 @@ async function getQuarkShareFileList(pwdId, stoken, dirFid = "0") {
 }
 
 // ========================================
+// 分享页：读取用户勾选的文件（Ant Design Table）
+// ========================================
+// 真实分享页文件列表是 ant-table：勾选行有 class "ant-table-row-selected"，
+// data-row-key 即文件 fid。分享页文件列表不在 React fiber 里，
+// 但勾选状态在 DOM 上可直接读。
+
+function getSelectedQuarkShareFids() {
+  const rows = document.querySelectorAll("tr.ant-table-row-selected");
+  const fids = [];
+  for (const row of rows) {
+    const fid = row.getAttribute("data-row-key");
+    if (fid) fids.push(fid);
+  }
+  return fids;
+}
+
+// ========================================
 // 模块 C: 请求直链
 // ========================================
 
@@ -212,17 +229,26 @@ window.addEventListener("message", async function (event) {
       let data;
 
       if (isQuarkSharePage()) {
-        // ---- 分享页：下载当前目录全部文件（不走 fiber，走 API）----
+        // ---- 分享页：下载用户勾选的文件（ant-table 勾选行）----
         const shareParams = getQuarkShareParams();
         if (!shareParams) {
           window.postMessage({ type: "QUARK_ERROR", message: "无法识别分享链接" }, "*");
           return;
         }
         const stoken = await getQuarkShareToken(shareParams.pwdId, shareParams.passcode);
+        // 当前目录完整列表（拿 fid → share_fid_token 映射）
         const list = await getQuarkShareFileList(shareParams.pwdId, stoken, shareParams.dirFid);
-        files = list.filter((f) => f.file !== false); // 只要文件，跳过文件夹
+        // DOM 读勾选的 fid（ant-table 勾选行）
+        const selectedFids = getSelectedQuarkShareFids();
+        if (selectedFids.length === 0) {
+          window.postMessage({ type: "QUARK_ERROR", message: "no-selection" }, "*");
+          return;
+        }
+        // 匹配勾选文件（含 share_fid_token）
+        const selectedSet = new Set(selectedFids);
+        files = list.filter((f) => f.file !== false && selectedSet.has(f.fid));
         if (files.length === 0) {
-          window.postMessage({ type: "QUARK_ERROR", message: "当前目录没有可下载的文件" }, "*");
+          window.postMessage({ type: "QUARK_ERROR", message: "勾选的文件不在当前目录列表中" }, "*");
           return;
         }
         data = await getQuarkDownloadLinks(

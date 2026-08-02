@@ -66,7 +66,7 @@ function quarkPageHtml(noSelect) {
       { fid: "fid-3", file_name: "photo.jpg", size: 1000 }
     ];
     // 分享页场景：文件带 share_fid_token（pathname 以 /s/ 开头）
-    if (/^\\/s\\//.test(location.pathname)) {
+    if (location.pathname.startsWith("/s/")) {
       fileList.forEach((f) => { f.share_fid_token = "share-token-" + f.fid; f.pdir_fid = "0"; });
     }
     const selectedRowKeys = ${selected};
@@ -80,6 +80,16 @@ function quarkPageHtml(noSelect) {
     };
     const el = document.getElementById("file-list");
     el["__reactFiber$mock"] = fiber;
+    // 分享页场景：模拟 ant-table 勾选行（quark.js 从 DOM 读选中 fid）
+    if (location.pathname.startsWith("/s/")) {
+      const table = document.createElement("table");
+      table.innerHTML =
+        '<tr class="ant-table-row ant-table-row-selected" data-row-key="fid-1">' +
+        '<td class="filename">report.pdf</td></tr>' +
+        '<tr class="ant-table-row" data-row-key="fid-2">' +
+        '<td class="filename">data.zip</td></tr>';
+      el.appendChild(table);
+    }
   </script>
 </body>
 </html>`;

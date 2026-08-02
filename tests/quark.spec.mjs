@@ -198,27 +198,20 @@ test.describe("夸克网盘下载", () => {
     expect(rule.condition.resourceTypes).toContain("xmlhttprequest");
   });
 
-  test("分享页（/s/xxx）→ 下载当前目录全部文件 → 推送到 aria2", async ({
-    page,
-    mock,
-    setupConfig,
-  }) => {
+  test("分享页（/s/xxx）→ 只下载勾选的文件 → 推送到 aria2", async ({ page, mock, setupConfig }) => {
     await setupConfig();
     await mockQuarkToken(page);
     await mockQuarkApi(page);
     await openQuarkPage(page, false, true); // 分享页路径 /s/share123
 
-    // 分享页不依赖勾选：直接下载当前目录全部文件
+    // 分享页：只下载勾选的文件（mock 里 fid-1 勾选、fid-2 未勾选）
     await page.evaluate(() => window.postMessage({ type: "FETCH_QUARK_LINKS" }, "*"));
 
-    // 分享页走 API 链路：token → detail(当前目录) → download → 推送到 aria2
-    await expect.poll(async () => (await mock.addUris()).length).toBe(2);
+    // 只推送勾选的 fid-1（report.pdf），不推送未勾选的 fid-2
+    await expect.poll(async () => (await mock.addUris()).length).toBe(1);
     const adds = await mock.addUris();
     expect(adds[0].params[0][0]).toContain("mock-cdn.quark.cn");
-    // 当前目录文件（fid-1 → report.pdf, fid-2 → data.zip）作为 out
-    const outs = adds.map((a) => a.params[1]?.out);
-    expect(outs).toContain("report.pdf");
-    expect(outs).toContain("data.zip");
+    expect(adds[0].params[1].out).toBe("report.pdf");
 
     // 绿色 Toast（成功）
     await expect.poll(() => toastBackground(page)).toContain("232, 245, 233");
@@ -237,10 +230,10 @@ test.describe("夸克网盘下载", () => {
     expect((await mock.addUris()).length).toBe(0);
   });
 
-  test("分享页当前目录无文件 → 橙色 Toast，不推送", async ({ page, mock, setupConfig }) => {
+  test("分享页未勾选任何文件 → 橙色 Toast，不推送", async ({ page, mock, setupConfig }) => {
     await setupConfig();
     await mockQuarkToken(page);
-    // detail 返回空列表（当前目录只有文件夹或为空）
+    // 覆盖 sort 让勾选行为空：detail 返回空列表（无匹配文件）
     await page.route(`${QUARK_SHARE_DETAIL_API}*`, (route) => {
       route.fulfill({
         status: 200,

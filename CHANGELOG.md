@@ -8,12 +8,13 @@
 ### ✨ 新功能
 
 - **夸克网盘一键下载** — 在夸克网盘（pan.quark.cn）页面勾选文件后，右键 →「📥 发送选中文件到 Aria2」，自动提取选中文件的下载直链并批量推送到 aria2
-  - 注入脚本（`plugin/quark.js`）穿透页面 React fiber，从文件列表读取选中项（`list + selectedRowKeys`），无需登录态以外的任何配置
-  - 直链通过夸克官方接口 `pan.quark.cn/api/v2/file/download` 获取（`credentials: include` 携带页面 Cookie）
+  - **我的网盘**（`/list`）：注入脚本穿透 React fiber，从文件列表读取勾选项（`list + selectedRowKeys`）→ `file/download` 取直链
+  - **分享页**（`/s/xxx`）：分享页文件列表不在 React fiber 中（实测），改为读 Ant Design Table 勾选行（`tr.ant-table-row-selected` 的 `data-row-key` = fid）→ 走分享 API 链路：`sharepage/token` 换 stoken → `sharepage/detail` 拿文件列表（fid → share_fid_token 映射）→ `file/download` 带 `pwd_id + stoken + fids_token` 取直链（**无需转存**）
+  - 直链域名 `drive-pc.quark.cn`（PC 客户端 API）；DNR 规则把请求 UA 改写为夸克客户端 UA（fetch 无法设置 UA）
   - 文件名用接口返回的 `file_name` 作为 aria2 `out` 参数（直链 URL 带签名参数无后缀，避免文件名错乱）
-  - 未勾选文件 / 接口报错（含未登录 31001）/ 空结果 → 橙色 Toast 提示，不静默
+  - 未勾选文件 / 接口报错（含未登录 31001）/ 勾选不在列表中 → 橙色 Toast 提示，不静默
   - 批量发送逐条反馈，全部返回后统一提示成功/部分失败数量
-  - 新增 6 个 E2E 用例（提取直链推送 / 未勾选 / 业务错误码 / 网络层失败 / HTTP 500 / 空数据），共 58 个测试全绿
+  - 新增 10 个 E2E 用例（我的网盘 7 + 分享页 3：勾选下载 / token 失败 / 未勾选），共 62 个测试全绿
 
 ## [1.6.0] - 2026-08-02
 
