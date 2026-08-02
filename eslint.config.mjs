@@ -137,6 +137,7 @@ export default [
         shouldBypass: "readonly",
         shouldSkipHfFile: "readonly",
         fetchHfFileList: "readonly",
+        loadConfig: "readonly",
       },
     },
     rules: {

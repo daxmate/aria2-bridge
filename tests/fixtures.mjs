@@ -122,7 +122,9 @@ export const test = base.extend({
           }),
         { base: MOCK_BASE, extra }
       );
-      // storage.onChanged 同步 config 是异步的，给 background 一个 tick
+      // 强制 SW 内存 config 与 storage 同步：loadConfig 是异步的，
+      // storage.onChanged 可能晚于用例读取 config（SW 启动竞态）
+      await sw.evaluate(() => loadConfig());
       await new Promise((r) => setTimeout(r, 100));
     };
     await use(apply);

@@ -5,6 +5,9 @@
 // at the navigation level, preventing blank-page
 // navigation before aria2 gets the URL.
 
+// 读取用户语言偏好（toast 文案跟随设置而非浏览器 UI 语言）
+Aria2I18n.init();
+
 // ========================================
 // Toast feedback helper
 // ========================================
