@@ -78,7 +78,12 @@ const server = http.createServer((req, res) => {
   if (req.method === "GET" && req.url.startsWith("/files/")) {
     const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
     const ext = url.pathname.split(".").pop() || "bin";
-    const mime = ext === "zip" ? "application/zip" : ext === "pdf" ? "application/pdf" : "application/octet-stream";
+    const mime =
+      ext === "zip"
+        ? "application/zip"
+        : ext === "pdf"
+          ? "application/pdf"
+          : "application/octet-stream";
     res.writeHead(200, {
       "Content-Type": mime,
       "Content-Length": "256",
@@ -93,7 +98,8 @@ const server = http.createServer((req, res) => {
   if ((req.method === "GET" || req.method === "HEAD") && req.url === "/spa-download") {
     res.writeHead(200, {
       "Content-Type": "application/pdf",
-      "Content-Disposition": "attachment; filename*=UTF-8''%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6.pdf",
+      "Content-Disposition":
+        "attachment; filename*=UTF-8''%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6.pdf",
       "Content-Length": "10485760",
     });
     if (req.method === "HEAD") {
@@ -161,8 +167,6 @@ const server = http.createServer((req, res) => {
         case "aria2.getVersion":
           result = { version: "1.37.0", enabledFeatures: ["async-dns"] };
           break;
-        default:
-          result = null;
       }
       sendJson(res, 200, { jsonrpc: "2.0", id: parsed.id, result });
     });

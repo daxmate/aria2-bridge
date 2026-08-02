@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Lint + Format + E2E
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Build AriaNg from submodule
+        # plugin/aria-ng/ 是构建产物（gitignore），测试需要它 → 先构建
+        run: |
+          cd submodules/AriaNg
+          npm install
+          npm run build
+          cd ../..
+          rm -rf plugin/aria-ng
+          cp -r submodules/AriaNg/dist plugin/aria-ng
+          cp scripts/aria-ng-fix.js plugin/aria-ng/js/aria-ng-fix.js
+          # Inject fix script into index.html
+          MAIN_JS=$(ls plugin/aria-ng/js/aria-ng-*.min.js 2>/dev/null | head -1)
+          if [ -n "$MAIN_JS" ]; then
+            MAIN_FILE=$(basename "$MAIN_JS")
+            sed -i "s|$MAIN_FILE\"></script>|&<script src=\"js/aria-ng-fix.js\"></script>|" plugin/aria-ng/index.html
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Version consistency check
+        # manifest.json 与 package.json 版本必须同步
+        run: |
+          MANIFEST_VERSION=$(node -p "require('./plugin/manifest.json').version")
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$MANIFEST_VERSION" != "$PKG_VERSION" ]; then
+            echo "❌ manifest version $MANIFEST_VERSION does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+          echo "✅ Version match: $MANIFEST_VERSION"
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run tests
+        # pretest 自动执行 check:i18n
+        run: npm test

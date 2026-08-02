@@ -3,21 +3,54 @@
 // ========================================
 
 const DEFAULT_CONFIG = {
-  rpcUrl: 'http://localhost:6800/jsonrpc',
-  rpcSecret: '',
+  rpcUrl: "http://localhost:6800/jsonrpc",
+  rpcSecret: "",
   enabled: true,
   bypassDomains: [],
-  locale: 'auto',
+  locale: "auto",
   downloadExts: [
-    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
-    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-    '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
-    '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
-    '.torrent', '.nzb',
-    '.csv', '.json', '.xml',
-    '.psd', '.ai', '.skp',
-    '.epub', '.mobi', '.cbr'
-  ]
+    ".zip",
+    ".rar",
+    ".7z",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".zst",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".mp3",
+    ".mp4",
+    ".avi",
+    ".mkv",
+    ".mov",
+    ".flv",
+    ".wmv",
+    ".webm",
+    ".iso",
+    ".dmg",
+    ".exe",
+    ".msi",
+    ".apk",
+    ".deb",
+    ".rpm",
+    ".torrent",
+    ".nzb",
+    ".csv",
+    ".json",
+    ".xml",
+    ".psd",
+    ".ai",
+    ".skp",
+    ".epub",
+    ".mobi",
+    ".cbr",
+  ],
 };
 
 const $ = (id) => document.getElementById(id);
@@ -28,53 +61,59 @@ const t = function (key, subs) {
 // --- i18n ---
 
 function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(function (el) {
-    var key = el.getAttribute('data-i18n');
-    var msg = t(key);
+  document.querySelectorAll("[data-i18n]").forEach(function (el) {
+    const key = el.getAttribute("data-i18n");
+    const msg = t(key);
     if (msg) el.textContent = msg;
   });
 
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
-    var key = el.getAttribute('data-i18n-placeholder');
-    var msg = t(key);
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+    const key = el.getAttribute("data-i18n-placeholder");
+    const msg = t(key);
     if (msg) el.placeholder = msg;
   });
 
-  var titleEl = document.querySelector('title');
-  var titleKey = titleEl && titleEl.getAttribute('data-i18n');
+  const titleEl = document.querySelector("title");
+  const titleKey = titleEl && titleEl.getAttribute("data-i18n");
   if (titleKey) {
-    var titleMsg = t(titleKey);
+    const titleMsg = t(titleKey);
     if (titleMsg) document.title = titleMsg;
   }
 }
 
 // --- Load ---
 async function loadSettings() {
-  var data = await chrome.storage.sync.get(DEFAULT_CONFIG);
-  $('rpcUrl').value = data.rpcUrl || '';
-  $('rpcSecret').value = data.rpcSecret || '';
-  $('bypassDomains').value = (data.bypassDomains || []).join('\n');
-  $('downloadExts').value = (data.downloadExts || []).join('\n');
-  $('enabled').checked = data.enabled;
-  $('localeSelect').value = data.locale || 'auto';
+  const data = await chrome.storage.sync.get(DEFAULT_CONFIG);
+  $("rpcUrl").value = data.rpcUrl || "";
+  $("rpcSecret").value = data.rpcSecret || "";
+  $("bypassDomains").value = (data.bypassDomains || []).join("\n");
+  $("downloadExts").value = (data.downloadExts || []).join("\n");
+  $("enabled").checked = data.enabled;
+  $("localeSelect").value = data.locale || "auto";
 }
 
 // --- Save ---
 async function saveSettings() {
-  var updates = {
-    rpcUrl: $('rpcUrl').value.trim() || 'http://localhost:6800/jsonrpc',
-    rpcSecret: $('rpcSecret').value,
-    bypassDomains: $('bypassDomains').value
-      .split('\n')
-      .map(function (s) { return s.trim(); })
+  const updates = {
+    rpcUrl: $("rpcUrl").value.trim() || "http://localhost:6800/jsonrpc",
+    rpcSecret: $("rpcSecret").value,
+    bypassDomains: $("bypassDomains")
+      .value.split("\n")
+      .map(function (s) {
+        return s.trim();
+      })
       .filter(Boolean),
-    downloadExts: $('downloadExts').value
-      .split('\n')
-      .map(function (s) { return s.trim().toLowerCase(); })
+    downloadExts: $("downloadExts")
+      .value.split("\n")
+      .map(function (s) {
+        return s.trim().toLowerCase();
+      })
       .filter(Boolean)
-      .map(function (s) { return s.startsWith('.') ? s : '.' + s; }),
-    enabled: $('enabled').checked,
-    locale: $('localeSelect').value
+      .map(function (s) {
+        return s.startsWith(".") ? s : "." + s;
+      }),
+    enabled: $("enabled").checked,
+    locale: $("localeSelect").value,
   };
 
   await chrome.storage.sync.set(updates);
@@ -82,25 +121,27 @@ async function saveSettings() {
 }
 
 // --- Init ---
-document.addEventListener('DOMContentLoaded', async function () {
+document.addEventListener("DOMContentLoaded", async function () {
   await Aria2I18n.init();
   applyI18n();
   await loadSettings();
 
   // 语言变更 → 即时保存 + 热生效
-  $('localeSelect').addEventListener('change', async function () {
-    var updates = await saveSettings();
+  $("localeSelect").addEventListener("change", async function () {
+    await saveSettings();
     await Aria2I18n.reload();
     applyI18n();
     try {
-      await chrome.runtime.sendMessage({ action: 'updateLocale' });
-    } catch (e) { /* background not ready, ignore */ }
+      await chrome.runtime.sendMessage({ action: "updateLocale" });
+    } catch (e) {
+      /* background not ready, ignore */
+    }
   });
 
   // 自动保存其余字段
-  $('rpcUrl').addEventListener('change', saveSettings);
-  $('rpcSecret').addEventListener('change', saveSettings);
-  $('bypassDomains').addEventListener('change', saveSettings);
-  $('downloadExts').addEventListener('change', saveSettings);
-  $('enabled').addEventListener('change', saveSettings);
+  $("rpcUrl").addEventListener("change", saveSettings);
+  $("rpcSecret").addEventListener("change", saveSettings);
+  $("bypassDomains").addEventListener("change", saveSettings);
+  $("downloadExts").addEventListener("change", saveSettings);
+  $("enabled").addEventListener("change", saveSettings);
 });

@@ -38,9 +38,7 @@ test.describe("Hugging Face 下载", () => {
     expect(model.size).toBe(123456);
 
     const spaced = files.find((f) => f.path === "sub dir/weights.onnx");
-    expect(spaced.url).toBe(
-      "https://huggingface.co/org/model/resolve/main/sub%20dir/weights.onnx"
-    );
+    expect(spaced.url).toBe("https://huggingface.co/org/model/resolve/main/sub%20dir/weights.onnx");
 
     // 元数据被过滤
     expect(files.some((f) => f.path === "README.md")).toBe(false);

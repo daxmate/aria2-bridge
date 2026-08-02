@@ -8,9 +8,8 @@ test.describe("右键菜单", () => {
       sw.evaluate(
         (menuId) =>
           new Promise((resolve) => {
-            chrome.contextMenus.create(
-              { id: menuId, title: "probe", contexts: ["link"] },
-              () => resolve(chrome.runtime.lastError ? chrome.runtime.lastError.message : null)
+            chrome.contextMenus.create({ id: menuId, title: "probe", contexts: ["link"] }, () =>
+              resolve(chrome.runtime.lastError ? chrome.runtime.lastError.message : null)
             );
           }),
         id

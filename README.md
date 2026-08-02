@@ -189,6 +189,15 @@ npx playwright install chromium   # 首次安装浏览器（如未装过）
 npm test             # 一键跑全部测试（pretest 自动做 i18n 校验）
 ```
 
+代码质量工具（与 DeepPage 一致）：
+
+```bash
+npm run lint        # ESLint 检查（flat config，分区：扩展全局脚本 / CJS / Node ESM）
+npm run lint:fix    # ESLint 自动修复
+npm run format      # Prettier 格式化
+npm run format:check # Prettier 检查
+```
+
 测试不依赖真实 aria2 —— `tests/mock-server.js` 模拟 aria2 JSON-RPC（端口 18951），可配置失败模式（RPC error / HTTP 500 / 挂起），并记录全部 RPC 请求供断言。
 
 ### 覆盖的功能点

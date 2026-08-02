@@ -5,11 +5,11 @@
  * 会被 background.js (importScripts) / options.js / content.js 加载使用。
  */
 
-;(function () {
+(function () {
   const I18n = {
     _messages: null,
     _ready: false,
-    _pending: null
+    _pending: null,
   };
 
   /**
@@ -19,8 +19,8 @@
     if (I18n._pending) return I18n._pending;
     try {
       I18n._pending = (async () => {
-        const data = await chrome.storage.sync.get('locale');
-        const locale = data.locale || '';
+        const data = await chrome.storage.sync.get("locale");
+        const locale = data.locale || "";
         await I18n._load(locale);
       })();
       await I18n._pending;
@@ -32,15 +32,15 @@
   I18n._load = async function (locale) {
     I18n._ready = false;
     // 不加载、自动模式、或与 Chrome 语言相同时，直接使用 chrome.i18n
-    if (!locale || locale === 'auto') {
+    if (!locale || locale === "auto") {
       I18n._messages = null;
       I18n._ready = true;
       return;
     }
 
     try {
-      const resp = await fetch(chrome.runtime.getURL('_locales/' + locale + '/messages.json'));
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const resp = await fetch(chrome.runtime.getURL("_locales/" + locale + "/messages.json"));
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
       I18n._messages = await resp.json();
       I18n._ready = true;
     } catch (e) {
@@ -59,7 +59,7 @@
   I18n.t = function (key, subs) {
     // 已加载自定义 locale
     if (I18n._messages && I18n._messages[key]) {
-      let msg = I18n._messages[key].message || '';
+      let msg = I18n._messages[key].message || "";
       const placeholders = I18n._messages[key].placeholders;
 
       if (placeholders && subs && subs.length > 0) {
@@ -67,26 +67,26 @@
         msg = msg.replace(/\$([a-zA-Z]\w*)\$/g, function (_, name) {
           const ph = placeholders[name];
           if (ph && ph.content) {
-            var m = ph.content.match(/^\$(\d+)$/);
+            const m = ph.content.match(/^\$(\d+)$/);
             if (m) {
-              var idx = parseInt(m[1], 10) - 1;
-              return idx < subs.length ? subs[idx] : '';
+              const idx = parseInt(m[1], 10) - 1;
+              return idx < subs.length ? subs[idx] : "";
             }
           }
-          return '';
+          return "";
         });
       } else if (subs && subs.length > 0) {
         // 无 placeholders 但有替换参数时直接替换 $1$
         msg = msg.replace(/\$(\d+)\$/g, function (_, n) {
-          var idx = parseInt(n, 10) - 1;
-          return idx < subs.length ? subs[idx] : '';
+          const idx = parseInt(n, 10) - 1;
+          return idx < subs.length ? subs[idx] : "";
         });
       }
       return msg;
     }
 
     // 回退到 Chrome 内置 i18n
-    if (typeof chrome.i18n !== 'undefined' && chrome.i18n.getMessage) {
+    if (typeof chrome.i18n !== "undefined" && chrome.i18n.getMessage) {
       return chrome.i18n.getMessage(key, subs) || key;
     }
 

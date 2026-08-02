@@ -9,9 +9,7 @@ async function clickZip(page) {
 }
 
 async function addUriRequests(mock) {
-  await expect
-    .poll(async () => (await mock.addUris()).length)
-    .toBeGreaterThanOrEqual(1);
+  await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
   return mock.addUris();
 }
 
@@ -52,9 +50,7 @@ test.describe("RPC 转发", () => {
 
   test("透传 User-Agent / Referer / Cookie 头部", async ({ page, mock, context }) => {
     // 给 mock 域种一个 cookie（模拟登录态下载）
-    await context.addCookies([
-      { name: "sid", value: "abc123", url: PAGE },
-    ]);
+    await context.addCookies([{ name: "sid", value: "abc123", url: PAGE }]);
     await page.goto(PAGE, { waitUntil: "domcontentloaded" });
     await clickZip(page);
 

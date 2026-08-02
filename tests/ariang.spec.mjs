@@ -20,9 +20,7 @@ test.describe("AriaNg 管理面板", () => {
     const url = await sw.evaluate(() => buildAriaNgUrl());
 
     // MySecret → base64 "TXlTZWNyZXQ=" → URL-safe 去 padding "TXlTZWNyZXQ"
-    expect(url).toContain(
-      "#!/settings/rpc/set/http/localhost/6800/jsonrpc/TXlTZWNyZXQ"
-    );
+    expect(url).toContain("#!/settings/rpc/set/http/localhost/6800/jsonrpc/TXlTZWNyZXQ");
   });
 
   test("带特殊字符 secret → base64url 转义（+/ 替换、去 =）", async ({ sw, setupConfig }) => {
@@ -35,13 +33,10 @@ test.describe("AriaNg 管理面板", () => {
     // 不应有裸 +、/、= 残留
     const decoded = decodeURIComponent(url);
     expect(decoded).not.toContain("+");
-    expect(decoded).not.toMatch(/YStiL2M9PQ[^\/]*=/);
+    expect(decoded).not.toMatch(/YStiL2M9PQ[^/]*=/);
   });
 
-  test("AriaNg 页面可打开并正常渲染（aria-ng-fix.js 生效）", async ({
-    page,
-    extensionId,
-  }) => {
+  test("AriaNg 页面可打开并正常渲染（aria-ng-fix.js 生效）", async ({ page, extensionId }) => {
     await page.goto(`chrome-extension://${extensionId}/aria-ng/index.html`, {
       waitUntil: "domcontentloaded",
     });
@@ -51,8 +46,8 @@ test.describe("AriaNg 管理面板", () => {
     await expect(page.locator('a[href^="#!/downloading"]')).toBeVisible();
 
     // aria-ng-fix.js：ng-href 不应被 $sce 标记为 unsafe:
-    const unsafeLinks = await page.evaluate(() =>
-      document.querySelectorAll('a[href^="unsafe:"], link[href^="unsafe:"]').length
+    const unsafeLinks = await page.evaluate(
+      () => document.querySelectorAll('a[href^="unsafe:"], link[href^="unsafe:"]').length
     );
     expect(unsafeLinks).toBe(0);
   });

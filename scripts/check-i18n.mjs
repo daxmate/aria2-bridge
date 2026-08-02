@@ -48,9 +48,7 @@ for (const locale of LOCALES) {
 // 3. 占位符引用完整性：message 中的 $name$ 必须在 placeholders 中声明
 for (const locale of LOCALES) {
   for (const [key, entry] of Object.entries(messages[locale])) {
-    const phRefs = [...(entry.message || "").matchAll(/\$([a-zA-Z]\w*)\$/g)].map(
-      (m) => m[1]
-    );
+    const phRefs = [...(entry.message || "").matchAll(/\$([a-zA-Z]\w*)\$/g)].map((m) => m[1]);
     const declared = new Set(Object.keys(entry.placeholders || {}));
     for (const name of phRefs) {
       const content = entry.placeholders?.[name]?.content;
@@ -62,9 +60,7 @@ for (const locale of LOCALES) {
 
 // 4. 各语言占位符数量一致（同一 key 的替换参数个数应相同）
 for (const key of base) {
-  const counts = LOCALES.map(
-    (l) => (messages[l][key].message.match(/\$\d+\$/g) || []).length
-  );
+  const counts = LOCALES.map((l) => (messages[l][key].message.match(/\$\d+\$/g) || []).length);
   if (new Set(counts).size > 1) {
     fail(`${key} 各语言占位符数量不一致: ${LOCALES.map((l, i) => `${l}=${counts[i]}`).join(", ")}`);
   }

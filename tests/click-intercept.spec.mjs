@@ -18,9 +18,7 @@ test.describe("点击拦截", () => {
     await expect(toast).toContainText("已发送");
 
     // mock aria2 收到 addUri，URL 正确
-    await expect
-      .poll(async () => (await mock.addUris()).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     const add = (await mock.addUris())[0];
     expect(add.params[0][0]).toBe(`${PAGE}files/pack.zip`);
   });
@@ -54,9 +52,7 @@ test.describe("点击拦截", () => {
     expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
 
     // 浏览器发起下载 → onCreated 兜底转发（带 Content-Disposition 文件名）
-    await expect
-      .poll(async () => (await mock.addUris()).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     const add = (await mock.addUris())[0];
     const out = add.params[1] && add.params[1].out;
     expect(out).toBe("测试文件.pdf"); // filename*=UTF-8'' 解析
@@ -66,9 +62,7 @@ test.describe("点击拦截", () => {
     await page.click("#link-mid", { button: "middle" });
 
     await expect(page.locator("#__aria2_bridge_toast")).toBeVisible();
-    await expect
-      .poll(async () => (await mock.addUris()).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     const add = (await mock.addUris())[0];
     expect(add.params[0][0]).toBe(`${PAGE}files/mid.zip`);
   });
@@ -94,9 +88,7 @@ test.describe("点击拦截", () => {
     await page.click("#link-bin");
 
     await expect(page.locator("#__aria2_bridge_toast")).toBeVisible();
-    await expect
-      .poll(async () => (await mock.addUris()).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     const add = (await mock.addUris())[0];
     expect(add.params[0][0]).toBe(`${PAGE}hold.bin`);
   });
@@ -112,9 +104,7 @@ test.describe("点击拦截", () => {
     expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
 
     // 浏览器下载被 onCreated 兜底转发到 aria2（挂起下载保证 cancel 成功）
-    await expect
-      .poll(async () => (await mock.addUris()).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     expect((await mock.addUris())[0]).toBeTruthy();
   });
 

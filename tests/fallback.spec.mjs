@@ -27,11 +27,7 @@ test.describe("aria2 不可用 → 浏览器回退", () => {
     await page.goto(PAGE, { waitUntil: "domcontentloaded" });
   });
 
-  test("点击拦截路径：RPC 返回 error → 橙色 Toast + 浏览器原生下载", async ({
-    page,
-    sw,
-    mock,
-  }) => {
+  test("点击拦截路径：RPC 返回 error → 橙色 Toast + 浏览器原生下载", async ({ page, sw, mock }) => {
     await mock.config({ failMode: "error", errorMessage: "RPC secret mismatch" });
     await watchFallbackDownloads(sw);
 
@@ -45,9 +41,7 @@ test.describe("aria2 不可用 → 浏览器回退", () => {
     expect(bg).toContain("255, 243, 224"); // #fff3e0 橙色系
 
     // 浏览器原生下载被重新发起（同一 URL）
-    await expect
-      .poll(async () => (await fallbackDownloads(sw)).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await fallbackDownloads(sw)).length).toBeGreaterThanOrEqual(1);
     const calls = await fallbackDownloads(sw);
     expect(calls[0].url).toBe(ZIP_URL);
   });
@@ -59,18 +53,12 @@ test.describe("aria2 不可用 → 浏览器回退", () => {
     await page.click("#link-zip");
 
     await expect(page.locator("#__aria2_bridge_toast")).toContainText("回退");
-    await expect
-      .poll(async () => (await fallbackDownloads(sw)).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await fallbackDownloads(sw)).length).toBeGreaterThanOrEqual(1);
     const calls = await fallbackDownloads(sw);
     expect(calls[0].url).toBe(ZIP_URL);
   });
 
-  test("onCreated 兜底路径：aria2 失败 → 重新发起浏览器下载", async ({
-    page,
-    sw,
-    mock,
-  }) => {
+  test("onCreated 兜底路径：aria2 失败 → 重新发起浏览器下载", async ({ page, sw, mock }) => {
     await mock.config({ failMode: "error" });
     await watchFallbackDownloads(sw);
 
@@ -78,9 +66,7 @@ test.describe("aria2 不可用 → 浏览器回退", () => {
     await page.click("#link-bin");
 
     // 兜底转发失败后，扩展用 downloads.download 重新下载同一 URL
-    await expect
-      .poll(async () => (await fallbackDownloads(sw)).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await fallbackDownloads(sw)).length).toBeGreaterThanOrEqual(1);
     const calls = await fallbackDownloads(sw);
     expect(calls[0].url).toBe(`${PAGE}hold.bin`);
 

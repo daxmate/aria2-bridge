@@ -2,25 +2,58 @@
 // Aria2 Bridge — Service Worker
 // ========================================
 
-importScripts('js/i18n.js');
+importScripts("js/i18n.js");
 
-let _i18nReady = Aria2I18n.init();
+const _i18nReady = Aria2I18n.init();
 
 const DEFAULT_CONFIG = {
-  rpcUrl: 'http://localhost:6800/jsonrpc',
-  rpcSecret: '',
+  rpcUrl: "http://localhost:6800/jsonrpc",
+  rpcSecret: "",
   enabled: true,
   bypassDomains: [],
   downloadExts: [
-    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.zst',
-    '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-    '.mp3', '.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.webm',
-    '.iso', '.dmg', '.exe', '.msi', '.apk', '.deb', '.rpm',
-    '.torrent', '.nzb',
-    '.csv', '.json', '.xml',
-    '.psd', '.ai', '.skp',
-    '.epub', '.mobi', '.cbr'
-  ]
+    ".zip",
+    ".rar",
+    ".7z",
+    ".tar",
+    ".gz",
+    ".bz2",
+    ".xz",
+    ".zst",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".xls",
+    ".xlsx",
+    ".ppt",
+    ".pptx",
+    ".mp3",
+    ".mp4",
+    ".avi",
+    ".mkv",
+    ".mov",
+    ".flv",
+    ".wmv",
+    ".webm",
+    ".iso",
+    ".dmg",
+    ".exe",
+    ".msi",
+    ".apk",
+    ".deb",
+    ".rpm",
+    ".torrent",
+    ".nzb",
+    ".csv",
+    ".json",
+    ".xml",
+    ".psd",
+    ".ai",
+    ".skp",
+    ".epub",
+    ".mobi",
+    ".cbr",
+  ],
 };
 
 let config = {};
@@ -34,12 +67,6 @@ async function loadConfig() {
   updateBadge();
 }
 
-async function saveConfig(updates) {
-  await chrome.storage.sync.set(updates);
-  Object.assign(config, updates);
-  updateBadge();
-}
-
 // ========================================
 // Aria2 RPC
 // ========================================
@@ -49,21 +76,19 @@ async function saveConfig(updates) {
  * If rpcSecret is configured, prepends 'token:<secret>' as first param.
  */
 async function aria2Rpc(method, params) {
-  const effectiveParams = config.rpcSecret
-    ? ['token:' + config.rpcSecret, ...params]
-    : params;
+  const effectiveParams = config.rpcSecret ? ["token:" + config.rpcSecret, ...params] : params;
 
   const body = {
-    jsonrpc: '2.0',
+    jsonrpc: "2.0",
     id: `bridge_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     method,
-    params: effectiveParams
+    params: effectiveParams,
   };
 
   const response = await fetch(config.rpcUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -88,10 +113,10 @@ async function aria2Rpc(method, params) {
 async function getCookieString(url) {
   try {
     const cookies = await chrome.cookies.getAll({ url });
-    if (!cookies || cookies.length === 0) return '';
-    return cookies.map(c => `${c.name}=${c.value}`).join('; ');
+    if (!cookies || cookies.length === 0) return "";
+    return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
   } catch {
-    return '';
+    return "";
   }
 }
 
@@ -153,7 +178,7 @@ async function aria2AddUri(url, options = {}) {
     params.push(rpcOpts);
   }
 
-  return aria2Rpc('aria2.addUri', params);
+  return aria2Rpc("aria2.addUri", params);
 }
 
 // ========================================
@@ -163,8 +188,8 @@ async function aria2AddUri(url, options = {}) {
 function shouldBypass(url) {
   try {
     const u = new URL(url);
-    return config.bypassDomains.some(domain =>
-      u.hostname === domain || u.hostname.endsWith('.' + domain)
+    return config.bypassDomains.some(
+      (domain) => u.hostname === domain || u.hostname.endsWith("." + domain)
     );
   } catch {
     return true;
@@ -177,28 +202,28 @@ function shouldBypass(url) {
  * provide one in the URL or Content-Disposition header.
  */
 const MIME_EXT_MAP = {
-  'application/pdf': '.pdf',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
-  'application/msword': '.doc',
-  'application/vnd.ms-excel': '.xls',
-  'application/vnd.ms-powerpoint': '.ppt',
-  'application/zip': '.zip',
-  'application/x-rar-compressed': '.rar',
-  'application/x-7z-compressed': '.7z',
-  'application/gzip': '.gz',
-  'application/x-tar': '.tar',
-  'image/jpeg': '.jpg',
-  'image/png': '.png',
-  'image/gif': '.gif',
-  'image/webp': '.webp',
-  'image/svg+xml': '.svg',
-  'text/csv': '.csv',
-  'text/plain': '.txt',
-  'application/json': '.json',
-  'application/xml': '.xml',
-  'application/octet-stream': ''
+  "application/pdf": ".pdf",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx",
+  "application/msword": ".doc",
+  "application/vnd.ms-excel": ".xls",
+  "application/vnd.ms-powerpoint": ".ppt",
+  "application/zip": ".zip",
+  "application/x-rar-compressed": ".rar",
+  "application/x-7z-compressed": ".7z",
+  "application/gzip": ".gz",
+  "application/x-tar": ".tar",
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/svg+xml": ".svg",
+  "text/csv": ".csv",
+  "text/plain": ".txt",
+  "application/json": ".json",
+  "application/xml": ".xml",
+  "application/octet-stream": "",
 };
 
 /**
@@ -206,9 +231,9 @@ const MIME_EXT_MAP = {
  * Returns empty string if unknown.
  */
 function guessExtFromMime(mime) {
-  if (!mime) return '';
-  const key = mime.toLowerCase().split(';')[0].trim();
-  return MIME_EXT_MAP[key] || '';
+  if (!mime) return "";
+  const key = mime.toLowerCase().split(";")[0].trim();
+  return MIME_EXT_MAP[key] || "";
 }
 
 /**
@@ -224,7 +249,7 @@ function extractFilename(url, fallback, mime) {
   let name = null;
 
   if (fallback) {
-    const parts = fallback.replace(/\\/g, '/').split('/');
+    const parts = fallback.replace(/\\/g, "/").split("/");
     name = parts.pop();
     if (!name) name = null;
   }
@@ -232,13 +257,13 @@ function extractFilename(url, fallback, mime) {
   if (!name) {
     try {
       const path = new URL(url).pathname;
-      name = path.split('/').pop();
-      if (!name || !name.includes('.')) name = null;
+      name = path.split("/").pop();
+      if (!name || !name.includes(".")) name = null;
     } catch {}
   }
 
   // If we got a name but it has no extension, try appending one from MIME
-  if (name && !name.includes('.') && mime) {
+  if (name && !name.includes(".") && mime) {
     const ext = guessExtFromMime(mime);
     if (ext) name += ext;
   }
@@ -255,12 +280,12 @@ async function fetchDownloadHeadersFromTab(url, referrer) {
   try {
     const origin = new URL(url).origin;
     // 查找与 referrer 同源的标签页
-    const tabs = await chrome.tabs.query({ url: origin + '/*' });
+    const tabs = await chrome.tabs.query({ url: origin + "/*" });
     for (const tab of tabs) {
       try {
         const result = await chrome.tabs.sendMessage(tab.id, {
-          action: 'fetchDownloadHeaders',
-          url
+          action: "fetchDownloadHeaders",
+          url,
         });
         if (result && result.contentType) return result;
       } catch {
@@ -273,10 +298,10 @@ async function fetchDownloadHeadersFromTab(url, referrer) {
 
 function showNotification(title, message) {
   chrome.notifications.create({
-    type: 'basic',
-    iconUrl: 'icons/icon48.png',
+    type: "basic",
+    iconUrl: "icons/icon48.png",
     title,
-    message
+    message,
   });
 }
 
@@ -295,41 +320,40 @@ const HF_SKIP_PATTERNS = [
   /^CODE_OF_CONDUCT\.md$/,
   /^\.git\/.*/,
   /^\.huggingface$/,
-  /^model_cards\/.*/
+  /^model_cards\/.*/,
 ];
 
 function shouldSkipHfFile(path) {
-  return HF_SKIP_PATTERNS.some(p => p.test(path));
+  return HF_SKIP_PATTERNS.some((p) => p.test(path));
 }
 
 async function fetchHfFileList(modelId) {
   try {
     // modelId 如 "org/model"，API 路径需要保留 /
-    const resp = await fetch(
-      `https://huggingface.co/api/models/${modelId}/tree/main?recursive=1`,
-      { headers: { 'Accept': 'application/json' } }
-    );
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const resp = await fetch(`https://huggingface.co/api/models/${modelId}/tree/main?recursive=1`, {
+      headers: { Accept: "application/json" },
+    });
+    if (!resp.ok) throw new Error("HTTP " + resp.status);
     const items = await resp.json();
 
     const files = [];
     for (const item of items) {
-      if (item.type !== 'file') continue;
+      if (item.type !== "file") continue;
       if (shouldSkipHfFile(item.path)) continue;
 
-      const pathParts = item.path.split('/');
-      const encodedPath = pathParts.map(encodeURIComponent).join('/');
+      const pathParts = item.path.split("/");
+      const encodedPath = pathParts.map(encodeURIComponent).join("/");
 
       files.push({
         path: item.path,
         size: item.size,
-        url: `https://huggingface.co/${modelId}/resolve/main/${encodedPath}`
+        url: `https://huggingface.co/${modelId}/resolve/main/${encodedPath}`,
       });
     }
 
     return files;
   } catch (e) {
-    console.error('[Aria2 Bridge] HF file list error:', e);
+    console.error("[Aria2 Bridge] HF file list error:", e);
     return null;
   }
 }
@@ -383,25 +407,25 @@ const removedUrls = new Map(); // url -> timestamp
 
 async function loadRemovedUrls() {
   try {
-    const { removedUrls: saved } = await chrome.storage.session.get('removedUrls');
-    if (saved && typeof saved === 'object') {
+    const { removedUrls: saved } = await chrome.storage.session.get("removedUrls");
+    if (saved && typeof saved === "object") {
       const now = Date.now();
       for (const [u, t] of Object.entries(saved)) {
         if (now - t <= REMOVED_TTL_MS) removedUrls.set(u, t);
       }
     }
   } catch (e) {
-    console.warn('[Aria2 Bridge] loadRemovedUrls error:', e.message);
+    console.warn("[Aria2 Bridge] loadRemovedUrls error:", e.message);
   }
 }
 
 async function persistRemovedUrls() {
   try {
     await chrome.storage.session.set({
-      removedUrls: Object.fromEntries(removedUrls)
+      removedUrls: Object.fromEntries(removedUrls),
     });
   } catch (e) {
-    console.warn('[Aria2 Bridge] persistRemovedUrls error:', e.message);
+    console.warn("[Aria2 Bridge] persistRemovedUrls error:", e.message);
   }
 }
 
@@ -434,9 +458,9 @@ function forgetRemoved(url) {
  */
 async function isRemovedInAria2(url) {
   try {
-    const stopped = await aria2Rpc('aria2.tellStopped', [0, 100]);
+    const stopped = await aria2Rpc("aria2.tellStopped", [0, 100]);
     for (const t of stopped) {
-      if (t.status !== 'removed') continue;
+      if (t.status !== "removed") continue;
       for (const f of t.files || []) {
         for (const u of f.uris || []) {
           if (u.uri === url) {
@@ -449,7 +473,7 @@ async function isRemovedInAria2(url) {
     }
     return false;
   } catch (e) {
-    console.warn('[Aria2 Bridge] isRemovedInAria2 error:', e.message);
+    console.warn("[Aria2 Bridge] isRemovedInAria2 error:", e.message);
     return false;
   }
 }
@@ -461,15 +485,15 @@ async function isRemovedInAria2(url) {
  */
 async function syncRemovedTasks() {
   try {
-    const stopped = await aria2Rpc('aria2.tellStopped', [0, 200]);
+    const stopped = await aria2Rpc("aria2.tellStopped", [0, 200]);
     let changed = false;
     const now = Date.now();
     for (const t of stopped) {
-      if (t.status !== 'removed') continue;
+      if (t.status !== "removed") continue;
       const urls = [];
       for (const f of t.files || []) {
         for (const u of f.uris || []) {
-          if (u.uri.startsWith('http://') || u.uri.startsWith('https://')) {
+          if (u.uri.startsWith("http://") || u.uri.startsWith("https://")) {
             urls.push(u.uri);
           }
         }
@@ -484,7 +508,7 @@ async function syncRemovedTasks() {
     }
     if (changed) persistRemovedUrls();
   } catch (e) {
-    console.warn('[Aria2 Bridge] syncRemovedTasks error:', e.message);
+    console.warn("[Aria2 Bridge] syncRemovedTasks error:", e.message);
   }
 }
 
@@ -493,16 +517,16 @@ async function syncRemovedTasks() {
 // ========================================
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'download') {
+  if (message.action === "download") {
     processDownload(message.url, message.referer)
       .then(() => {
-        flashBadge('✓', '#4caf50');
+        flashBadge("✓", "#4caf50");
         sendResponse({ success: true });
       })
       .catch((err) => {
         // aria2 down — fall back to browser-native download
-        console.warn('[Aria2 Bridge] aria2 unreachable, falling back:', err.message);
-        flashBadge('!', '#ff9800');
+        console.warn("[Aria2 Bridge] aria2 unreachable, falling back:", err.message);
+        flashBadge("!", "#ff9800");
         isSelfRedirect = true;
         chrome.downloads.download({ url: message.url }).finally(() => {
           isSelfRedirect = false;
@@ -513,7 +537,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   // Update locale (from options page)
-  if (message.action === 'updateLocale') {
+  if (message.action === "updateLocale") {
     updateContextMenus().then(() => sendResponse({ ok: true }));
     return true;
   }
@@ -523,17 +547,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 async function updateContextMenus() {
   await Aria2I18n.reload();
   try {
-    chrome.contextMenus.update(MENU_ID_SEND, { title: Aria2I18n.t('menuSend') });
-    chrome.contextMenus.update(MENU_ID_OPEN, { title: Aria2I18n.t('menuOpenAriaNg') });
-    chrome.contextMenus.update(MENU_ID_HF_DOWNLOAD, { title: Aria2I18n.t('menuHfDownload') });
+    chrome.contextMenus.update(MENU_ID_SEND, { title: Aria2I18n.t("menuSend") });
+    chrome.contextMenus.update(MENU_ID_OPEN, { title: Aria2I18n.t("menuOpenAriaNg") });
+    chrome.contextMenus.update(MENU_ID_HF_DOWNLOAD, { title: Aria2I18n.t("menuHfDownload") });
   } catch (e) {
-    console.warn('[Aria2 Bridge] Failed to update context menus:', e.message);
+    console.warn("[Aria2 Bridge] Failed to update context menus:", e.message);
   }
 }
 
 async function processDownload(url, referer) {
   if (!config.enabled) return;
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) return;
   if (isRecentlyForwarded(url)) {
     console.log(`[Aria2 Bridge] Skip duplicate forward: ${url}`);
     return;
@@ -565,7 +589,7 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
   const url = downloadItem.url;
   if (!url) return;
 
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) return;
   if (shouldBypass(url)) return;
   if (downloadItem.fileSize > 0 && downloadItem.fileSize < 100) return;
   if (downloadItem.byExtensionId) return;
@@ -598,7 +622,7 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
   // 用户已删除过的任务：不自动重新添加（只有用户主动点击才放行）
   // 双重检查：本地记忆（轮询同步）+ 实时查询 aria2（堵住同步窗口期）
-  if (isRemovedUrl(url) || await isRemovedInAria2(url)) {
+  if (isRemovedUrl(url) || (await isRemovedInAria2(url))) {
     console.log(`[Aria2 Bridge] Skip removed task re-add: ${url}`);
     return;
   }
@@ -611,23 +635,25 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
     // 常见于 SPA 下载（税务发票等），URL 无后缀且浏览器 MIME 字段可能为空
     // 如果文件名没有扩展名，通过 content script（同源环境）获取响应头
     // 绕过 CORS 限制，且自动携带页面 Cookies → 能正确拿到 Content-Disposition
-    if (!filename || !filename.includes('.')) {
+    if (!filename || !filename.includes(".")) {
       const headers = await fetchDownloadHeadersFromTab(url, downloadItem.referrer);
       if (headers.contentDisposition) {
         const d = headers.contentDisposition;
         // 优先取 filename*=UTF-8''xxx（RFC 5987），再取 filename="xxx"
         const starMatch = d.match(/filename\*\s*=\s*(?:UTF-8|ISO-8859-1)''([^;]+)/i);
-        const plainMatch = d.match(/filename\s*=\s*"([^"]+)"/i) ||
-                           d.match(/filename\s*=\s*([^;]+)/i);
+        const plainMatch =
+          d.match(/filename\s*=\s*"([^"]+)"/i) || d.match(/filename\s*=\s*([^;]+)/i);
         const cdName = starMatch
           ? decodeURIComponent(starMatch[1])
-          : (plainMatch ? plainMatch[1].trim() : null);
+          : plainMatch
+            ? plainMatch[1].trim()
+            : null;
         if (cdName) {
           filename = cdName;
         }
       }
       // Content-Disposition 没有文件名 → 从 Content-Type 补扩展名
-      if (filename && !filename.includes('.')) {
+      if (filename && !filename.includes(".")) {
         const ext = guessExtFromMime(headers.contentType);
         if (ext) filename += ext;
       }
@@ -638,16 +664,16 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
     await aria2AddUri(url, options);
     markForwarded(url);
-    flashBadge('✓', '#4caf50');
+    flashBadge("✓", "#4caf50");
     console.log(`[Aria2 Bridge] Download → aria2: ${url}`);
   } catch (err) {
     // aria2 down — restart browser download
-    console.warn('[Aria2 Bridge] aria2 unreachable, restarting browser download:', err.message);
+    console.warn("[Aria2 Bridge] aria2 unreachable, restarting browser download:", err.message);
     isSelfRedirect = true;
     try {
       await chrome.downloads.download({
         url,
-        filename: downloadItem.filename || undefined
+        filename: downloadItem.filename || undefined,
       });
     } finally {
       isSelfRedirect = false;
@@ -659,9 +685,9 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 // Context menu
 // ========================================
 
-const MENU_ID_SEND = 'aria2-bridge-send';
-const MENU_ID_OPEN = 'aria2-bridge-open-ariang';
-const MENU_ID_HF_DOWNLOAD = 'aria2-bridge-hf-download';
+const MENU_ID_SEND = "aria2-bridge-send";
+const MENU_ID_OPEN = "aria2-bridge-open-ariang";
+const MENU_ID_HF_DOWNLOAD = "aria2-bridge-hf-download";
 
 chrome.runtime.onInstalled.addListener(async () => {
   // 等待 i18n 初始化完成，确保菜单使用正确的语言
@@ -669,19 +695,19 @@ chrome.runtime.onInstalled.addListener(async () => {
 
   chrome.contextMenus.create({
     id: MENU_ID_SEND,
-    title: Aria2I18n.t('menuSend'),
-    contexts: ['link', 'image', 'video', 'audio']
+    title: Aria2I18n.t("menuSend"),
+    contexts: ["link", "image", "video", "audio"],
   });
   chrome.contextMenus.create({
     id: MENU_ID_OPEN,
-    title: Aria2I18n.t('menuOpenAriaNg'),
-    contexts: ['action']
+    title: Aria2I18n.t("menuOpenAriaNg"),
+    contexts: ["action"],
   });
   chrome.contextMenus.create({
     id: MENU_ID_HF_DOWNLOAD,
-    title: Aria2I18n.t('menuHfDownload'),
-    contexts: ['page'],
-    documentUrlPatterns: ['https://huggingface.co/*']
+    title: Aria2I18n.t("menuHfDownload"),
+    contexts: ["page"],
+    documentUrlPatterns: ["https://huggingface.co/*"],
   });
 });
 
@@ -692,35 +718,38 @@ function buildAriaNgUrl() {
   // 没配 secret 时不传 hash 路由，让 AriaNg 用自己的 localStorage 中的设置
   // 否则每次打开都会用空 secret 覆盖用户手工保存的密钥
   if (!config.rpcSecret) {
-    return chrome.runtime.getURL('aria-ng/index.html');
+    return chrome.runtime.getURL("aria-ng/index.html");
   }
 
-  let protocol = 'http';
-  let host = 'localhost';
-  let port = '6800';
-  let iface = 'jsonrpc';
+  let protocol = "http";
+  let host = "localhost";
+  let port = "6800";
+  let iface = "jsonrpc";
 
   try {
-    const url = new URL(config.rpcUrl || 'http://localhost:6800/jsonrpc');
-    protocol = url.protocol.replace(':', '') || 'http';
-    host = url.hostname || 'localhost';
-    port = url.port || '6800';
+    const url = new URL(config.rpcUrl || "http://localhost:6800/jsonrpc");
+    protocol = url.protocol.replace(":", "") || "http";
+    host = url.hostname || "localhost";
+    port = url.port || "6800";
     const match = url.pathname.match(/\/([^/]+)$/);
     if (match) iface = match[1];
   } catch {}
 
-  const secret = btoa(config.rpcSecret)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  const secret = btoa(config.rpcSecret).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-  return chrome.runtime.getURL('aria-ng/index.html') +
-    '#!/settings/rpc/set/' +
-    encodeURIComponent(protocol) + '/' +
-    encodeURIComponent(host) + '/' +
-    encodeURIComponent(port) + '/' +
-    encodeURIComponent(iface) + '/' +
-    encodeURIComponent(secret);
+  return (
+    chrome.runtime.getURL("aria-ng/index.html") +
+    "#!/settings/rpc/set/" +
+    encodeURIComponent(protocol) +
+    "/" +
+    encodeURIComponent(host) +
+    "/" +
+    encodeURIComponent(port) +
+    "/" +
+    encodeURIComponent(iface) +
+    "/" +
+    encodeURIComponent(secret)
+  );
 }
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -733,15 +762,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   // Menu: Hugging Face — download all model files
   if (info.menuItemId === MENU_ID_HF_DOWNLOAD) {
-    chrome.action.setBadgeBackgroundColor({ color: '#2196f3' });
-    chrome.action.setBadgeText({ text: '···' });
+    chrome.action.setBadgeBackgroundColor({ color: "#2196f3" });
+    chrome.action.setBadgeText({ text: "···" });
 
     try {
       // 先从 content script 获取 model ID
-      const idResponse = await chrome.tabs.sendMessage(tab.id, { action: 'getHfModelId' });
+      const idResponse = await chrome.tabs.sendMessage(tab.id, { action: "getHfModelId" });
       if (!idResponse || !idResponse.modelId) {
-        flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfModelIdFail'));
+        flashBadge("✗", "#f44336");
+        showNotification("Aria2 Bridge", Aria2I18n.t("notifHfModelIdFail"));
         return;
       }
 
@@ -749,34 +778,38 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       const files = await fetchHfFileList(modelId);
 
       if (!files || files.length === 0) {
-        flashBadge('✗', '#f44336');
-        showNotification('Aria2 Bridge', Aria2I18n.t('notifHfNoFiles'));
+        flashBadge("✗", "#f44336");
+        showNotification("Aria2 Bridge", Aria2I18n.t("notifHfNoFiles"));
         return;
       }
 
-      const modelName = modelId.split('/').pop() || modelId;
+      const modelName = modelId.split("/").pop() || modelId;
 
       // Badge 显示文件总数
       chrome.action.setBadgeText({ text: String(files.length) });
 
       // 批量发送
-      const results = await Promise.allSettled(files.map(file => {
-        const outPath = modelName + '/' + file.path;
-        return aria2AddUri(file.url, { out: outPath });
-      }));
+      const results = await Promise.allSettled(
+        files.map((file) => {
+          const outPath = modelName + "/" + file.path;
+          return aria2AddUri(file.url, { out: outPath });
+        })
+      );
 
-      const successCount = results.filter(r => r.status === 'fulfilled').length;
-      const failCount = results.filter(r => r.status === 'rejected').length;
+      const successCount = results.filter((r) => r.status === "fulfilled").length;
+      const failCount = results.filter((r) => r.status === "rejected").length;
 
-      flashBadge(failCount > 0 ? '⚠' : '✓', failCount > 0 ? '#ff9800' : '#4caf50');
-      showNotification('Aria2 Bridge — HF',
+      flashBadge(failCount > 0 ? "⚠" : "✓", failCount > 0 ? "#ff9800" : "#4caf50");
+      showNotification(
+        "Aria2 Bridge — HF",
         failCount > 0
-          ? Aria2I18n.t('notifHfPartial', [String(successCount), String(failCount)])
-          : Aria2I18n.t('notifHfSuccess', [String(successCount)]));
+          ? Aria2I18n.t("notifHfPartial", [String(successCount), String(failCount)])
+          : Aria2I18n.t("notifHfSuccess", [String(successCount)])
+      );
     } catch (err) {
-      console.warn('[Aria2 Bridge] HF context menu error:', err.message);
-      flashBadge('✗', '#f44336');
-      showNotification('Aria2 Bridge', Aria2I18n.t('notifHfError'));
+      console.warn("[Aria2 Bridge] HF context menu error:", err.message);
+      flashBadge("✗", "#f44336");
+      showNotification("Aria2 Bridge", Aria2I18n.t("notifHfError"));
     }
     return;
   }
@@ -794,13 +827,13 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   try {
     const gid = await aria2AddUri(url, options);
-    const label = url.split('/').pop() || url;
-    showNotification(Aria2I18n.t('notifSentTitle'), label);
-    flashBadge('✓', '#4caf50');
+    const label = url.split("/").pop() || url;
+    showNotification(Aria2I18n.t("notifSentTitle"), label);
+    flashBadge("✓", "#4caf50");
     setTimeout(() => chrome.notifications.clear(gid), 3000);
   } catch (err) {
-    showNotification(Aria2I18n.t('notifFailTitle'), err.message);
-    flashBadge('✗', '#f44336');
+    showNotification(Aria2I18n.t("notifFailTitle"), err.message);
+    flashBadge("✗", "#f44336");
   }
 });
 
@@ -809,10 +842,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 // ========================================
 
 chrome.action.onClicked.addListener(async () => {
-  const baseUrl = chrome.runtime.getURL('aria-ng/index.html');
+  const baseUrl = chrome.runtime.getURL("aria-ng/index.html");
 
   // 查找已有的 AriaNg 标签页（tabs 权限支持按 URL 匹配）
-  const tabs = await chrome.tabs.query({ url: baseUrl + '*' });
+  const tabs = await chrome.tabs.query({ url: baseUrl + "*" });
 
   if (tabs.length > 0) {
     // 已有 → 切换到第一个
@@ -827,10 +860,10 @@ chrome.action.onClicked.addListener(async () => {
 
 function updateBadge() {
   if (config.enabled) {
-    chrome.action.setBadgeText({ text: '' });
+    chrome.action.setBadgeText({ text: "" });
   } else {
-    chrome.action.setBadgeText({ text: 'OFF' });
-    chrome.action.setBadgeBackgroundColor({ color: '#888' });
+    chrome.action.setBadgeText({ text: "OFF" });
+    chrome.action.setBadgeBackgroundColor({ color: "#888" });
   }
 }
 
@@ -874,7 +907,7 @@ loadRemovedUrls().then(() => {
 });
 
 // 定期同步：捕获用户在 AriaNg 里删除的任务（status=removed）
-chrome.alarms.create('aria2-sync-removed', { periodInMinutes: 1 });
+chrome.alarms.create("aria2-sync-removed", { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'aria2-sync-removed') syncRemovedTasks();
+  if (alarm.name === "aria2-sync-removed") syncRemovedTasks();
 });

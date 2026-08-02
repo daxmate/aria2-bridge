@@ -17,9 +17,7 @@ test.describe("onCreated 兜底拦截", () => {
 
     // 转发成功即证明链路走通：cancel 失败会直接 return（不转发），
     // 因此 addUri 收到请求 = cancel + erase + 转发全部成功
-    await expect
-      .poll(async () => (await mock.addUris()).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
     const add = (await mock.addUris())[0];
     expect(add.params[0][0]).toBe(HOLD_URL);
   });
@@ -27,9 +25,7 @@ test.describe("onCreated 兜底拦截", () => {
   test("同一 URL 30s 窗口内不重复转发（去重）", async ({ page, mock }) => {
     await page.click("#link-bin");
     // 等第一次转发完成
-    await expect
-      .poll(async () => (await mock.addUris()).length)
-      .toBeGreaterThanOrEqual(1);
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
 
     await page.click("#link-bin"); // 再次触发同一 URL
 
