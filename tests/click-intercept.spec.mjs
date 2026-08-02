@@ -68,10 +68,11 @@ test.describe("点击拦截", () => {
   });
 
   test("Ctrl+点击 → 不拦截（新标签页打开）", async ({ page, context, mock }) => {
-    // macOS 上 Ctrl+点击是右键菜单，用 Meta（Command）+ 点击测新标签页
+    // macOS 上 Ctrl+点击是右键菜单：新标签页修饰键 macOS 用 Meta，Linux/Windows 用 Control
+    const NEW_TAB_MOD = process.platform === "darwin" ? "Meta" : "Control";
     const [newPage] = await Promise.all([
       context.waitForEvent("page"),
-      page.click("#link-plain", { modifiers: ["Meta"] }),
+      page.click("#link-plain", { modifiers: [NEW_TAB_MOD] }),
     ]);
     await expect(newPage).toHaveURL(/\/page$/);
     await newPage.close();

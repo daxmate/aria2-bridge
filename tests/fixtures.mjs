@@ -56,6 +56,7 @@ export const test = base.extend({
     const context = await chromium.launchPersistentContext("", {
       headless: false,
       viewport: { width: 1600, height: 1000 },
+      locale: "zh-CN", // 固定语言：content script 的 chrome.i18n 文案（toast 等）跟随浏览器语言，CI 与本地必须一致
       args: [
         "--headless=new",
         `--disable-extensions-except=${EXT_PATH}`,
