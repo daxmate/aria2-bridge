@@ -37,7 +37,9 @@ async function fetchDownloadHeadersFromTab(url, referrer) {
 
 async function processDownload(url, referer) {
   if (!config.enabled) return;
-  if (!url.startsWith("http://") && !url.startsWith("https://")) return;
+  // 支持 http(s) 文件与 magnet 磁力链（aria2 原生支持）
+  if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("magnet:"))
+    return;
   if (isRecentlyForwarded(url)) {
     console.log(`[Aria2 Bridge] Skip duplicate forward: ${url}`);
     return;

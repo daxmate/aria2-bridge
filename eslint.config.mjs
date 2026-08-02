@@ -179,6 +179,7 @@ export default [
         shouldBypass: "readonly",
         shouldSkipHfFile: "readonly",
         fetchHfFileList: "readonly",
+        aria2AddUri: "readonly",
         loadConfig: "readonly",
       },
     },

@@ -121,4 +121,30 @@ test.describe("点击拦截", () => {
     expect(DEFAULT_DOWNLOAD_EXTS).toContain(".json");
     expect(DEFAULT_DOWNLOAD_EXTS).not.toContain(".bin");
   });
+
+  test("左键点击 magnet 链接 → 拦截并发送到 aria2 + 绿色 Toast", async ({ page, mock }) => {
+    await page.click("#link-magnet");
+
+    await expect.poll(() => toastBackground(page)).toContain("232, 245, 233");
+
+    await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);
+    const add = (await mock.addUris())[0];
+    expect(add.params[0][0]).toMatch(/^magnet:\?xt=urn:btih:/);
+    expect(add.params[0][0]).toContain("dn=ubuntu-24.04.iso");
+  });
+
+  test("interceptMagnet 关闭 → 磁力链接不拦截（无 Toast 无 RPC）", async ({
+    page,
+    mock,
+    setupConfig,
+  }) => {
+    await setupConfig({ interceptMagnet: false });
+    await gotoTestPage(page);
+    await page.click("#link-magnet");
+
+    await page.waitForTimeout(600);
+    expect(await page.locator("#__aria2_bridge_toast").count()).toBe(0);
+    const { requests } = await mock.requests();
+    expect(requests.length).toBe(0);
+  });
 });

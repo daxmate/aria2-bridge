@@ -135,16 +135,23 @@ const DEFAULT_DOWNLOAD_EXTS = [
 ];
 
 let downloadExts = null;
+let interceptMagnet = true;
 
 // 从 storage 读取拦截后缀列表
-chrome.storage.sync.get({ downloadExts: DEFAULT_DOWNLOAD_EXTS }).then((result) => {
-  downloadExts = result.downloadExts;
-});
+chrome.storage.sync
+  .get({ downloadExts: DEFAULT_DOWNLOAD_EXTS, interceptMagnet: true })
+  .then((result) => {
+    downloadExts = result.downloadExts;
+    interceptMagnet = result.interceptMagnet;
+  });
 
 // 监听配置变化，实时更新
 chrome.storage.onChanged.addListener((changes) => {
   if (changes.downloadExts) {
     downloadExts = changes.downloadExts.newValue;
+  }
+  if (changes.interceptMagnet) {
+    interceptMagnet = changes.interceptMagnet.newValue;
   }
 });
 
@@ -189,6 +196,16 @@ document.addEventListener(
     if (!link || !link.href) return;
 
     const url = link.href;
+
+    // 磁力链接：aria2 原生支持，开关开启时拦截转发
+    // （magnet: 不会触发浏览器下载，无需 downloads.onCreated 兜底）
+    if (url.startsWith("magnet:")) {
+      if (!interceptMagnet) return; // 开关关闭 → 交给浏览器默认行为（本地 BT 客户端）
+      e.preventDefault();
+      e.stopPropagation();
+      sendToAria2(url, location.href, e.clientX, e.clientY);
+      return;
+    }
 
     // Skip non-HTTP(S)
     if (!url.startsWith("http://") && !url.startsWith("https://")) return;

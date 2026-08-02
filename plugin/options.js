@@ -6,6 +6,7 @@ const DEFAULT_CONFIG = {
   rpcUrl: "http://localhost:6800/jsonrpc",
   rpcSecret: "",
   enabled: true,
+  interceptMagnet: true,
   bypassDomains: [],
   locale: "auto",
   downloadExts: [
@@ -89,6 +90,7 @@ async function loadSettings() {
   $("bypassDomains").value = (data.bypassDomains || []).join("\n");
   $("downloadExts").value = (data.downloadExts || []).join("\n");
   $("enabled").checked = data.enabled;
+  $("interceptMagnet").checked = data.interceptMagnet;
   $("localeSelect").value = data.locale || "auto";
 }
 
@@ -113,6 +115,7 @@ async function saveSettings() {
         return s.startsWith(".") ? s : "." + s;
       }),
     enabled: $("enabled").checked,
+    interceptMagnet: $("interceptMagnet").checked,
     locale: $("localeSelect").value,
   };
 
@@ -144,4 +147,5 @@ document.addEventListener("DOMContentLoaded", async function () {
   $("bypassDomains").addEventListener("change", saveSettings);
   $("downloadExts").addEventListener("change", saveSettings);
   $("enabled").addEventListener("change", saveSettings);
+  $("interceptMagnet").addEventListener("change", saveSettings);
 });

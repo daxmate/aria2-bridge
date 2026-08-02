@@ -23,6 +23,26 @@ test.describe("设置页", () => {
       timeout: 15000,
     });
     await expect(page.locator("#enabled")).toBeChecked();
+    await expect(page.locator("#interceptMagnet")).toBeChecked();
+  });
+
+  test("interceptMagnet 开关 → change 自动保存到 storage", async ({ page, sw }) => {
+    await page.locator("#interceptMagnet").uncheck();
+    await expect
+      .poll(async () => {
+        const data = await sw.evaluate(() => chrome.storage.sync.get("interceptMagnet"));
+        return data.interceptMagnet;
+      })
+      .toBe(false);
+
+    // 重新勾选 → 恢复 true
+    await page.locator("#interceptMagnet").check();
+    await expect
+      .poll(async () => {
+        const data = await sw.evaluate(() => chrome.storage.sync.get("interceptMagnet"));
+        return data.interceptMagnet;
+      })
+      .toBe(true);
   });
 
   test("修改 RPC 地址/密钥 → change 自动保存到 storage", async ({ page, sw }) => {

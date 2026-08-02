@@ -7,6 +7,7 @@ const DEFAULT_CONFIG = {
   rpcUrl: "http://localhost:6800/jsonrpc",
   rpcSecret: "",
   enabled: true,
+  interceptMagnet: true,
   bypassDomains: [],
   downloadExts: [
     ".zip",

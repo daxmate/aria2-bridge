@@ -13,7 +13,7 @@
 
 ## 🟡 P1 重要
 
-- [ ] **磁力/种子链接支持（magnet:）** — aria2 的 BT 下载是核心强项，但当前 content script 与 background 都只放行 `http/https`。加：content script 拦截 `magnet:` 链接点击（`looksLikeDownload` 前先判协议）+ 右键菜单「用 Aria2 下载磁力链接」；background `processDownload` 放行 `magnet:`。注意 content 的协议白名单（`u.protocol !== 'http:' && !== 'https:'` 处）和 AriaNg 侧 BT 任务展示（子模块已支持，无需改）
+- [x] **磁力/种子链接支持（magnet:）** ✅ 已完成（v1.5.0）— content script 点击拦截 magnet: 链接（新增 `interceptMagnet` 设置项，默认开）+ 右键菜单发送；background `processDownload` 放行 `magnet:`；.torrent 原已在默认扩展名列表。AriaNg 侧 BT 任务展示子模块原生支持，无需改
 - [ ] **下载完成系统通知** — 目前只有「已发送/失败」即时通知，长下载完成时用户通常已切走。实现：`aria2.addUri` 成功后轮询 `aria2.tellStatus`（间隔可复用 alarms，或 per-task `setTimeout` + SW 生命周期内查询），status 变 `complete` 时发系统通知（notifications 权限已有）。注意 SW 休眠：轮询期间 SW 可能被回收，alarms 方式更可靠
 - [ ] **按域名/文件类型自动分类目录** — options 加「下载目录规则」：域名或文件后缀 → 目标目录，`aria2.addUri` 时带 `dir` 参数（aria2 原生支持）。匹配顺序建议：域名精确 → 域名后缀 → 文件后缀 → 默认。规则 UI 可参考 bypassDomains 的 textarea 行格式
 

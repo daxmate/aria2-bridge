@@ -3,6 +3,14 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.5.0] - 2026-08-02
+
+### ✨ 新功能
+
+- **磁力 / BT 下载** — 点击磁力链接（magnet:）自动转发给 aria2（原生支持，含 .torrent 种子文件），带绿色 Toast 反馈；右键菜单发送磁力链接同样可用
+  - 新增设置项「拦截磁力链接（magnet:）」，默认开启；关闭后磁力链接交给本地 BT 客户端
+  - 新增 4 个 E2E 用例（点击拦截 / 开关关闭不拦 / RPC 接受 magnet / 设置页开关保存），共 43 个测试全绿
+
 ## [1.4.1] - 2026-08-02
 
 ### 🔧 重构
@@ -77,3 +85,4 @@
 [1.3.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.3.0
 [1.4.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.4.0
 [1.4.1]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.4.1
+[1.5.0]: https://github.com/daxmate/aria2-bridge/releases/tag/v1.5.0

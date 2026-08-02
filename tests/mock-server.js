@@ -36,6 +36,7 @@ const TEST_PAGE = `<!DOCTYPE html>
   <a id="link-dlattr" href="/spa-download" download>spa download</a>
   <a id="link-mid" href="/files/mid.zip" download>mid.zip</a>
   <a id="link-bin" href="/hold.bin">hold.bin</a>
+  <a id="link-magnet" href="magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=ubuntu-24.04.iso">magnet link</a>
   <div id="section">section target</div>
 </body>
 </html>`;

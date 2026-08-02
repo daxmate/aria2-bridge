@@ -118,4 +118,24 @@ test.describe("纯函数", () => {
     expect(results.config).toBe(false);
     expect(results.nested).toBe(false);
   });
+
+  test("aria2AddUri 接受 magnet URI（右键菜单发送磁力底层验证）", async ({
+    sw,
+    mock,
+    setupConfig,
+  }) => {
+    // 纯函数 describe 没有 beforeEach setupConfig → 显式指向 mock RPC
+    await setupConfig();
+    // 右键菜单发送磁力无协议过滤（info.linkUrl 原样转发）；这里验证 RPC 层不阻塞 magnet:
+    const gid = await sw.evaluate(() =>
+      aria2AddUri("magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=ubuntu.iso")
+    );
+    expect(gid).toMatch(/^gid-mock-/);
+    const add = (await mock.addUris())[0];
+    expect(add.params[0][0]).toMatch(/^magnet:\?xt=urn:btih:/);
+    // 磁力不需要 out（无文件名）；仅默认 User-Agent header
+    expect(add.params[1].out).toBeUndefined();
+    expect(add.params[1].referer).toBeUndefined();
+    expect(add.params[1].header).toBeDefined();
+  });
 });

@@ -191,6 +191,14 @@
     "message": "启用下载自动拦截",
     "description": "启用拦截复选框标签"
   },
+  "optionsMagnetLabel": {
+    "message": "拦截磁力链接（magnet:）",
+    "description": "磁力拦截复选框标签"
+  },
+  "optionsMagnetHint": {
+    "message": "开启后点击磁力链接将转发给 aria2 下载；关闭则交给本地 BT 客户端",
+    "description": "磁力拦截复选框提示"
+  },
   "optionsSectionAriaNg": {
     "message": "📊 AriaNg 管理面板",
     "description": "AriaNg 区块标题"

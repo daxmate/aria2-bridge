@@ -244,6 +244,15 @@
           >启用下载自动拦截</label
         >
       </div>
+      <div class="field checkbox-row">
+        <input type="checkbox" id="interceptMagnet" />
+        <label data-i18n="optionsMagnetLabel" for="interceptMagnet"
+          >拦截磁力链接（magnet:）</label
+        >
+      </div>
+      <div class="hint" data-i18n="optionsMagnetHint">
+        开启后点击磁力链接将转发给 aria2 下载；关闭则交给本地 BT 客户端
+      </div>
     </section>
 
     <script src="js/i18n.js"></script>

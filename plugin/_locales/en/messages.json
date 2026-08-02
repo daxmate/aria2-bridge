@@ -191,6 +191,14 @@
     "message": "Enable download interception",
     "description": "Label for enable checkbox"
   },
+  "optionsMagnetLabel": {
+    "message": "Intercept magnet links (magnet:)",
+    "description": "Label for magnet interception checkbox"
+  },
+  "optionsMagnetHint": {
+    "message": "When enabled, clicking a magnet link forwards it to aria2. Disable to leave magnet links to your local torrent client.",
+    "description": "Hint for magnet interception checkbox"
+  },
   "optionsSectionAriaNg": {
     "message": "📊 AriaNg Dashboard",
     "description": "AriaNg section heading"
