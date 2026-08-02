@@ -1,5 +1,5 @@
 // 点击拦截测试：content script 三档拦截策略 + Toast 反馈
-import { test, expect, DEFAULT_DOWNLOAD_EXTS, gotoTestPage, TEST_PAGE } from "./fixtures.mjs";
+import { test, expect, DEFAULT_DOWNLOAD_EXTS, gotoTestPage, TEST_PAGE, toastBackground } from "./fixtures.mjs";
 
 const PAGE = TEST_PAGE;
 
@@ -12,10 +12,8 @@ test.describe("点击拦截", () => {
   test("左键点击 .zip 链接 → 拦截并发送到 aria2 + 绿色 Toast", async ({ page, mock }) => {
     await page.click("#link-zip");
 
-    // 绿色 Toast 出现（content script 拦截成功的标志）
-    const toast = page.locator("#__aria2_bridge_toast");
-    await expect(toast).toBeVisible();
-    await expect(toast).toContainText("已发送");
+    // 绿色 Toast（#e8f5e9）——颜色断言语言无关，poll 原子读取
+    await expect.poll(() => toastBackground(page)).toContain("232, 245, 233");
 
     // mock aria2 收到 addUri，URL 正确
     await expect.poll(async () => (await mock.addUris()).length).toBeGreaterThanOrEqual(1);

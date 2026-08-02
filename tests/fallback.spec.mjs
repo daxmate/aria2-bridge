@@ -1,5 +1,5 @@
 // 回退测试：aria2 不可用（RPC error / HTTP 500）时自动回退浏览器原生下载
-import { test, expect, gotoTestPage, TEST_PAGE } from "./fixtures.mjs";
+import { test, expect, gotoTestPage, TEST_PAGE, toastBackground } from "./fixtures.mjs";
 
 const PAGE = TEST_PAGE;
 const ZIP_URL = `${PAGE}files/pack.zip`;
@@ -33,12 +33,8 @@ test.describe("aria2 不可用 → 浏览器回退", () => {
 
     await page.click("#link-zip");
 
-    // 失败 Toast（橙色样式）
-    const toast = page.locator("#__aria2_bridge_toast");
-    await expect(toast).toBeVisible();
-    await expect(toast).toContainText("回退");
-    const bg = await toast.evaluate((el) => el.style.background);
-    expect(bg).toContain("255, 243, 224"); // #fff3e0 橙色系
+    // 失败 Toast（橙色 #fff3e0）——颜色断言语言无关
+    await expect.poll(() => toastBackground(page)).toContain("255, 243, 224");
 
     // 浏览器原生下载被重新发起（同一 URL）
     await expect.poll(async () => (await fallbackDownloads(sw)).length).toBeGreaterThanOrEqual(1);
@@ -52,7 +48,8 @@ test.describe("aria2 不可用 → 浏览器回退", () => {
 
     await page.click("#link-zip");
 
-    await expect(page.locator("#__aria2_bridge_toast")).toContainText("回退");
+    // 失败 Toast（橙色）
+    await expect.poll(() => toastBackground(page)).toContain("255, 243, 224");
     await expect.poll(async () => (await fallbackDownloads(sw)).length).toBeGreaterThanOrEqual(1);
     const calls = await fallbackDownloads(sw);
     expect(calls[0].url).toBe(ZIP_URL);

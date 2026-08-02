@@ -61,6 +61,13 @@ export async function gotoTestPage(page) {
   await page.waitForTimeout(500);
 }
 
+// 读取当前 toast 的背景色（成功 #e8f5e9 / 回退 #fff3e0，均为硬编码，不依赖 i18n 文案）。
+// toast 生命周期约 2s，用 poll 轮询读取，语言无关且原子。
+export async function toastBackground(page) {
+  const el = await page.$("#__aria2_bridge_toast");
+  return el ? await el.evaluate((n) => n.style.background) : null;
+}
+
 // 扩展 context fixture（每次测试独立临时 profile）
 export const test = base.extend({
   context: async ({}, use) => {
