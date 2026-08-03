@@ -70,6 +70,27 @@
         color: #888;
         margin-top: 4px;
       }
+      .about-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+      }
+      .about-logo { font-size: 36px; line-height: 1; margin-bottom: 6px; }
+      .about-name { font-size: 16px; font-weight: 700; color: #222; margin-bottom: 6px; }
+      .about-desc { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 14px; }
+      .about-meta { border-top: 1px solid #eee; padding-top: 10px; text-align: left; }
+      .about-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; color: #444; }
+      .about-row a { color: #4a90d9; text-decoration: none; }
+      .about-row a:hover { text-decoration: underline; }
+      .about-version { cursor: pointer; user-select: none; }
+      .about-version:active { transform: scale(0.92); }
+      .about-egg { font-size: 30px; margin-top: 10px; animation: about-egg-bounce 0.8s ease infinite; }
+      @keyframes about-egg-bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
       .checkbox-row {
         display: flex;
         align-items: center;
@@ -261,6 +282,32 @@
       </div>
       <div class="hint" data-i18n="optionsNotifyCompleteHint">
         转发到 aria2 的任务下载完成或失败时发送系统通知
+      </div>
+    </section>
+
+    <section>
+      <h3 data-i18n="optionsSectionAbout">关于</h3>
+      <div class="about-card">
+        <div class="about-logo">⚡</div>
+        <div class="about-name">Aria2 Bridge</div>
+        <div class="about-desc" data-i18n="optionsAboutDesc"></div>
+        <div class="about-meta">
+          <div class="about-row">
+            <span data-i18n="optionsAboutAuthor">作者</span>
+            <span id="about-author">daxmate</span>
+          </div>
+          <div class="about-row">
+            <span data-i18n="optionsAboutVersion">版本</span>
+            <span id="about-version" class="about-version">v0.0.0</span>
+          </div>
+          <div class="about-row">
+            <span data-i18n="optionsAboutHomepage">项目主页</span>
+            <a href="https://github.com/daxmate/aria2-bridge" target="_blank" rel="noopener"
+              >github.com/daxmate/aria2-bridge ↗</a
+            >
+          </div>
+        </div>
+        <div class="about-egg" id="about-egg" hidden>🐘</div>
       </div>
     </section>
 

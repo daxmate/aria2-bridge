@@ -60,11 +60,11 @@
     "description": "通知标题：发送失败"
   },
   "notifCompleteTitle": {
-    "message": "Aria2 Bridge — 下载完成",
+    "message": "✅ Aria2 Bridge — 下载完成",
     "description": "通知标题：任务下载完成"
   },
   "notifCompleteBody": {
-    "message": "$name$ 下载完成",
+    "message": "$name$ 下载完成，去 AriaNg 看看吧",
     "description": "通知正文：下载完成",
     "placeholders": {
       "name": {
@@ -74,7 +74,7 @@
     }
   },
   "notifErrorTitle": {
-    "message": "Aria2 Bridge — 下载失败",
+    "message": "❌ Aria2 Bridge — 下载失败",
     "description": "通知标题：任务下载失败"
   },
   "notifErrorBody": {
@@ -338,5 +338,29 @@
   "notifQuarkNotReady": {
     "message": "夸克网盘页面未就绪，请刷新后重试",
     "description": "通知：content script 未响应"
+  },
+  "optionsSectionAbout": {
+    "message": "关于",
+    "description": ""
+  },
+  "optionsAboutDesc": {
+    "message": "轻量下载拦截插件 —— 最初写给自己的小工具，把浏览器下载交给 aria2。",
+    "description": ""
+  },
+  "optionsAboutAuthor": {
+    "message": "作者",
+    "description": ""
+  },
+  "optionsAboutVersion": {
+    "message": "版本",
+    "description": ""
+  },
+  "optionsAboutHomepage": {
+    "message": "项目主页",
+    "description": ""
+  },
+  "optionsAboutEasterEgg": {
+    "message": "彩蛋被你找到了！这个扩展最初是 🐘 写给自己的 —— 下载交给 aria2，省心又稳。",
+    "description": ""
   }
 }

@@ -148,4 +148,25 @@ document.addEventListener("DOMContentLoaded", async function () {
   $("enabled").addEventListener("change", saveSettings);
   $("interceptMagnet").addEventListener("change", saveSettings);
   $("notifyDownloadComplete").addEventListener("change", saveSettings);
+
+  // About：版本号 + 连点彩蛋（🐘）
+  const versionEl = $("about-version");
+  if (versionEl) {
+    versionEl.textContent = "v" + chrome.runtime.getManifest().version;
+    let clicks = 0;
+    let timer = null;
+    versionEl.addEventListener("click", function () {
+      clicks++;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        clicks = 0;
+      }, 1500);
+      if (clicks >= 5) {
+        clicks = 0;
+        const egg = $("about-egg");
+        if (egg) egg.hidden = false;
+        alert(Aria2I18n.t("optionsAboutEasterEgg"));
+      }
+    });
+  }
 });

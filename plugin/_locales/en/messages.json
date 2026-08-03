@@ -60,11 +60,11 @@
     "description": "Notification title for failed send"
   },
   "notifCompleteTitle": {
-    "message": "Aria2 Bridge — Download Complete",
+    "message": "✅ Aria2 Bridge — Download Complete",
     "description": "Notification title: download finished"
   },
   "notifCompleteBody": {
-    "message": "$name$ finished downloading",
+    "message": "$name$ finished downloading — check AriaNg",
     "description": "Notification body: download complete",
     "placeholders": {
       "name": {
@@ -74,7 +74,7 @@
     }
   },
   "notifErrorTitle": {
-    "message": "Aria2 Bridge — Download Failed",
+    "message": "❌ Aria2 Bridge — Download Failed",
     "description": "Notification title: download failed"
   },
   "notifErrorBody": {
@@ -338,5 +338,29 @@
   "notifQuarkNotReady": {
     "message": "Quark Drive page is not ready, please refresh and retry",
     "description": "Notification: content script did not respond"
+  },
+  "optionsSectionAbout": {
+    "message": "About",
+    "description": ""
+  },
+  "optionsAboutDesc": {
+    "message": "A lightweight download interceptor — a little tool I built for myself to hand browser downloads to aria2.",
+    "description": ""
+  },
+  "optionsAboutAuthor": {
+    "message": "Author",
+    "description": ""
+  },
+  "optionsAboutVersion": {
+    "message": "Version",
+    "description": ""
+  },
+  "optionsAboutHomepage": {
+    "message": "Homepage",
+    "description": ""
+  },
+  "optionsAboutEasterEgg": {
+    "message": "You found the egg! This extension was originally built by 🐘 for personal use — hand downloads to aria2 and stop worrying.",
+    "description": ""
   }
 }
