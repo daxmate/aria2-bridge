@@ -222,6 +222,12 @@ npm run format:check # Prettier 检查
 - **AriaNg**：buildAriaNgUrl（secret → URL-safe base64 hash 路由）、页面渲染、aria-ng-fix.js 生效
 - **i18n**：zh_CN/en 的 key 一致性、非空、占位符完整性（`scripts/check-i18n.mjs`）
 
+## Made by
+
+这个扩展最初是写给自己的 —— 浏览器下载太慢、不好管理，于是把下载都交给 aria2。
+
+由 [daxmate](https://github.com/daxmate) 维护，如果觉得好用，欢迎 [Star](https://github.com/daxmate/aria2-bridge)，或在 [Issues](https://github.com/daxmate/aria2-bridge/issues) 里聊聊你的想法。
+
 ## License
 
 MIT
