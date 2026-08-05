@@ -3,6 +3,15 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.7.2] - 2026-08-05
+
+### 🔧 重构
+
+- **emoji 图标 → SVG** — 选项页标题的 ⚡、彩蛋的 🐘 替换为统一风格的内联 SVG（24×24 / 描边 2px / 随主题变色），右键菜单及选项页文案中的 emoji 图标全部移除
+  - 新增 `plugin/images/` 目录，存放 11 个 SVG 图标源文件（闪电 / 链接 / 沙漏 / 对勾 / 叉 / 文件夹 / 软盘 / 刷新 / 柱状图 / 下载 / 大象），供后续按钮恢复使用
+  - 系统通知标题的 ✅❌ 保留（Chrome notifications API 仅支持文本，emoji 作为视觉标记）
+  - 补齐 eslint globals 白名单（上一提交引入的 `cleanupStaleDownloads` 未注册 + options.js 的 `alert`），lint 恢复 0 error
+
 ## [1.7.1] - 2026-08-05
 
 ### 🐛 修复
