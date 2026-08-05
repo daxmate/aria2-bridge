@@ -3,6 +3,18 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.7.1] - 2026-08-05
+
+### 🐛 修复
+
+- **彻底修复“已删除任务自动复活”** — 删除过的下载任务（张学友歌单 / MacTeX / Codex 等）反复自动回到 aria2 队列，每个 URL 2-8 个副本，持续约一个月
+  - **根因（三层叠加）**：① 浏览器下载历史残留的“已取消”记录（拦截后 `erase` 失败）作为种子；② Vivaldi 设置 `start_automatically=true` 在浏览器启动时自动恢复这些中断下载（“重启两次才触发”是恢复流程的两阶段特性）；③ 扩展 `onCreated` 把恢复的下载转发到 aria2，且去重窗口太短 + 已删除黑名单存 `storage.session`（浏览器重启即丢）拦不住
+  - **添加前队列查重**：`isAlreadyInQueue()` 检查 aria2 active/waiting 是否已有同 URL 任务，有则跳过——同一 URL 不再重复添加
+  - **黑名单持久化**：已删除任务记忆从 `storage.session` 改存 `storage.local`，浏览器重启不再丢失
+  - **清理残留种子**：新增 `cleanupStaleDownloads()`，扩展启动时 + 每 5 分钟自动清理下载管理器里 `USER_CANCELED` 的残留下载项，从源头消除“复活种子”
+  - **只拦真实点击**：content script 增加 `isTrusted` 过滤，页面 JS 自动触发的下载不再走点击拦截路径，交给有查重保护的 `onCreated` 兜底
+  - 排查期间同时发现并清除了 manifest 迁移到 `plugin/` 目录后残留的根目录旧扩展实例（双实例会导致每个 URL 双份转发）
+
 ## [1.7.0] - 2026-08-02
 
 ### ✨ 新功能
