@@ -37,6 +37,7 @@ export default [
         navigator: "readonly",
         location: "readonly",
         localStorage: "readonly",
+        alert: "readonly", // options.js（页面脚本）
         console: "readonly",
         URL: "readonly",
         fetch: "readonly",
@@ -86,6 +87,7 @@ export default [
         isSelfRedirect: "writable", // lib/intercept.js
         fetchDownloadHeadersFromTab: "readonly",
         processDownload: "readonly",
+        cleanupStaleDownloads: "readonly", // lib/intercept.js
         MENU_ID_SEND: "readonly",
         MENU_ID_OPEN: "readonly",
         MENU_ID_HF_DOWNLOAD: "readonly",
@@ -224,6 +226,7 @@ export default [
         trackDownload: "readonly",
         untrackDownload: "readonly",
         checkDownloadStatus: "readonly",
+        cleanupStaleDownloads: "readonly", // tests/evaluate 访问 intercept.js 全局
         trackedDownloads: "readonly",
         persistTrackedDownloads: "readonly",
         config: "readonly",

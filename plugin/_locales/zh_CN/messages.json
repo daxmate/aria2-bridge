@@ -16,11 +16,11 @@
     "description": "右键菜单项：发送链接到 aria2"
   },
   "menuOpenAriaNg": {
-    "message": "📊 打开 AriaNg 管理面板",
+    "message": "打开 AriaNg 管理面板",
     "description": "右键菜单项：打开 AriaNg 管理面板"
   },
   "menuHfDownload": {
-    "message": "📥 下载该模型所有文件到 Aria2",
+    "message": "下载该模型所有文件到 Aria2",
     "description": "右键菜单项：从 HuggingFace 模型页面批量下载"
   },
   "toastSent": {
@@ -128,7 +128,7 @@
     "description": "设置页标题"
   },
   "optionsPageTitle": {
-    "message": "⚡ Aria2 Bridge 设置",
+    "message": "Aria2 Bridge 设置",
     "description": "设置页主标题"
   },
   "optionsSectionConnection": {
@@ -160,15 +160,15 @@
     "description": "RPC 密钥提示"
   },
   "optionsTestBtn": {
-    "message": "🔗 测试连接",
+    "message": "测试连接",
     "description": "测试连接按钮"
   },
   "optionsTestConnecting": {
-    "message": "⏳ 测试中...",
+    "message": "测试中...",
     "description": "测试中按钮文字"
   },
   "optionsTestSuccess": {
-    "message": "✅ 连接成功 — aria2 $version$",
+    "message": "连接成功 — aria2 $version$",
     "description": "连接成功结果",
     "placeholders": {
       "version": {
@@ -178,7 +178,7 @@
     }
   },
   "optionsTestFail": {
-    "message": "❌ 连接失败: $error$",
+    "message": "连接失败: $error$",
     "description": "连接失败结果",
     "placeholders": {
       "error": {
@@ -240,7 +240,7 @@
     "description": "磁力拦截复选框提示"
   },
   "optionsSectionAriaNg": {
-    "message": "📊 AriaNg 管理面板",
+    "message": "AriaNg 管理面板",
     "description": "AriaNg 区块标题"
   },
   "optionsAriaNgDesc": {
@@ -248,19 +248,19 @@
     "description": "AriaNg 描述"
   },
   "optionsOpenAriaNgBtn": {
-    "message": "📂 打开 AriaNg",
+    "message": "打开 AriaNg",
     "description": "打开 AriaNg 按钮"
   },
   "optionsSaveBtn": {
-    "message": "💾 保存设置",
+    "message": "保存设置",
     "description": "保存按钮文字"
   },
   "optionsSaveSuccess": {
-    "message": "✅ 设置已保存",
+    "message": "设置已保存",
     "description": "保存成功状态"
   },
   "optionsSaveFail": {
-    "message": "❌ 保存失败: $error$",
+    "message": "保存失败: $error$",
     "description": "保存失败状态",
     "placeholders": {
       "error": {
@@ -270,11 +270,11 @@
     }
   },
   "optionsResetBtn": {
-    "message": "↻ 恢复默认",
+    "message": "恢复默认",
     "description": "恢复默认按钮文字"
   },
   "optionsResetDone": {
-    "message": "↻ 已恢复默认设置",
+    "message": "已恢复默认设置",
     "description": "恢复默认状态"
   },
   "optionsSectionLanguage": {
@@ -294,7 +294,7 @@
     "description": "语言选择器提示"
   },
   "menuQuarkDownload": {
-    "message": "📥 发送选中文件到 Aria2",
+    "message": "发送选中文件到 Aria2",
     "description": "右键菜单项：夸克网盘页面发送选中文件"
   },
   "quarkNoSelection": {

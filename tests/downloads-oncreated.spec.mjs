@@ -87,7 +87,9 @@ test.describe("onCreated 兜底拦截", () => {
     expect(queueChecks.length).toBeGreaterThanOrEqual(1);
   });
 
-  test("cleanupStaleDownloads：清理 USER_CANCELED/USER_SHUTDOWN 残留，保留其他中断", async ({ sw }) => {
+  test("cleanupStaleDownloads：清理 USER_CANCELED/USER_SHUTDOWN 残留，保留其他中断", async ({
+    sw,
+  }) => {
     // 在 SW 环境里临时替换 chrome.downloads（每个测试独立 context，不影响其他用例）
     const erased = await sw.evaluate(async () => {
       self.__erased = [];

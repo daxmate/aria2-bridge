@@ -16,11 +16,11 @@
     "description": "Context menu item: send link to aria2"
   },
   "menuOpenAriaNg": {
-    "message": "📊 Open AriaNg Dashboard",
+    "message": "Open AriaNg Dashboard",
     "description": "Context menu item: open AriaNg management panel"
   },
   "menuHfDownload": {
-    "message": "📥 Download all model files to Aria2",
+    "message": "Download all model files to Aria2",
     "description": "Context menu item: batch download from HuggingFace model page"
   },
   "toastSent": {
@@ -128,7 +128,7 @@
     "description": "Options page <title>"
   },
   "optionsPageTitle": {
-    "message": "⚡ Aria2 Bridge Settings",
+    "message": "Aria2 Bridge Settings",
     "description": "Options page main heading"
   },
   "optionsSectionConnection": {
@@ -160,15 +160,15 @@
     "description": "Hint text below RPC secret input"
   },
   "optionsTestBtn": {
-    "message": "🔗 Test Connection",
+    "message": "Test Connection",
     "description": "Button to test RPC connection"
   },
   "optionsTestConnecting": {
-    "message": "⏳ Testing...",
+    "message": "Testing...",
     "description": "Button text while testing connection"
   },
   "optionsTestSuccess": {
-    "message": "✅ Connected — aria2 $version$",
+    "message": "Connected — aria2 $version$",
     "description": "Successful connection test result",
     "placeholders": {
       "version": {
@@ -178,7 +178,7 @@
     }
   },
   "optionsTestFail": {
-    "message": "❌ Connection failed: $error$",
+    "message": "Connection failed: $error$",
     "description": "Failed connection test result",
     "placeholders": {
       "error": {
@@ -240,7 +240,7 @@
     "description": "Hint for magnet interception checkbox"
   },
   "optionsSectionAriaNg": {
-    "message": "📊 AriaNg Dashboard",
+    "message": "AriaNg Dashboard",
     "description": "AriaNg section heading"
   },
   "optionsAriaNgDesc": {
@@ -248,19 +248,19 @@
     "description": "Description of AriaNg in options page"
   },
   "optionsOpenAriaNgBtn": {
-    "message": "📂 Open AriaNg",
+    "message": "Open AriaNg",
     "description": "Button to open AriaNg"
   },
   "optionsSaveBtn": {
-    "message": "💾 Save Settings",
+    "message": "Save Settings",
     "description": "Save button text"
   },
   "optionsSaveSuccess": {
-    "message": "✅ Settings saved",
+    "message": "Settings saved",
     "description": "Status message after successful save"
   },
   "optionsSaveFail": {
-    "message": "❌ Save failed: $error$",
+    "message": "Save failed: $error$",
     "description": "Status message when save fails",
     "placeholders": {
       "error": {
@@ -270,11 +270,11 @@
     }
   },
   "optionsResetBtn": {
-    "message": "↻ Restore Defaults",
+    "message": "Restore Defaults",
     "description": "Reset button text"
   },
   "optionsResetDone": {
-    "message": "↻ Defaults restored",
+    "message": "Defaults restored",
     "description": "Status message after restoring defaults"
   },
   "optionsSectionLanguage": {
@@ -294,7 +294,7 @@
     "description": "Hint text below language selector"
   },
   "menuQuarkDownload": {
-    "message": "📥 Send selected files to Aria2",
+    "message": "Send selected files to Aria2",
     "description": "Context menu: send selected Quark Drive files"
   },
   "quarkNoSelection": {
