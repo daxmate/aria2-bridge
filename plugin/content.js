@@ -138,6 +138,11 @@ function sendToAria2(url, referer) {
 document.addEventListener(
   "click",
   (e) => {
+    // 只拦截真实用户点击。JS 脚本调 a.click() 触发的（isTrusted=false）
+    // 不拦截 → 走 background 的 downloads.onCreated 兜底（那里有黑名单+队列查重），
+    // 避免页面自动/重复触发时被当作“用户主动下载”反复添加
+    if (!e.isTrusted) return;
+
     // Only handle left clicks without modifiers
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
 
@@ -204,6 +209,7 @@ document.addEventListener(
 document.addEventListener(
   "auxclick",
   (e) => {
+    if (!e.isTrusted) return; // 同上：只拦截真实用户点击
     if (e.button !== 1) return;
 
     const link = e.target.closest("a");

@@ -100,14 +100,20 @@ loadRemovedUrls().then(() => {
 });
 loadTrackedDownloads();
 
+// 启动时清理残留的取消下载项（防“重试种子”再次触发 onCreated → 任务复活）
+cleanupStaleDownloads();
+
 // 夸克直链接口需要夸克客户端 UA（fetch 无法设置 UA，用 DNR 网络层改写）
 registerQuarkUaRule();
 
 // 定期同步：捕获用户在 AriaNg 里删除的任务（status=removed）
 chrome.alarms.create("aria2-sync-removed", { periodInMinutes: 1 });
+// 定期清理残留取消下载项（下载管理器里的“重试种子”）
+chrome.alarms.create("aria2-cleanup-downloads", { periodInMinutes: 5 });
 // 轮询跟踪任务状态：下载完成/失败 → 系统通知（MV3 alarms 最小周期 30s）
 chrome.alarms.create("aria2-download-status", { periodInMinutes: 0.5 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "aria2-sync-removed") syncRemovedTasks();
+  if (alarm.name === "aria2-cleanup-downloads") cleanupStaleDownloads();
   if (alarm.name === "aria2-download-status") checkDownloadStatus();
 });

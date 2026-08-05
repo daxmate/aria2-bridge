@@ -48,6 +48,12 @@ async function processDownload(url, referer, out) {
   // 用户主动点击下载 → 清除“已删除”记忆，允许重新添加
   forgetRemoved(url);
 
+  // 查重：同 URL 任务已在 aria2 队列（active/waiting/paused）→ 不再重复添加
+  if (await isAlreadyInQueue(url)) {
+    console.log(`[Aria2 Bridge] Skip: already in aria2 queue: ${url}`);
+    return;
+  }
+
   const options = { referer };
 
   // 优先使用调用方指定的文件名（如夸克直链带签名参数，URL 本身无文件后缀）
@@ -147,6 +153,12 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
     if (filename) options.out = filename;
     if (downloadItem.referrer) options.referer = downloadItem.referrer;
 
+    // 查重：同 URL 任务已在 aria2 队列 → 跳过，避免重复添加
+    if (await isAlreadyInQueue(url)) {
+      console.log(`[Aria2 Bridge] Skip: already in aria2 queue: ${url}`);
+      return;
+    }
+
     const gid = await aria2AddUri(url, options);
     // 跟踪该任务：下载完成/失败时发系统通知
     trackDownload(gid, filename, url);
@@ -167,3 +179,65 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
     }
   }
 });
+
+// ========================================
+// 队列查重：同 URL 任务已在 aria2（active/waiting/paused）→ true
+// 防止同一 URL 被反复添加多个副本（历史教训：Vivaldi 下载管理器残留
+// 项每次被恢复/重试都会触发 onCreated → 重复转发）
+// ========================================
+
+async function isAlreadyInQueue(url) {
+  try {
+    const groups = [
+      await aria2Rpc("aria2.tellActive", []),
+      await aria2Rpc("aria2.tellWaiting", [0, 1000]),
+      await aria2Rpc("aria2.tellPaused", [0, 1000]),
+    ];
+    for (const tasks of groups) {
+      for (const t of tasks) {
+        for (const f of t.files || []) {
+          for (const u of f.uris || []) {
+            if (u.uri === url) return true;
+          }
+        }
+      }
+    }
+    return false;
+  } catch (e) {
+    // RPC 失败时保守处理：不阻塞原流程（按未命中处理，保持旧行为）
+    console.warn("[Aria2 Bridge] isAlreadyInQueue error:", e.message);
+    return false;
+  }
+}
+
+// ========================================
+// 清理残留下载记录：扩展拦截后 cancel 的下载项（USER_CANCELED）
+// 如果 erase 失败会残留在浏览器下载管理器里，成为“重试种子”——
+// 浏览器恢复会话/用户点重试时再次触发 onCreated → 任务复活。
+// 启动时 + 定期清理，从源头消除残留。
+// ========================================
+
+async function cleanupStaleDownloads() {
+  try {
+    const items = await chrome.downloads.search({ state: "interrupted" });
+    let erased = 0;
+    for (const item of items) {
+      // 只清理扩展自己 cancel 的（USER_CANCELED / USER_SHUTDOWN），
+      // 不动其他原因中断的下载（可能用户想手动恢复）
+      if (item.interruptReason !== "USER_CANCELED" && item.interruptReason !== "USER_SHUTDOWN") {
+        continue;
+      }
+      try {
+        await chrome.downloads.erase(item.id);
+        erased++;
+      } catch {
+        // 单条失败忽略，继续清理其他
+      }
+    }
+    if (erased > 0) {
+      console.log(`[Aria2 Bridge] Cleaned ${erased} stale cancelled download(s)`);
+    }
+  } catch (e) {
+    console.warn("[Aria2 Bridge] cleanupStaleDownloads error:", e.message);
+  }
+}

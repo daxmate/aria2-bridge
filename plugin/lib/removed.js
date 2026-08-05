@@ -38,6 +38,10 @@ function markForwarded(url) {
 // download the user has deleted. Only an
 // explicit user action (content-script click)
 // clears the memory and allows re-adding.
+//
+// ⚠️ 存储在 storage.local：跨浏览器重启保留。
+// 之前用 storage.session，浏览器一重启黑名单就清空，
+// 导致已删除任务在下次浏览器恢复会话时被重新添加。
 // ========================================
 
 const REMOVED_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -45,7 +49,7 @@ const removedUrls = new Map(); // url -> timestamp
 
 async function loadRemovedUrls() {
   try {
-    const { removedUrls: saved } = await chrome.storage.session.get("removedUrls");
+    const { removedUrls: saved } = await chrome.storage.local.get("removedUrls");
     if (saved && typeof saved === "object") {
       const now = Date.now();
       for (const [u, t] of Object.entries(saved)) {
@@ -59,7 +63,7 @@ async function loadRemovedUrls() {
 
 async function persistRemovedUrls() {
   try {
-    await chrome.storage.session.set({
+    await chrome.storage.local.set({
       removedUrls: Object.fromEntries(removedUrls),
     });
   } catch (e) {
