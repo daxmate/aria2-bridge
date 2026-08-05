@@ -65,4 +65,48 @@ test.describe("onCreated 兜底拦截", () => {
     const toldStopped = requests.filter((r) => r.method === "aria2.tellStopped");
     expect(toldStopped.length).toBeGreaterThanOrEqual(1);
   });
+
+  test("aria2 队列已有同 URL 任务 → 跳过转发（isAlreadyInQueue 查重）", async ({ page, mock }) => {
+    // 模拟 aria2 队列里已有该 URL 的任务（active 中）
+    await mock.config({
+      active: [{ files: [{ uris: [{ uri: HOLD_URL }] }] }],
+      waiting: [],
+    });
+
+    await page.click("#link-bin");
+    await page.waitForTimeout(1500);
+
+    // 查重命中 → 不产生新的 addUri
+    expect((await mock.addUris()).length).toBe(0);
+
+    // 确实查询过队列（tellActive/tellWaiting 被调用 = 查重逻辑生效的证据）
+    const { requests } = await mock.requests();
+    const queueChecks = requests.filter(
+      (r) => r.method === "aria2.tellActive" || r.method === "aria2.tellWaiting"
+    );
+    expect(queueChecks.length).toBeGreaterThanOrEqual(1);
+  });
+
+  test("cleanupStaleDownloads：清理 USER_CANCELED/USER_SHUTDOWN 残留，保留其他中断", async ({ sw }) => {
+    // 在 SW 环境里临时替换 chrome.downloads（每个测试独立 context，不影响其他用例）
+    const erased = await sw.evaluate(async () => {
+      self.__erased = [];
+      const realSearch = chrome.downloads.search;
+      const realErase = chrome.downloads.erase;
+      chrome.downloads.search = async () => [
+        { id: 1, interruptReason: "USER_CANCELED" },
+        { id: 2, interruptReason: "USER_SHUTDOWN" },
+        { id: 3, interruptReason: "FILE_FAILED" }, // 其他原因中断：不应被清理
+      ];
+      chrome.downloads.erase = async (id) => {
+        self.__erased.push(id);
+      };
+      await cleanupStaleDownloads();
+      chrome.downloads.search = realSearch;
+      chrome.downloads.erase = realErase;
+      return self.__erased;
+    });
+
+    expect(erased).toEqual([1, 2]);
+  });
 });

@@ -9,6 +9,9 @@ const state = {
   errorMessage: "Mock aria2 error",
   // tellStopped 返回的任务列表（测试 removed 场景）
   stopped: [],
+  // tellActive / tellWaiting 返回的任务列表（测试队列查重 isAlreadyInQueue）
+  active: [],
+  waiting: [],
   // tellStatus 返回的任务（gid → aria2 任务对象），测试下载完成/失败通知用
   tasks: {},
   requests: [],
@@ -109,6 +112,8 @@ const server = http.createServer((req, res) => {
         state.requests = [];
         state.failMode = null;
         state.stopped = [];
+        state.active = [];
+        state.waiting = [];
         state.tasks = {};
         state.quarkShareSortCalls = 0;
         sendJson(res, 200, { ok: true });
@@ -360,6 +365,12 @@ const server = http.createServer((req, res) => {
           break;
         case "aria2.tellStopped":
           result = state.stopped;
+          break;
+        case "aria2.tellActive":
+          result = state.active;
+          break;
+        case "aria2.tellWaiting":
+          result = state.waiting;
           break;
         case "aria2.tellStatus":
           // 未在 tasks 中注入的任务视为已删除（removed），与 aria2 删除后行为一致
