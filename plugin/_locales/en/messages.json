@@ -244,7 +244,7 @@
     "description": "Label for one-time signed token download skip checkbox"
   },
   "optionsSkipTokenHint": {
-    "message": "When enabled, downloads whose URL carries a one-time signed token (e.g. ankiweb ?t=eyJ...) are not forwarded to aria2 and use the browser's native download. Such tokens are consumed by the browser request, so forwarding would always fail.",
+    "message": "When enabled, downloads whose URL carries a one-time signed token (e.g. ankiweb ?t=eyJ...) or an Alibaba Cloud OSS signed link (OSSAccessKeyId/Signature) are not forwarded to aria2 and use the browser's native download. Such signed URLs are consumed by the browser request, or the CDN may return different content depending on request characteristics, so forwarding to aria2 is unreliable.",
     "description": "Hint for one-time signed token download skip checkbox"
   },
   "optionsSectionAriaNg": {

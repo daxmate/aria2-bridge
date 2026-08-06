@@ -244,7 +244,7 @@
     "description": "一次性签名 token 下载跳过复选框标签"
   },
   "optionsSkipTokenHint": {
-    "message": "开启后，URL 带一次性签名 token（如 ankiweb 的 ?t=eyJ...）的下载不会被转发 aria2，直接使用浏览器原生下载。此类 token 在浏览器请求时即被消耗，转发必然失败",
+    "message": "开启后，URL 带一次性签名 token（如 ankiweb 的 ?t=eyJ...）或阿里云 OSS 签名直链（OSSAccessKeyId/Signature）的下载不会被转发 aria2，直接使用浏览器原生下载。此类签名 URL 在浏览器请求时即被消耗，或 CDN 会按请求特征返回不同内容，转发 aria2 不可靠",
     "description": "一次性签名 token 下载跳过复选框提示"
   },
   "optionsSectionAriaNg": {

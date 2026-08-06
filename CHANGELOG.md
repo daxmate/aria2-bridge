@@ -3,6 +3,13 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.8.2] - 2026-08-06
+
+### 🐛 修复
+
+- **OSS 签名直链下载不再转发 aria2** — 阿里云 OSS 签名直链（URL 带 `OSSAccessKeyId`/`Signature` 参数，如 jiaoyanyun 的 `pdf-cdn.speiyou.com`）转发 aria2 后可能拿到损坏文件：实测同一 URL 浏览器下载正常、aria2 下载返回 CDN 缓存中的旧版损坏文件（7 月 11 日预生成，内容与 11 月 29 日重新生成的完好版不同）。此类签名直链本质是服务器临时签发给浏览器的，CDN 可能按请求特征（UA/Referer/Cookie）返回不同内容 → 现在默认不拦截，直接浏览器原生下载（与 ankiweb 一次性 JWT token 同类处理，受同一开关控制）
+- **新增 OSS 签名直链跳过测试** — 覆盖 `OSSAccessKeyId`+`Signature` 参数 URL 不转发 aria2、浏览器下载保留
+
 ## [1.8.1] - 2026-08-06
 
 ### 🐛 修复

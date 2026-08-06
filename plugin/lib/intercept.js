@@ -30,6 +30,30 @@ function hasJwtLikeToken(url) {
 }
 
 /**
+ * 阿里云 OSS 签名直链检测：query 同时含 OSSAccessKeyId 与 Signature。
+ * 这类 URL 是服务器临时签发给浏览器的直链，CDN 可能按请求特征（UA/Referer/
+ * Cookie）返回不同内容——实测 jiaoyanyun 的 CDN 对 aria2 的请求返回了损坏的
+ * 旧缓存文件（同 URL 浏览器下载正常）。转发 aria2 不可靠 → 交给浏览器原生下载。
+ */
+function hasOssSignedUrl(url) {
+  try {
+    const params = new URL(url).searchParams;
+    return params.has("OSSAccessKeyId") && params.has("Signature");
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 签名 URL 检测：JWT 一次性 token（ankiweb 类）或 OSS 签名直链。
+ * 两者都是“临时签名 URL”，转发 aria2 重新请求不可靠（token 被消耗 /
+ * CDN 按请求特征返回不同内容）→ 不拦截，浏览器原生下载。
+ */
+function hasSignedUrlToken(url) {
+  return hasJwtLikeToken(url) || hasOssSignedUrl(url);
+}
+
+/**
  * 通过 content script（同源环境）获取下载 URL 的响应头。
  * 绕过 service worker fetch 的 CORS 限制，自动携带页面 Cookies。
  */
@@ -59,11 +83,12 @@ async function processDownload(url, referer, out) {
   // 支持 http(s) 文件与 magnet 磁力链（aria2 原生支持）
   if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("magnet:"))
     return;
-  // 一次性签名 token URL：转发 aria2 不可靠（服务端一次性/限流），
-  // 抛错 → 走 background 的 catch 回退浏览器下载（用户点击不落空）
-  if (config.skipTokenDownloads && hasJwtLikeToken(url)) {
-    console.log(`[Aria2 Bridge] Skip one-time token URL: ${url}`);
-    throw new Error("skip: one-time token URL");
+  // 签名 URL（JWT 一次性 token / OSS 签名直链）：转发 aria2 不可靠
+  // （token 被消耗 / CDN 按请求特征返回不同内容），抛错 → 走 background 的
+  // catch 回退浏览器下载（用户点击不落空）
+  if (config.skipTokenDownloads && hasSignedUrlToken(url)) {
+    console.log(`[Aria2 Bridge] Skip signed URL: ${url}`);
+    throw new Error("skip: signed URL");
   }
   if (isRecentlyForwarded(url)) {
     console.log(`[Aria2 Bridge] Skip duplicate forward: ${url}`);
@@ -123,11 +148,12 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
   // 完成 —— 用户点击永不落空（要么 aria2、要么浏览器）。
   // ════════════════════════════════════════════════════════════════
 
-  // 一次性签名 token（JWT 形状，如 ankiweb ?t=eyJ...）：
-  // 浏览器请求发出时 token 已被消耗，转发 aria2 重新请求必然失败
-  // （一次性 / 限流）→ 不拦截，浏览器原生下载。
-  if (config.skipTokenDownloads && hasJwtLikeToken(url)) {
-    console.log(`[Aria2 Bridge] Skip one-time token URL (browser download): ${url}`);
+  // 签名 URL（JWT 一次性 token / OSS 签名直链）：
+  // 浏览器请求发出时 token 已被消耗 / CDN 按请求特征返回不同内容（如
+  // jiaoyanyun 对 aria2 请求返回损坏的旧缓存文件），转发 aria2 不可靠
+  // → 不拦截，浏览器原生下载。
+  if (config.skipTokenDownloads && hasSignedUrlToken(url)) {
+    console.log(`[Aria2 Bridge] Skip signed URL (browser download): ${url}`);
     return;
   }
 

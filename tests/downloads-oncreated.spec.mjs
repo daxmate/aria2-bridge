@@ -135,6 +135,29 @@ test.describe("onCreated 兜底拦截", () => {
     expect(inProgress).toBe(1);
   });
 
+  test("URL 带 OSS 签名直链参数 → 不拦截，浏览器原生下载", async ({ page, mock, sw }) => {
+    // 阿里云 OSS 签名直链特征：OSSAccessKeyId + Signature（如 jiaoyanyun 的
+    // pdf-cdn.speiyou.com 直链）→ 跳过转发，浏览器下载保持进行中
+    await page.evaluate((href) => {
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = "test.pdf";
+      document.body.appendChild(a);
+      a.click();
+    }, `${PAGE}spa-download?OSSAccessKeyId=testkey&Signature=abcd%3D&Expires=9999999999`);
+
+    await page.waitForTimeout(1200);
+
+    // 不转发 aria2
+    expect((await mock.addUris()).length).toBe(0);
+    // 浏览器下载保持进行中（未被取消）
+    const inProgress = await sw.evaluate(
+      async () =>
+        (await chrome.downloads.search({})).filter((i) => i.state === "in_progress").length
+    );
+    expect(inProgress).toBe(1);
+  });
+
   test("cleanupStaleDownloads：清理 USER_CANCELED/USER_SHUTDOWN 残留，保留其他中断", async ({
     sw,
   }) => {
