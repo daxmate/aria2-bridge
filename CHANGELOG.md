@@ -3,6 +3,22 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.8.0] - 2026-08-06
+
+### 🐛 修复
+
+- **下载点击永不落空（结构性修复）** — 某些网页（如 ankiweb 共享牌组页）的下载既不进 aria2 也不走浏览器原生下载，关掉插件才能下载
+  - **根因**：`onCreated` 兜底路径“先取消、后检查”——先把浏览器下载 `cancel` 掉，再做去重/黑名单/队列检查，检查一旦命中就静默 `return`：下载已被取消，既没转发 aria2 也没恢复浏览器下载，用户点击直接“消失”
+  - **修复**：所有检查前置到 cancel 之前（一次性 token / 去重 / 黑名单 / 队列查重）。任何 skip 都不取消浏览器下载，让它原生完成——要么 aria2、要么浏览器，永远不会什么都没有
+  - **一次性签名 token 检测**：URL 带 JWT 形状参数（如 ankiweb 的 `?t=eyJ...`）的下载不再转发 aria2——浏览器请求发出时 token 已被消耗，aria2 用同一 URL 重新请求必然失败（一次性/限流），直接交给浏览器原生下载
+  - **队列查重逐方法容错**：`isAlreadyInQueue` 对 tellActive/tellWaiting/tellPaused 单独容错，某个方法不可用（本机 daemon 缺 `aria2.tellPaused`）不再拖垮整个查重（此前导致队列查重静默失效，同 URL 会重复加任务）
+  - **点击路径 skip 不再假装成功**：content script 拦截的链接在去重/队列命中时抛错走回退（浏览器下载 + 橙色 toast），不再静默显示“已发送”却什么都没发生
+- **修复 content script 加载英文 locale 报错** — 设置英文后任意页面控制台报 `Failed to load locale "en": TypeError: Failed to fetch`（`js/i18n.js:47`）：content script 的 fetch 受 `web_accessible_resources` 限制，`_locales/` 不在白名单导致 CORS 失败。已将 `_locales/*` 加入 web_accessible_resources
+
+### ✨ 新功能
+
+- **设置项「跳过带一次性签名 token 的下载」**（默认开启）— options 下载分区新增开关，关闭后一次性 token 下载也会尝试转发 aria2（zh/en 双语）
+
 ## [1.7.2] - 2026-08-05
 
 ### 🔧 重构

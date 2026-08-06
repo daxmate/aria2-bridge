@@ -239,6 +239,14 @@
     "message": "开启后点击磁力链接将转发给 aria2 下载；关闭则交给本地 BT 客户端",
     "description": "磁力拦截复选框提示"
   },
+  "optionsSkipTokenLabel": {
+    "message": "跳过带一次性签名 token 的下载",
+    "description": "一次性签名 token 下载跳过复选框标签"
+  },
+  "optionsSkipTokenHint": {
+    "message": "开启后，URL 带一次性签名 token（如 ankiweb 的 ?t=eyJ...）的下载不会被转发 aria2，直接使用浏览器原生下载。此类 token 在浏览器请求时即被消耗，转发必然失败",
+    "description": "一次性签名 token 下载跳过复选框提示"
+  },
   "optionsSectionAriaNg": {
     "message": "AriaNg 管理面板",
     "description": "AriaNg 区块标题"

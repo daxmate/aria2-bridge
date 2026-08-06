@@ -10,6 +10,25 @@
 
 let isSelfRedirect = false;
 
+// ========================================
+// 一次性签名 token（JWT 形状）检测
+// ========================================
+
+// JWT 特征：query 参数值以 base64url 的 "eyJ"（JSON 开头 {"）打头，
+// 含 1-2 个点分隔段（header.payload[.signature]）。这类 token 通常
+// 一次性或短时效（如 ankiweb 的 ?t=eyJ...），浏览器请求发出即被消耗，
+// 转发 aria2 重新请求必然失败 → 此类下载交给浏览器原生处理。
+const JWT_TOKEN_PARAM_RE =
+  /(?:[?&])[^=&#]+=eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)?(?=&|$)/;
+
+function hasJwtLikeToken(url) {
+  try {
+    return JWT_TOKEN_PARAM_RE.test(new URL(url).search);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * 通过 content script（同源环境）获取下载 URL 的响应头。
  * 绕过 service worker fetch 的 CORS 限制，自动携带页面 Cookies。
@@ -40,9 +59,17 @@ async function processDownload(url, referer, out) {
   // 支持 http(s) 文件与 magnet 磁力链（aria2 原生支持）
   if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("magnet:"))
     return;
+  // 一次性签名 token URL：转发 aria2 不可靠（服务端一次性/限流），
+  // 抛错 → 走 background 的 catch 回退浏览器下载（用户点击不落空）
+  if (config.skipTokenDownloads && hasJwtLikeToken(url)) {
+    console.log(`[Aria2 Bridge] Skip one-time token URL: ${url}`);
+    throw new Error("skip: one-time token URL");
+  }
   if (isRecentlyForwarded(url)) {
     console.log(`[Aria2 Bridge] Skip duplicate forward: ${url}`);
-    return;
+    // 磁力链浏览器无法原生下载，静默跳过（已转发过 aria2）；http(s) 抛错回退
+    if (url.startsWith("magnet:")) return;
+    throw new Error("skip: duplicate forward");
   }
 
   // 用户主动点击下载 → 清除“已删除”记忆，允许重新添加
@@ -51,7 +78,7 @@ async function processDownload(url, referer, out) {
   // 查重：同 URL 任务已在 aria2 队列（active/waiting/paused）→ 不再重复添加
   if (await isAlreadyInQueue(url)) {
     console.log(`[Aria2 Bridge] Skip: already in aria2 queue: ${url}`);
-    return;
+    throw new Error("skip: already in aria2 queue");
   }
 
   const options = { referer };
@@ -85,7 +112,45 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
   if (downloadItem.fileSize > 0 && downloadItem.fileSize < 100) return;
   if (downloadItem.byExtensionId) return;
 
-  // Cancel browser download
+  // ════════════════════════════════════════════════════════════════
+  // 先检查、后取消（2026-08-06 结构性修复）
+  //
+  // 旧逻辑：先 cancel 浏览器下载，再做去重/黑名单/队列检查。一旦检查
+  // 命中就静默 return —— 下载已被取消，既没进 aria2 也没恢复浏览器
+  // 下载，用户点击“消失”（如 ankiweb 第二次点击、黑名单命中等）。
+  //
+  // 新逻辑：所有检查前置。任何 skip 都不取消浏览器下载，让它原生
+  // 完成 —— 用户点击永不落空（要么 aria2、要么浏览器）。
+  // ════════════════════════════════════════════════════════════════
+
+  // 一次性签名 token（JWT 形状，如 ankiweb ?t=eyJ...）：
+  // 浏览器请求发出时 token 已被消耗，转发 aria2 重新请求必然失败
+  // （一次性 / 限流）→ 不拦截，浏览器原生下载。
+  if (config.skipTokenDownloads && hasJwtLikeToken(url)) {
+    console.log(`[Aria2 Bridge] Skip one-time token URL (browser download): ${url}`);
+    return;
+  }
+
+  // 去重：同一 URL 在短时间内（30s）不重复转发
+  if (isRecentlyForwarded(url)) {
+    console.log(`[Aria2 Bridge] Skip duplicate forward (browser download): ${url}`);
+    return;
+  }
+
+  // 用户已删除过的任务：不自动重新添加（只有用户主动点击才放行）
+  // 双重检查：本地记忆（轮询同步）+ 实时查询 aria2（堵住同步窗口期）
+  if (isRemovedUrl(url) || (await isRemovedInAria2(url))) {
+    console.log(`[Aria2 Bridge] Skip removed task re-add (browser download): ${url}`);
+    return;
+  }
+
+  // 队列查重：同 URL 任务已在 aria2（active/waiting/paused）→ 不重复添加
+  if (await isAlreadyInQueue(url)) {
+    console.log(`[Aria2 Bridge] Skip: already in aria2 queue (browser download): ${url}`);
+    return;
+  }
+
+  // 所有检查通过 → 此时才取消浏览器下载并转发 aria2
   try {
     await new Promise((resolve, reject) => {
       chrome.downloads.cancel(downloadItem.id, () => {
@@ -94,28 +159,15 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
       });
     });
   } catch {
-    return; // too far along
+    return; // 下载已完成/无法取消 → 保持浏览器下载
   }
 
   // 清除浏览器下载记录，避免被取消的下载项残留在列表里
-  // （否则删除 aria2 任务后，页面重试/用户重试会再次触发 onCreated → 任务“复活”）
+  // （否则删除 aria2 任务后，页面重试/用户重试会再次触发 onCreated → 任务“复活”)
   try {
     await chrome.downloads.erase(downloadItem.id);
   } catch {
     // erase 失败不影响主流程（例如状态不允许清除），忽略即可
-  }
-
-  // 去重：同一 URL 在短时间内（30s）不重复转发
-  if (isRecentlyForwarded(url)) {
-    console.log(`[Aria2 Bridge] Skip duplicate forward: ${url}`);
-    return;
-  }
-
-  // 用户已删除过的任务：不自动重新添加（只有用户主动点击才放行）
-  // 双重检查：本地记忆（轮询同步）+ 实时查询 aria2（堵住同步窗口期）
-  if (isRemovedUrl(url) || (await isRemovedInAria2(url))) {
-    console.log(`[Aria2 Bridge] Skip removed task re-add: ${url}`);
-    return;
   }
 
   try {
@@ -153,12 +205,6 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
     if (filename) options.out = filename;
     if (downloadItem.referrer) options.referer = downloadItem.referrer;
 
-    // 查重：同 URL 任务已在 aria2 队列 → 跳过，避免重复添加
-    if (await isAlreadyInQueue(url)) {
-      console.log(`[Aria2 Bridge] Skip: already in aria2 queue: ${url}`);
-      return;
-    }
-
     const gid = await aria2AddUri(url, options);
     // 跟踪该任务：下载完成/失败时发系统通知
     trackDownload(gid, filename, url);
@@ -187,27 +233,34 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 // ========================================
 
 async function isAlreadyInQueue(url) {
-  try {
-    const groups = [
-      await aria2Rpc("aria2.tellActive", []),
-      await aria2Rpc("aria2.tellWaiting", [0, 1000]),
-      await aria2Rpc("aria2.tellPaused", [0, 1000]),
-    ];
-    for (const tasks of groups) {
-      for (const t of tasks) {
-        for (const f of t.files || []) {
-          for (const u of f.uris || []) {
-            if (u.uri === url) return true;
-          }
+  // 每个 RPC 方法单独容错：某个方法不可用（如部分 daemon 不支持
+  // aria2.tellPaused）不应拖垮整个查重，至少 active+waiting 生效
+  const groups = [];
+  const calls = [
+    ["aria2.tellActive", []],
+    ["aria2.tellWaiting", [0, 1000]],
+    ["aria2.tellPaused", [0, 1000]],
+  ];
+  for (const [method, args] of calls) {
+    try {
+      groups.push(await aria2Rpc(method, args));
+    } catch (e) {
+      console.warn(`[Aria2 Bridge] isAlreadyInQueue ${method} error:`, e.message);
+    }
+  }
+  for (const tasks of groups) {
+    // 某些 daemon/兼容层对未知方法返回 result: null 而非错误（如测试 mock）
+    // → 跳过非数组，避免迭代 null 抛 TypeError 拖垮整个查重
+    if (!Array.isArray(tasks)) continue;
+    for (const t of tasks) {
+      for (const f of t.files || []) {
+        for (const u of f.uris || []) {
+          if (u.uri === url) return true;
         }
       }
     }
-    return false;
-  } catch (e) {
-    // RPC 失败时保守处理：不阻塞原流程（按未命中处理，保持旧行为）
-    console.warn("[Aria2 Bridge] isAlreadyInQueue error:", e.message);
-    return false;
   }
+  return false;
 }
 
 // ========================================

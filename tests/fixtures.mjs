@@ -68,11 +68,13 @@ export async function toastBackground(page) {
 export const test = base.extend({
   context: async ({}, use) => {
     const context = await chromium.launchPersistentContext("", {
-      headless: false,
+      // headless 模式 + 完整 chromium（channel: "chromium"）：
+      // ① 不弹窗打扰用户 ② headless shell 不支持扩展，必须用完整 chromium 的新 headless 模式
+      headless: true,
+      channel: "chromium",
       viewport: { width: 1600, height: 1000 },
       locale: "zh-CN", // 固定语言：content script 的 chrome.i18n 文案（toast 等）跟随浏览器语言，CI 与本地必须一致
       args: [
-        "--headless=new",
         // 控制浏览器 UI 语言 → chrome.i18n 文案（toast/通知）跟随，CI 与本地必须一致
         "--lang=zh-CN",
         `--disable-extensions-except=${EXT_PATH}`,

@@ -67,6 +67,28 @@ test.describe("设置页", () => {
       .toBe(true);
   });
 
+  test("skipTokenDownloads 开关 → 默认开启且 change 自动保存", async ({ page, sw }) => {
+    // 默认开启（setupConfig 未覆盖该字段 → 走 DEFAULT_CONFIG）
+    await expect(page.locator("#skipTokenDownloads")).toBeChecked();
+
+    await page.locator("#skipTokenDownloads").uncheck();
+    await expect
+      .poll(async () => {
+        const data = await sw.evaluate(() => chrome.storage.sync.get("skipTokenDownloads"));
+        return data.skipTokenDownloads;
+      })
+      .toBe(false);
+
+    // 重新勾选 → 恢复 true
+    await page.locator("#skipTokenDownloads").check();
+    await expect
+      .poll(async () => {
+        const data = await sw.evaluate(() => chrome.storage.sync.get("skipTokenDownloads"));
+        return data.skipTokenDownloads;
+      })
+      .toBe(true);
+  });
+
   test("修改 RPC 地址/密钥 → change 自动保存到 storage", async ({ page, sw }) => {
     await page.fill("#rpcUrl", "http://192.168.1.10:6800/jsonrpc");
     await page.fill("#rpcSecret", "s3cret");

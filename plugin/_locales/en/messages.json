@@ -239,6 +239,14 @@
     "message": "When enabled, clicking a magnet link forwards it to aria2. Disable to leave magnet links to your local torrent client.",
     "description": "Hint for magnet interception checkbox"
   },
+  "optionsSkipTokenLabel": {
+    "message": "Skip downloads with one-time signed tokens",
+    "description": "Label for one-time signed token download skip checkbox"
+  },
+  "optionsSkipTokenHint": {
+    "message": "When enabled, downloads whose URL carries a one-time signed token (e.g. ankiweb ?t=eyJ...) are not forwarded to aria2 and use the browser's native download. Such tokens are consumed by the browser request, so forwarding would always fail.",
+    "description": "Hint for one-time signed token download skip checkbox"
+  },
   "optionsSectionAriaNg": {
     "message": "AriaNg Dashboard",
     "description": "AriaNg section heading"

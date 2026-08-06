@@ -7,6 +7,7 @@ const DEFAULT_CONFIG = {
   rpcSecret: "",
   enabled: true,
   interceptMagnet: true,
+  skipTokenDownloads: true,
   notifyDownloadComplete: true,
   bypassDomains: [],
   locale: "auto",
@@ -88,6 +89,7 @@ async function loadSettings() {
   $("downloadExts").value = (data.downloadExts || []).join("\n");
   $("enabled").checked = data.enabled;
   $("interceptMagnet").checked = data.interceptMagnet;
+  $("skipTokenDownloads").checked = data.skipTokenDownloads;
   $("notifyDownloadComplete").checked = data.notifyDownloadComplete;
   $("localeSelect").value = data.locale || "auto";
 }
@@ -114,6 +116,7 @@ async function saveSettings() {
       }),
     enabled: $("enabled").checked,
     interceptMagnet: $("interceptMagnet").checked,
+    skipTokenDownloads: $("skipTokenDownloads").checked,
     notifyDownloadComplete: $("notifyDownloadComplete").checked,
     locale: $("localeSelect").value,
   };
@@ -147,6 +150,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   $("downloadExts").addEventListener("change", saveSettings);
   $("enabled").addEventListener("change", saveSettings);
   $("interceptMagnet").addEventListener("change", saveSettings);
+  $("skipTokenDownloads").addEventListener("change", saveSettings);
   $("notifyDownloadComplete").addEventListener("change", saveSettings);
 
   // About：版本号 + 连点彩蛋（🐘）

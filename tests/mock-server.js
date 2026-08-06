@@ -297,7 +297,11 @@ const server = http.createServer((req, res) => {
   // ---- SPA 下载：无后缀 URL + Content-Disposition 中文文件名（RFC 5987） ----
   // 挂起模式：下载保持进行中，保证 onCreated 的 cancel 成功
   // HEAD 也要响应：content script 的 fetchDownloadHeaders 用 HEAD 探文件名
-  if ((req.method === "GET" || req.method === "HEAD") && req.url === "/spa-download") {
+  // 容忍 query 参数（如 ?t=eyJ... 一次性 token 用例）
+  if (
+    (req.method === "GET" || req.method === "HEAD") &&
+    req.url.split("?")[0] === "/spa-download"
+  ) {
     res.writeHead(200, {
       "Content-Type": "application/pdf",
       "Content-Disposition":

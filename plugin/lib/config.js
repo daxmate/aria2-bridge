@@ -8,6 +8,7 @@ const DEFAULT_CONFIG = {
   rpcSecret: "",
   enabled: true,
   interceptMagnet: true,
+  skipTokenDownloads: true,
   notifyDownloadComplete: true,
   bypassDomains: [],
   downloadExts: [

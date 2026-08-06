@@ -296,6 +296,15 @@
         开启后点击磁力链接将转发给 aria2 下载；关闭则交给本地 BT 客户端
       </div>
       <div class="field checkbox-row">
+        <input type="checkbox" id="skipTokenDownloads" />
+        <label data-i18n="optionsSkipTokenLabel" for="skipTokenDownloads"
+          >跳过带一次性签名 token 的下载</label
+        >
+      </div>
+      <div class="hint" data-i18n="optionsSkipTokenHint">
+        开启后，URL 带一次性签名 token（如 ankiweb 的 ?t=eyJ...）的下载不会被转发 aria2，直接使用浏览器原生下载
+      </div>
+      <div class="field checkbox-row">
         <input type="checkbox" id="notifyDownloadComplete" />
         <label data-i18n="optionsNotifyCompleteLabel" for="notifyDownloadComplete"
           >下载完成时通知</label

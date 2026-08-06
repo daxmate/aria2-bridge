@@ -35,13 +35,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: true });
       })
       .catch((err) => {
-        // aria2 down — fall back to browser-native download
-        console.warn("[Aria2 Bridge] aria2 unreachable, falling back:", err.message);
+        // aria2 down 或 skip（去重/队列/一次性 token）→ 回退浏览器原生下载
+        console.warn(
+          "[Aria2 Bridge] Forward failed, falling back to browser download:",
+          err.message
+        );
         flashBadge("!", "#ff9800");
         isSelfRedirect = true;
-        chrome.downloads.download({ url: message.url }).finally(() => {
-          isSelfRedirect = false;
-        });
+        chrome.downloads
+          .download({ url: message.url })
+          .catch(() => {
+            // magnet: 等浏览器无法原生下载的 URL 静默忽略
+          })
+          .finally(() => {
+            isSelfRedirect = false;
+          });
         sendResponse({ success: false, error: err.message });
       });
     return true;
