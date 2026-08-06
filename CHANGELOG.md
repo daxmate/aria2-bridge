@@ -3,6 +3,14 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.8.1] - 2026-08-06
+
+### 🐛 修复
+
+- **设置页 RPC 分区标题与密钥标签显示原始 i18n key** — options.html 引用了不存在的翻译 key（`optionsSectionRpc` / `optionsRpcSecretLabel` / `optionsRpcSecretHint`），设置页直接显示 key 文本（如「optionsSectionRpc」）。已修正为语言文件中实际的 `optionsSectionConnection` / `optionsSecretLabel` / `optionsSecretHint`
+- **check-i18n 增加 HTML 引用校验** — 此前只校验 JS 中的 `t()` 引用，options.html 的 `data-i18n` / `data-i18n-placeholder` 引用不存在的 key 无法被发现。现在 HTML 引用也会校验，CI 可拦截同类问题（`npm run check:i18n` 是 `npm test` 的 pretest）
+- **新增设置页 i18n 渲染测试** — 断言所有 `data-i18n` 元素无原始 key 残留（zh_CN + 切换英文后），防止界面显示 key 文本的回归
+
 ## [1.8.0] - 2026-08-06
 
 ### 🐛 修复

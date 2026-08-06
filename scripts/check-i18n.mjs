@@ -66,6 +66,21 @@ for (const key of base) {
   }
 }
 
+// 5. HTML data-i18n / data-i18n-placeholder 引用的 key 必须存在于所有语言文件
+// （options.html 曾引用不存在的 key（optionsSectionRpc 等）导致界面显示原始 key 文本，
+//  而旧版校验只查 JS 引用，漏掉了 HTML 引用）
+const html = readFileSync(join(root, "plugin", "options.html"), "utf8");
+const htmlRefs = [
+  ...[...html.matchAll(/data-i18n="([^"]+)"/g)].map((m) => m[1]),
+  ...[...html.matchAll(/data-i18n-placeholder="([^"]+)"/g)].map((m) => m[1]),
+];
+const keySet = new Set(base);
+for (const ref of new Set(htmlRefs)) {
+  if (!keySet.has(ref)) {
+    fail(`options.html 引用了不存在的 key: ${ref}`);
+  }
+}
+
 if (errors > 0) {
   console.error(`[check-i18n] ${errors} 个问题`);
   process.exit(1);

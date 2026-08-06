@@ -222,7 +222,7 @@
     </section>
     <!-- Aria2 RPC -->
     <section>
-      <h3 data-i18n="optionsSectionRpc">Aria2 RPC</h3>
+      <h3 data-i18n="optionsSectionConnection">连接</h3>
       <div class="field">
         <label data-i18n="optionsRpcUrlLabel" for="rpcUrl"
           >RPC 地址</label
@@ -237,13 +237,12 @@
         </div>
       </div>
       <div class="field">
-        <label data-i18n="optionsRpcSecretLabel" for="rpcSecret"
-          >RPC 密钥</label
+        <label data-i18n="optionsSecretLabel" for="rpcSecret"
+          >RPC 密钥（可选）</label
         >
         <input type="password" id="rpcSecret" />
-        <div class="hint" data-i18n="optionsRpcSecretHint">
-          Aria2 RPC 连接密钥（Secret Token），与 aria2.conf 中 rpc-secret 一致。
-          修改后需重新打开 AriaNg 使新配置生效。
+        <div class="hint" data-i18n="optionsSecretHint">
+          aria2 启动参数 --rpc-secret=xxx 中设置的密码，仅填密码本身即可（扩展自动加 token: 前缀）。留空表示无密码
         </div>
       </div>
     </section>

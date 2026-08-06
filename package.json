@@ -1,6 +1,6 @@
 {
   "name": "aria2-bridge",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "private": true,
   "description": "Aria2 Bridge — Chrome extension that forwards browser downloads to aria2",
   "scripts": {

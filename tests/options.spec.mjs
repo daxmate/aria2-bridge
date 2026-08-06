@@ -1,6 +1,22 @@
 // 设置页测试：默认值回显、自动保存、字段格式化、enabled → Badge、语言切换
 import { test, expect } from "./fixtures.mjs";
 
+// 收集页面中未解析的 i18n 文本：data-i18n 元素文本仍等于 key 本身（或 placeholder 未替换）
+async function unresolvedKeys(page) {
+  return page.evaluate(() => {
+    const bad = [];
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.getAttribute("data-i18n");
+      if (el.textContent.trim() === key) bad.push(key);
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      const key = el.getAttribute("data-i18n-placeholder");
+      if (el.placeholder === key) bad.push(key + " (placeholder)");
+    });
+    return bad;
+  });
+}
+
 test.describe("设置页", () => {
   test.beforeEach(async ({ page, setupConfig, extensionId }) => {
     await setupConfig();
@@ -11,6 +27,17 @@ test.describe("设置页", () => {
     await expect(page.locator("#rpcUrl")).toHaveValue("http://127.0.0.1:18951/jsonrpc", {
       timeout: 15000,
     });
+  });
+
+  test("所有 data-i18n 文案均已渲染（zh_CN，无原始 key 残留）", async ({ page }) => {
+    // 回归覆盖：options.html 曾引用不存在的 key（optionsSectionRpc/optionsRpcSecretLabel），
+    // 界面直接显示 key 文本（applyI18n 回退返回 key 本身）
+    await expect.poll(() => unresolvedKeys(page)).toEqual([]);
+  });
+
+  test("切换英文后所有 data-i18n 文案均已渲染", async ({ page }) => {
+    await page.selectOption("#localeSelect", "en");
+    await expect.poll(() => unresolvedKeys(page)).toEqual([]);
   });
 
   test("默认值回显（未配置时）", async ({ page, sw, extensionId }) => {
