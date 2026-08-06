@@ -5,6 +5,8 @@
 ## 功能
 
 - **自动拦截下载** — 开启后浏览器中的文件下载自动交给 aria2 处理，不占浏览器带宽
+- **点击永不落空** — 兜底拦截遵循“先检查、后取消”：去重、已删除任务黑名单、队列查重、一次性 token 等任何检查命中时都不取消浏览器下载——你的下载要么进 aria2、要么由浏览器原生完成，永远不会“什么都没发生”
+- **一次性签名 token 自动放行** — URL 带一次性签名 token（如 ankiweb 的 `?t=eyJ...`）的下载直接走浏览器原生下载（token 在浏览器请求时即被消耗，转发 aria2 必然失败并可能触发服务端限流），可在设置页关闭
 - **磁力 / BT 下载** — 点击磁力链接（magnet:）自动转发给 aria2（原生支持，含 .torrent 种子文件）；可在设置页关闭，留给本地 BT 客户端
 - **右键发送** — 在链接、图片、视频上右键 →「用 Aria2 下载」一键发送
 - **Hugging Face 一键下载** — 在 Hugging Face 模型页面右键 →「📥 下载该模型所有文件到 Aria2」，自动获取完整文件树并批量发送
@@ -33,6 +35,10 @@
 
 1. **Content Script** — 监听页面点击，匹配 `<a download>` 和可下载文件扩展名，阻止导航到空白页
 2. **Service Worker** — 通过 `chrome.downloads.onCreated` 兜住 JS 触发的程序化下载
+
+**特殊处理：一次性签名 token（JWT）** — 部分网站（如 ankiweb 共享牌组）的下载 URL 带一次性签名 token（`?t=eyJ...`）。浏览器发起请求时 token 即被消耗，转发给 aria2 重新请求必然失败（还可能触发服务端限流）。这类下载直接放行，由浏览器原生完成。
+
+**兜底原则：先检查、后取消** — 所有去重/黑名单/队列检查都在取消浏览器下载之前完成，任何跳过都不取消下载（详见上方“点击永不落空”）。
 
 发送下载时自动携带以下 HTTP 头部：
 
@@ -86,6 +92,9 @@ aria2c --conf-path=/path/to/aria2.conf
 | **RPC 密钥** | `--rpc-secret=xxx` 中设置的密码，仅填密码本身（扩展自动加 `token:` 前缀）。留空表示无密码 |
 | **默认下载目录** | 扩展不提供此设置项。请在 aria2 配置文件或启动参数中设置 `dir`（见下方注意事项） |
 | **不拦截的域名** | 每行一个，匹配的域名走浏览器原生下载 |
+| **跳过一次性 token 下载** | 开启后，URL 带一次性签名 token（如 ankiweb `?t=eyJ...`）的下载不转发 aria2，直接浏览器原生下载。默认开启 |
+| **拦截磁力链接** | 开启后点击磁力链接（magnet:）转发给 aria2；关闭则交给本地 BT 客户端。默认开启 |
+| **下载完成通知** | 转发到 aria2 的任务下载完成/失败时发送系统通知（点击直达 AriaNg）。默认开启 |
 | **拦截的文件类型** | 每行一个扩展名，Content Script 拦截这些扩展名的链接点击。留空使用默认列表 |
 | **启用自动拦截** | 下载拦截总开关 |
 
@@ -184,6 +193,8 @@ aria2-bridge/
 - 如果 aria2 未运行，下载会自动回退到浏览器原生下载
 - `cookies` 权限仅用于读取当前访问站点的 Cookie 并转发给 aria2，不会被记录或上传
 - Content Script 只拦截左键（及中键 `<a download>`），不影响右键菜单和快捷键
+- 带一次性签名 token 的下载（如 ankiweb）直接走浏览器原生下载，不会进入 aria2——此类 token 在浏览器请求时即被消耗，转发必然失败。如确需转发，可在设置页关闭「跳过带一次性签名 token 的下载」
+- 兜底拦截命中去重/黑名单/队列查重时保留浏览器原生下载，不会静默丢弃（点击永不落空）
 - 拦截下载时会在点击位置弹出 Toast 提示，同时工具栏 Badge 会短暂闪烁
 - Hugging Face 下载会跳过 `.gitattributes`、`README.md` 等元数据文件，只下载模型文件
 - 批量下载时工具栏 Badge 会显示文件总数，完成后闪烁 ✓
@@ -214,13 +225,13 @@ npm run format:check # Prettier 检查
 - **点击拦截**：左键/中键/Cmd+点击、无后缀链接、hash 链接、自定义 downloadExts、Toast 反馈
 - **RPC 转发**：JSON-RPC 请求格式、`rpc-secret`（token: 前缀）、UA/Referer/Cookie 透传、文件名提取
 - **回退**：aria2 不可用（error/500）时自动回退浏览器原生下载（点击拦截 + onCreated 两条路径）
-- **onCreated 兜底**：JS 触发下载取消并转发、30s 去重、已删除任务防复活（本地记忆 + tellStopped 实时查询）、SPA 场景 Content-Disposition 中文文件名
+- **onCreated 兜底**：JS 触发下载取消并转发、30s 去重、已删除任务防复活（本地记忆 + tellStopped 实时查询）、SPA 场景 Content-Disposition 中文文件名、一次性 token（JWT 形状）跳过、去重/黑名单/队列命中时保留浏览器下载
 - **右键菜单**：菜单创建、语言切换实时更新标题
 - **Hugging Face**：文件树获取、元数据过滤、URL 编码、失败处理
 - **下载完成通知**：转发任务跟踪（storage.session 持久化）、tellStatus 轮询（complete/error/removed）、24h 超时清理、开关关闭不轮询、点击通知打开 AriaNg
 - **设置页**：默认值回显、自动保存、字段格式化、enabled → Badge OFF、语言切换
 - **AriaNg**：buildAriaNgUrl（secret → URL-safe base64 hash 路由）、页面渲染、aria-ng-fix.js 生效
-- **i18n**：zh_CN/en 的 key 一致性、非空、占位符完整性（`scripts/check-i18n.mjs`）
+- **i18n**：zh_CN/en 的 key 一致性、非空、占位符完整性（`scripts/check-i18n.mjs`）；content script 自定义 locale 加载（web_accessible_resources 白名单）
 
 ## Made by
 
