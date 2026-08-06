@@ -50,7 +50,20 @@
 
 ## 安装
 
-### 从源码加载（开发模式）
+### 方式一：从 GitHub Releases 下载（推荐）
+
+不需要克隆仓库，直接下载打包好的 zip：
+
+1. 前往 [Releases 页面](https://github.com/daxmate/aria2-bridge/releases)，下载最新版本的 `aria2-bridge-vX.X.X.zip`
+2. 解压到本地（得到 `aria2-bridge-vX.X.X/` 目录）
+3. 打开 Chrome → `chrome://extensions`
+4. 开启右上角「开发者模式」
+5. 点击「加载已解压的扩展程序」→ 选择解压后的 `aria2-bridge-vX.X.X/` 目录
+6. ✅ 完成
+
+> **升级版本**：下载新版 zip 解压覆盖原目录（或解压到新目录），回到 `chrome://extensions` 点击扩展卡片上的刷新按钮（🔄）重新加载即可。
+
+### 方式二：从源码加载（开发模式）
 
 1. 克隆或下载本项目
 2. 打开 Chrome → `chrome://extensions`
