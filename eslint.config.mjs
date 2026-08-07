@@ -204,6 +204,7 @@ export default [
         setTimeout: "readonly",
         fetch: "readonly",
         URL: "readonly",
+        Buffer: "readonly",
         // page.evaluate / sw.evaluate 内是（扩展）浏览器上下文，需要 browser globals
         window: "readonly",
         document: "readonly",
@@ -227,6 +228,7 @@ export default [
         untrackDownload: "readonly",
         checkDownloadStatus: "readonly",
         cleanupStaleDownloads: "readonly", // tests/evaluate 访问 intercept.js 全局
+        hasSignedUrlToken: "readonly", // tests/evaluate 访问 intercept.js 全局
         trackedDownloads: "readonly",
         persistTrackedDownloads: "readonly",
         config: "readonly",

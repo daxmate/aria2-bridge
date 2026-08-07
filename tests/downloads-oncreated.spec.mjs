@@ -158,6 +158,64 @@ test.describe("onCreated 兜底拦截", () => {
     expect(inProgress).toBe(1);
   });
 
+  test("URL 域名命中内置签名站点列表（jiaoyanyun）→ 不拦截，浏览器原生下载", async ({
+    page,
+    mock,
+    sw,
+  }) => {
+    // jiaoyanyun 的下载 URL 形态多样（不一定带 OSSAccessKeyId/Signature 参数），
+    // 但域名命中内置列表 → 一律放行浏览器原生下载（2026-08-07：实测仅带
+    // 参数检测会漏，浏览器下载被取消转发 aria2，用户误判失败重复点击浪费次数）
+    const jyUrl = "https://xbresource.jiaoyanyun.com/exam-paper/pdf/noWaterMark/test_1.pdf";
+    // 拦截真实网络请求：返回 attachment 响应强制浏览器下载
+    // （跨源 <a download> 无 attachment 头会被浏览器当导航处理，不会产生下载项）
+    await page.route("https://xbresource.jiaoyanyun.com/**", (route) =>
+      route.fulfill({
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": 'attachment; filename="test.pdf"',
+        },
+        body: Buffer.from("%PDF-1.4 test"),
+      })
+    );
+    await page.evaluate((href) => {
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = "test.pdf";
+      a.id = "jy-dl";
+      a.textContent = "jy download";
+      document.body.appendChild(a);
+    }, jyUrl);
+    await page.click("#jy-dl");
+
+    await page.waitForTimeout(1200);
+
+    // 不转发 aria2
+    expect((await mock.addUris()).length).toBe(0);
+    // 浏览器确实发起了下载（未被拦截 cancel 吞掉；可能已完成或进行中）
+    const dl = await sw.evaluate(async () => (await chrome.downloads.search({})).length);
+    expect(dl).toBeGreaterThanOrEqual(1);
+  });
+
+  test("hasSignedUrlToken：Referrer 命中内置站点列表（jiaoyanyun 页面下载第三方 CDN 文件）", async ({
+    sw,
+  }) => {
+    // 下载 URL 是普通 CDN（无签名参数），但页面（referrer）在 jiaoyanyun 域名下
+    const result = await sw.evaluate(() =>
+      hasSignedUrlToken(
+        "https://cdn.example.com/files/paper.pdf",
+        "https://xbresource.jiaoyanyun.com/#/exampaperDetail?id=abc"
+      )
+    );
+    expect(result).toBe(true);
+    // 对照：无签名参数且非内置站点的 URL → 不命中
+    const negative = await sw.evaluate(() =>
+      hasSignedUrlToken("https://cdn.example.com/files/paper.pdf", "https://example.com/page")
+    );
+    expect(negative).toBe(false);
+  });
+
   test("cleanupStaleDownloads：清理 USER_CANCELED/USER_SHUTDOWN 残留，保留其他中断", async ({
     sw,
   }) => {

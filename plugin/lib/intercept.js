@@ -45,12 +45,35 @@ function hasOssSignedUrl(url) {
 }
 
 /**
- * 签名 URL 检测：JWT 一次性 token（ankiweb 类）或 OSS 签名直链。
- * 两者都是“临时签名 URL”，转发 aria2 重新请求不可靠（token 被消耗 /
- * CDN 按请求特征返回不同内容）→ 不拦截，浏览器原生下载。
+ * 已知“签名直链资源站”：下载 URL 形态多样（OSS 直链 / API 中间跳转 URL /
+ * 带 ticket/token 参数等），且 CDN 按请求特征（UA/Referer/Cookie）返回不同
+ * 内容——实测 jiaoyanyun 的 CDN 对 aria2 请求返回过损坏的旧缓存文件，也
+ * 出现过浏览器下载被取消、aria2 却拿不到文件的“点击落空”。这类站点的下载
+ * 一律交给浏览器原生完成，不转发 aria2。
  */
-function hasSignedUrlToken(url) {
-  return hasJwtLikeToken(url) || hasOssSignedUrl(url);
+const SIGNED_URL_SITES = ["jiaoyanyun.com", "speiyou.com"];
+
+function isSignedUrlSite(url, referrer) {
+  const hosts = [url, referrer].filter(Boolean).map((s) => {
+    try {
+      return new URL(s).hostname;
+    } catch {
+      return "";
+    }
+  });
+  return hosts.some((host) =>
+    SIGNED_URL_SITES.some((site) => host === site || host.endsWith("." + site))
+  );
+}
+
+/**
+ * 签名 URL 检测：JWT 一次性 token（ankiweb 类）、OSS 签名直链，或
+ * 已知签名直链站点（jiaoyanyun 类，按 URL/Referrer 域名判断）。
+ * 这类下载转发 aria2 重新请求不可靠（token 被消耗 / CDN 按请求特征返回
+ * 不同内容）→ 不拦截，浏览器原生下载。
+ */
+function hasSignedUrlToken(url, referrer) {
+  return hasJwtLikeToken(url) || hasOssSignedUrl(url) || isSignedUrlSite(url, referrer);
 }
 
 /**
@@ -86,7 +109,7 @@ async function processDownload(url, referer, out) {
   // 签名 URL（JWT 一次性 token / OSS 签名直链）：转发 aria2 不可靠
   // （token 被消耗 / CDN 按请求特征返回不同内容），抛错 → 走 background 的
   // catch 回退浏览器下载（用户点击不落空）
-  if (config.skipTokenDownloads && hasSignedUrlToken(url)) {
+  if (config.skipTokenDownloads && hasSignedUrlToken(url, referer)) {
     console.log(`[Aria2 Bridge] Skip signed URL: ${url}`);
     throw new Error("skip: signed URL");
   }
@@ -152,7 +175,7 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
   // 浏览器请求发出时 token 已被消耗 / CDN 按请求特征返回不同内容（如
   // jiaoyanyun 对 aria2 请求返回损坏的旧缓存文件），转发 aria2 不可靠
   // → 不拦截，浏览器原生下载。
-  if (config.skipTokenDownloads && hasSignedUrlToken(url)) {
+  if (config.skipTokenDownloads && hasSignedUrlToken(url, downloadItem.referrer)) {
     console.log(`[Aria2 Bridge] Skip signed URL (browser download): ${url}`);
     return;
   }

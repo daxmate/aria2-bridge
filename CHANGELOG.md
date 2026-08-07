@@ -3,6 +3,13 @@
 本项目所有重要变更都会记录在此文件，格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.8.3] - 2026-08-07
+
+### 🐛 修复
+
+- **签名直链站点内置域名列表，jiaoyanyun 类下载一律放行浏览器** — v1.8.2 只识别 URL 带 `OSSAccessKeyId`/`Signature` 参数的 OSS 直链，但 jiaoyanyun 的下载 URL 形态多样（API 中间跳转 URL、不带签名参数等），漏掉的形态仍会被拦截转发 aria2：浏览器下载被取消、aria2 未必成功，用户误判下载失败重复点击，白白浪费平台下载次数（实测 08-05/08-06/08-07 连续三天命中）。现在内置 `jiaoyanyun.com` / `speiyou.com` 域名列表，按 URL 或 Referrer 域名判断，命中一律不拦截、浏览器原生下载（与 ankiweb JWT / OSS 直链同类处理，受「跳过签名 URL 下载」开关控制）
+- **新增内置站点检测测试** — ① URL 域名命中 jiaoyanyun（无签名参数）→ 不转发 aria2、浏览器下载保留；② Referrer 命中 jiaoyanyun 页面下载第三方 CDN 文件 → 同样放行；③ 对照：非内置站点不受影响
+
 ## [1.8.2] - 2026-08-06
 
 ### 🐛 修复
